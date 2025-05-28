@@ -1,13 +1,13 @@
 import type { Route } from "next";
 
-export const SITE_NAME = "Netgeist NLP Platform";
+export const SITE_NAME = "NLP Platform";
 export const SITE_DESCRIPTION =
-  "Netgeist NLP Platform is a platform for building and deploying NLP models.";
+  "NLP Platform | speech to text, text to speech, sentiment analysis, entity extraction, and more.";
 export const SITE_URL =
   process.env.NODE_ENV === "development"
     ? "http://localhost:3000"
     : "https://nlp.netgeist.ai";
-export const GITHUB_REPO_URL = "";
+export const GITHUB_REPO_URL = "https://github.com/stockgeist/platform-next-cf";
 
 export const SITE_DOMAIN = new URL(SITE_URL).hostname;
 export const PASSWORD_RESET_TOKEN_EXPIRATION_SECONDS = 24 * 60 * 60; // 24 hours

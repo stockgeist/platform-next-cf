@@ -1,11 +1,16 @@
 import "server-only";
 import { eq, sql, desc, and, lt, isNull, gt, or, asc } from "drizzle-orm";
 import { getDB } from "@/db";
-import { userTable, creditTransactionTable, CREDIT_TRANSACTION_TYPE, purchasedItemsTable } from "@/db/schema";
-import { updateAllSessionsOfUser, KVSession } from "./kv-session";
+import {
+  userTable,
+  creditTransactionTable,
+  CREDIT_TRANSACTION_TYPE,
+  purchasedItemsTable,
+} from "@/db/schema";
+import { updateAllSessionsOfUser, type KVSession } from "./kv-session";
 import { CREDIT_PACKAGES, FREE_MONTHLY_CREDITS } from "@/constants";
 
-export type CreditPackage = typeof CREDIT_PACKAGES[number];
+export type CreditPackage = (typeof CREDIT_PACKAGES)[number];
 
 export function getCreditPackage(packageId: string): CreditPackage | undefined {
   return CREDIT_PACKAGES.find((pkg) => pkg.id === packageId);
@@ -34,11 +39,13 @@ async function processExpiredCredits(userId: string, currentTime: Date) {
       eq(creditTransactionTable.userId, userId),
       lt(creditTransactionTable.expirationDate, currentTime),
       isNull(creditTransactionTable.expirationDateProcessedAt),
-      gt(creditTransactionTable.remainingAmount, 0),
+      gt(creditTransactionTable.remainingAmount, 0)
     ),
     orderBy: [
       // Process MONTHLY_REFRESH transactions first
-      desc(sql`CASE WHEN ${creditTransactionTable.type} = ${CREDIT_TRANSACTION_TYPE.MONTHLY_REFRESH} THEN 1 ELSE 0 END`),
+      desc(
+        sql`CASE WHEN ${creditTransactionTable.type} = ${CREDIT_TRANSACTION_TYPE.MONTHLY_REFRESH} THEN 1 ELSE 0 END`
+      ),
       // Then process by creation date (oldest first)
       asc(creditTransactionTable.createdAt),
     ],
@@ -64,8 +71,10 @@ async function processExpiredCredits(userId: string, currentTime: Date) {
         })
         .where(eq(userTable.id, userId));
     } catch (error) {
-      console.error(`Failed to process expired credits for transaction ${transaction.id}:`, error);
-      continue;
+      console.error(
+        `Failed to process expired credits for transaction ${transaction.id}:`,
+        error
+      );
     }
   }
 }
@@ -99,7 +108,7 @@ export async function logTransaction({
   description,
   type,
   expirationDate,
-  paymentIntentId
+  paymentIntentId,
 }: {
   userId: string;
   amount: number;
@@ -116,11 +125,13 @@ export async function logTransaction({
     type,
     description,
     expirationDate,
-    paymentIntentId
+    paymentIntentId,
   });
 }
 
-export async function addFreeMonthlyCreditsIfNeeded(session: KVSession): Promise<number> {
+export async function addFreeMonthlyCreditsIfNeeded(
+  session: KVSession
+): Promise<number> {
   const currentTime = new Date();
 
   // Check if it's been at least a month since last refresh
@@ -136,7 +147,18 @@ export async function addFreeMonthlyCreditsIfNeeded(session: KVSession): Promise
     });
 
     // This should prevent race conditions between multiple sessions
-    if (!shouldRefreshCredits({ ...session, user: { ...session.user, lastCreditRefreshAt: user?.lastCreditRefreshAt ?? null } }, currentTime)) {
+    if (
+      !shouldRefreshCredits(
+        {
+          ...session,
+          user: {
+            ...session.user,
+            lastCreditRefreshAt: user?.lastCreditRefreshAt ?? null,
+          },
+        },
+        currentTime
+      )
+    ) {
       return user?.currentCredits ?? 0;
     }
 
@@ -151,9 +173,9 @@ export async function addFreeMonthlyCreditsIfNeeded(session: KVSession): Promise
     await logTransaction({
       userId: session.userId,
       amount: FREE_MONTHLY_CREDITS,
-      description: 'Free monthly credits',
+      description: "Free monthly credits",
       type: CREDIT_TRANSACTION_TYPE.MONTHLY_REFRESH,
-      expirationDate
+      expirationDate,
     });
 
     // Update last refresh date
@@ -173,19 +195,33 @@ export async function addFreeMonthlyCreditsIfNeeded(session: KVSession): Promise
   return session.user.currentCredits;
 }
 
-export async function hasEnoughCredits({ userId, requiredCredits }: { userId: string; requiredCredits: number }) {
+export async function hasEnoughCredits({
+  userId,
+  requiredCredits,
+}: {
+  userId: string;
+  requiredCredits: number;
+}) {
   const user = await getDB().query.userTable.findFirst({
     where: eq(userTable.id, userId),
     columns: {
       currentCredits: true,
-    }
+    },
   });
   if (!user) return false;
 
   return user.currentCredits >= requiredCredits;
 }
 
-export async function consumeCredits({ userId, amount, description }: { userId: string; amount: number; description: string }) {
+export async function consumeCredits({
+  userId,
+  amount,
+  description,
+}: {
+  userId: string;
+  amount: number;
+  description: string;
+}) {
   const db = getDB();
 
   // First check if user has enough credits
@@ -201,18 +237,19 @@ export async function consumeCredits({ userId, amount, description }: { userId: 
   }
 
   // Get all non-expired transactions with remaining credits, ordered by creation date
-  const activeTransactionsWithBalance = await db.query.creditTransactionTable.findMany({
-    where: and(
-      eq(creditTransactionTable.userId, userId),
-      gt(creditTransactionTable.remainingAmount, 0),
-      isNull(creditTransactionTable.expirationDateProcessedAt),
-      or(
-        isNull(creditTransactionTable.expirationDate),
-        gt(creditTransactionTable.expirationDate, new Date())
-      )
-    ),
-    orderBy: [asc(creditTransactionTable.createdAt)],
-  });
+  const activeTransactionsWithBalance =
+    await db.query.creditTransactionTable.findMany({
+      where: and(
+        eq(creditTransactionTable.userId, userId),
+        gt(creditTransactionTable.remainingAmount, 0),
+        isNull(creditTransactionTable.expirationDateProcessedAt),
+        or(
+          isNull(creditTransactionTable.expirationDate),
+          gt(creditTransactionTable.expirationDate, new Date())
+        )
+      ),
+      orderBy: [asc(creditTransactionTable.createdAt)],
+    });
 
   let remainingToDeduct = amount;
 
@@ -220,7 +257,10 @@ export async function consumeCredits({ userId, amount, description }: { userId: 
   for (const transaction of activeTransactionsWithBalance) {
     if (remainingToDeduct <= 0) break;
 
-    const deductFromThis = Math.min(transaction.remainingAmount, remainingToDeduct);
+    const deductFromThis = Math.min(
+      transaction.remainingAmount,
+      remainingToDeduct
+    );
 
     await db
       .update(creditTransactionTable)
@@ -268,7 +308,7 @@ export async function consumeCredits({ userId, amount, description }: { userId: 
 export async function getCreditTransactions({
   userId,
   page = 1,
-  limit = 10
+  limit = 10,
 }: {
   userId: string;
   page?: number;
@@ -284,7 +324,7 @@ export async function getCreditTransactions({
       expirationDateProcessedAt: false,
       remainingAmount: false,
       userId: false,
-    }
+    },
   });
 
   const total = await db
@@ -311,6 +351,6 @@ export async function getUserPurchasedItems(userId: string) {
 
   // Create a map of purchased items for easy lookup
   return new Set(
-    purchasedItems.map(item => `${item.itemType}:${item.itemId}`)
+    purchasedItems.map((item) => `${item.itemType}:${item.itemId}`)
   );
 }
