@@ -1,38 +1,55 @@
-"use client";
+'use client'
 
-import { signUpAction } from "./sign-up.actions";
-import { type SignUpSchema, signUpSchema } from "@/schemas/signup.schema";
-import { type PasskeyEmailSchema, passkeyEmailSchema } from "@/schemas/passkey.schema";
-import { startPasskeyRegistrationAction, completePasskeyRegistrationAction } from "./passkey-sign-up.actions";
+import { signUpAction } from './sign-up.actions'
+import { type SignUpSchema, signUpSchema } from '@/schemas/signup.schema'
+import {
+  type PasskeyEmailSchema,
+  passkeyEmailSchema,
+} from '@/schemas/passkey.schema'
+import {
+  startPasskeyRegistrationAction,
+  completePasskeyRegistrationAction,
+} from './passkey-sign-up.actions'
 
-import { Form, FormControl, FormField, FormItem, FormMessage } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import SeparatorWithText from "@/components/separator-with-text";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Spinner } from "@/components/ui/spinner";
-import { Captcha } from "@/components/captcha";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormMessage,
+} from '@/components/ui/form'
+import { Input } from '@/components/ui/input'
+import { Button } from '@/components/ui/button'
+import SeparatorWithText from '@/components/separator-with-text'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
+import { Spinner } from '@/components/ui/spinner'
+import { Captcha } from '@/components/captcha'
 
-import { useForm, useWatch } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { toast } from "sonner";
-import { useServerAction } from "zsa-react";
-import Link from "next/link";
-import SSOButtons from "../_components/sso-buttons";
-import { useState } from "react";
-import { startRegistration } from "@simplewebauthn/browser";
+import { useForm, useWatch } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { toast } from 'sonner'
+import { useServerAction } from 'zsa-react'
+import Link from 'next/link'
+import SSOButtons from '../_components/sso-buttons'
+import { useState } from 'react'
+import { startRegistration } from '@simplewebauthn/browser'
 import { KeyIcon } from 'lucide-react'
-import { useConfigStore } from "@/state/config";
-import { REDIRECT_AFTER_SIGN_IN } from "@/constants";
+import { useConfigStore } from '@/state/config'
+import { REDIRECT_AFTER_SIGN_IN } from '@/constants'
 
 interface SignUpClientProps {
-  redirectPath: string;
+  redirectPath: string
 }
 
 const SignUpPage = ({ redirectPath }: SignUpClientProps) => {
-  const { isTurnstileEnabled } = useConfigStore();
-  const [isPasskeyModalOpen, setIsPasskeyModalOpen] = useState(false);
-  const [isRegistering, setIsRegistering] = useState(false);
+  const { isTurnstileEnabled } = useConfigStore()
+  const [isPasskeyModalOpen, setIsPasskeyModalOpen] = useState(false)
+  const [isRegistering, setIsRegistering] = useState(false)
 
   const { execute: signUp } = useServerAction(signUpAction, {
     onError: (error) => {
@@ -40,70 +57,79 @@ const SignUpPage = ({ redirectPath }: SignUpClientProps) => {
       toast.error(error.err?.message)
     },
     onStart: () => {
-      toast.loading("Creating your account...")
+      toast.loading('Creating your account...')
     },
     onSuccess: () => {
       toast.dismiss()
-      toast.success("Account created successfully")
+      toast.success('Account created successfully')
       window.location.href = redirectPath || REDIRECT_AFTER_SIGN_IN
-    }
+    },
   })
 
-  const { execute: completePasskeyRegistration } = useServerAction(completePasskeyRegistrationAction, {
-    onError: (error) => {
-      toast.dismiss()
-      toast.error(error.err?.message)
-      setIsRegistering(false)
-    },
-    onSuccess: () => {
-      toast.dismiss()
-      toast.success("Account created successfully")
-      window.location.href = redirectPath || REDIRECT_AFTER_SIGN_IN
-    }
-  })
-
-  const { execute: startPasskeyRegistration } = useServerAction(startPasskeyRegistrationAction, {
-    onError: (error) => {
-      toast.dismiss()
-      toast.error(error.err?.message)
-      setIsRegistering(false)
-    },
-    onStart: () => {
-      toast.loading("Starting passkey registration...")
-      setIsRegistering(true)
-    },
-    onSuccess: async (response) => {
-      toast.dismiss()
-      if (!response?.data?.optionsJSON) {
-        toast.error("Failed to start passkey registration")
+  const { execute: completePasskeyRegistration } = useServerAction(
+    completePasskeyRegistrationAction,
+    {
+      onError: (error) => {
+        toast.dismiss()
+        toast.error(error.err?.message)
         setIsRegistering(false)
-        return;
-      }
+      },
+      onSuccess: () => {
+        toast.dismiss()
+        toast.success('Account created successfully')
+        window.location.href = redirectPath || REDIRECT_AFTER_SIGN_IN
+      },
+    },
+  )
 
-      try {
-        const attResp = await startRegistration({
-          optionsJSON: response.data.optionsJSON,
-          useAutoRegister: true,
-        });
-        await completePasskeyRegistration({ response: attResp });
-      } catch (error: unknown) {
-        console.error("Failed to register passkey:", error);
-        toast.error("Failed to register passkey")
+  const { execute: startPasskeyRegistration } = useServerAction(
+    startPasskeyRegistrationAction,
+    {
+      onError: (error) => {
+        toast.dismiss()
+        toast.error(error.err?.message)
         setIsRegistering(false)
-      }
-    }
-  })
+      },
+      onStart: () => {
+        toast.loading('Starting passkey registration...')
+        setIsRegistering(true)
+      },
+      onSuccess: async (response) => {
+        toast.dismiss()
+        if (!response?.data?.optionsJSON) {
+          toast.error('Failed to start passkey registration')
+          setIsRegistering(false)
+          return
+        }
+
+        try {
+          const attResp = await startRegistration({
+            optionsJSON: response.data.optionsJSON,
+            useAutoRegister: true,
+          })
+          await completePasskeyRegistration({ response: attResp })
+        } catch (error: unknown) {
+          console.error('Failed to register passkey:', error)
+          toast.error('Failed to register passkey')
+          setIsRegistering(false)
+        }
+      },
+    },
+  )
 
   const form = useForm<SignUpSchema>({
     resolver: zodResolver(signUpSchema),
-  });
+  })
 
   const passkeyForm = useForm<PasskeyEmailSchema>({
     resolver: zodResolver(passkeyEmailSchema),
-  });
+  })
 
-  const captchaToken = useWatch({ control: form.control, name: 'captchaToken' });
-  const passkeyCaptchaToken = useWatch({ control: passkeyForm.control, name: 'captchaToken' });
+  const captchaToken = useWatch({ control: form.control, name: 'captchaToken' })
+  const passkeyCaptchaToken = useWatch({
+    control: passkeyForm.control,
+    name: 'captchaToken',
+  })
 
   const onSubmit = async (data: SignUpSchema) => {
     signUp(data)
@@ -114,15 +140,18 @@ const SignUpPage = ({ redirectPath }: SignUpClientProps) => {
   }
 
   return (
-    <div className="min-h-[90vh] flex items-center px-4 justify-center bg-background my-6 md:my-10">
-      <div className="w-full max-w-md space-y-8 p-6 md:p-10 bg-card rounded-xl shadow-lg border border-border">
+    <div className="my-6 flex min-h-[90vh] items-center justify-center bg-background px-4 md:my-10">
+      <div className="w-full max-w-md space-y-8 rounded-xl border border-border bg-card p-6 shadow-lg md:p-10">
         <div className="text-center">
-          <h2 className="mt-6 text-2xl md:text-3xl font-bold tracking-tight text-foreground">
+          <h2 className="mt-6 text-2xl font-bold tracking-tight text-foreground md:text-3xl">
             Create your account
           </h2>
           <p className="mt-2 text-muted-foreground">
-            Already have an account?{" "}
-            <Link href={`/sign-in?redirect=${encodeURIComponent(redirectPath)}`} className="font-medium text-primary hover:text-primary/90 underline">
+            Already have an account?{' '}
+            <Link
+              href={`/sign-in?redirect=${encodeURIComponent(redirectPath)}`}
+              className="font-medium text-primary underline hover:text-primary/90"
+            >
               Sign in
             </Link>
           </p>
@@ -135,7 +164,7 @@ const SignUpPage = ({ redirectPath }: SignUpClientProps) => {
             className="w-full"
             onClick={() => setIsPasskeyModalOpen(true)}
           >
-            <KeyIcon className="w-5 h-5 mr-2" />
+            <KeyIcon className="mr-2 h-5 w-5" />
             Sign up with a Passkey
           </Button>
         </div>
@@ -145,7 +174,10 @@ const SignUpPage = ({ redirectPath }: SignUpClientProps) => {
         </SeparatorWithText>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="mt-8 space-y-4">
+          <form
+            onSubmit={form.handleSubmit(onSubmit)}
+            className="mt-8 space-y-4"
+          >
             <FormField
               control={form.control}
               name="email"
@@ -216,7 +248,7 @@ const SignUpPage = ({ redirectPath }: SignUpClientProps) => {
               )}
             />
 
-            <div className="flex flex-col justify-center items-center">
+            <div className="flex flex-col items-center justify-center">
               <Captcha
                 onSuccess={(token) => form.setValue('captchaToken', token)}
                 validationError={form.formState.errors.captchaToken?.message}
@@ -224,7 +256,7 @@ const SignUpPage = ({ redirectPath }: SignUpClientProps) => {
 
               <Button
                 type="submit"
-                className="w-full flex justify-center py-2.5 mt-8"
+                className="mt-8 flex w-full justify-center py-2.5"
                 disabled={Boolean(isTurnstileEnabled && !captchaToken)}
               >
                 Create Account with Password
@@ -234,13 +266,19 @@ const SignUpPage = ({ redirectPath }: SignUpClientProps) => {
         </Form>
 
         <div className="mt-6">
-          <p className="text-xs text-center text-muted-foreground">
-            By signing up, you agree to our{" "}
-            <Link href="/terms" className="font-medium text-primary hover:text-primary/90 underline">
+          <p className="text-center text-xs text-muted-foreground">
+            By signing up, you agree to our{' '}
+            <Link
+              href="/terms"
+              className="font-medium text-primary underline hover:text-primary/90"
+            >
               Terms of Service
-            </Link>{" "}
-            and{" "}
-            <Link href="/privacy" className="font-medium text-primary hover:text-primary/90 underline">
+            </Link>{' '}
+            and{' '}
+            <Link
+              href="/privacy"
+              className="font-medium text-primary underline hover:text-primary/90"
+            >
               Privacy Policy
             </Link>
           </p>
@@ -253,7 +291,10 @@ const SignUpPage = ({ redirectPath }: SignUpClientProps) => {
             <DialogTitle>Sign up with a Passkey</DialogTitle>
           </DialogHeader>
           <Form {...passkeyForm}>
-            <form onSubmit={passkeyForm.handleSubmit(onPasskeySubmit)} className="space-y-6 mt-6">
+            <form
+              onSubmit={passkeyForm.handleSubmit(onPasskeySubmit)}
+              className="mt-6 space-y-6"
+            >
               <FormField
                 control={passkeyForm.control}
                 name="email"
@@ -306,16 +347,23 @@ const SignUpPage = ({ redirectPath }: SignUpClientProps) => {
                   </FormItem>
                 )}
               />
-              <div className="flex flex-col justify-center items-center">
+              <div className="flex flex-col items-center justify-center">
                 <Captcha
-                  onSuccess={(token) => passkeyForm.setValue('captchaToken', token)}
-                  validationError={passkeyForm.formState.errors.captchaToken?.message}
+                  onSuccess={(token) =>
+                    passkeyForm.setValue('captchaToken', token)
+                  }
+                  validationError={
+                    passkeyForm.formState.errors.captchaToken?.message
+                  }
                 />
 
                 <Button
                   type="submit"
-                  className="w-full mt-8"
-                  disabled={isRegistering || Boolean(isTurnstileEnabled && !passkeyCaptchaToken)}
+                  className="mt-8 w-full"
+                  disabled={
+                    isRegistering ||
+                    Boolean(isTurnstileEnabled && !passkeyCaptchaToken)
+                  }
                 >
                   {isRegistering ? (
                     <>
@@ -323,13 +371,15 @@ const SignUpPage = ({ redirectPath }: SignUpClientProps) => {
                       Registering...
                     </>
                   ) : (
-                    "Continue"
+                    'Continue'
                   )}
                 </Button>
               </div>
               {!isRegistering && (
-                <p className="text-xs text-muted text-center mt-4">
-                  After clicking continue, your browser will prompt you to create and save your Passkey. This will allow you to sign in securely without a password in the future.
+                <p className="mt-4 text-center text-xs text-muted">
+                  After clicking continue, your browser will prompt you to
+                  create and save your Passkey. This will allow you to sign in
+                  securely without a password in the future.
                 </p>
               )}
             </form>
@@ -337,7 +387,7 @@ const SignUpPage = ({ redirectPath }: SignUpClientProps) => {
         </DialogContent>
       </Dialog>
     </div>
-  );
-};
+  )
+}
 
-export default SignUpPage;
+export default SignUpPage

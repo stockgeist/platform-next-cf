@@ -11,7 +11,7 @@ const compat = new FlatCompat({
 
 const eslintConfig = [
   {
-    ignores: ['src/app/components/ui/**/*', 'src/db/migrations/**/*'],
+    ignores: ['src/components/ui/**/*', 'src/db/migrations/**/*'],
   },
   ...compat.config({
     extends: [

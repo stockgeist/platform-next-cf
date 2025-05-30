@@ -1,9 +1,9 @@
-import { getSessionFromCookie } from "@/utils/auth";
-import { redirect } from "next/navigation";
-import { SettingsForm } from "./settings-form";
-import { Suspense } from "react";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
+import { getSessionFromCookie } from '@/utils/auth'
+import { redirect } from 'next/navigation'
+import { SettingsForm } from './settings-form'
+import { Suspense } from 'react'
+import { Card, CardContent, CardHeader } from '@/components/ui/card'
+import { Skeleton } from '@/components/ui/skeleton'
 
 function SettingsFormSkeleton() {
   return (
@@ -39,19 +39,19 @@ function SettingsFormSkeleton() {
         </div>
       </CardContent>
     </Card>
-  );
+  )
 }
 
 export default async function SettingsPage() {
-  const session = await getSessionFromCookie();
+  const session = await getSessionFromCookie()
 
   if (!session) {
-    return redirect("/sign-in");
+    return redirect('/sign-in')
   }
 
   return (
     <Suspense fallback={<SettingsFormSkeleton />}>
       <SettingsForm />
     </Suspense>
-  );
+  )
 }

@@ -8,6 +8,6 @@ export const useNavStore = create(
     },
     (set) => ({
       setIsOpen: (isOpen: boolean) => set({ isOpen }),
-    })
-  )
+    }),
+  ),
 )

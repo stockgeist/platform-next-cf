@@ -1,7 +1,7 @@
-"use client"
+'use client'
 
-import * as React from "react"
-import { Building2, ChevronsUpDown, Plus } from "lucide-react"
+import * as React from 'react'
+import { Building2, ChevronsUpDown, Plus } from 'lucide-react'
 
 import {
   DropdownMenu,
@@ -11,14 +11,14 @@ import {
   DropdownMenuSeparator,
   DropdownMenuShortcut,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+} from '@/components/ui/dropdown-menu'
 import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
   useSidebar,
-} from "@/components/ui/sidebar"
-import Link from "next/link"
+} from '@/components/ui/sidebar'
+import Link from 'next/link'
 
 export function TeamSwitcher({
   teams,
@@ -30,11 +30,16 @@ export function TeamSwitcher({
   }[]
 }) {
   const { isMobile } = useSidebar()
-  const [activeTeam, setActiveTeam] = React.useState<typeof teams[0] | null>(null)
+  const [activeTeam, setActiveTeam] = React.useState<(typeof teams)[0] | null>(
+    null,
+  )
 
   // Update activeTeam when teams change or on initial render
   React.useEffect(() => {
-    if (teams.length > 0 && (!activeTeam || !teams.find(t => t.name === activeTeam.name))) {
+    if (
+      teams.length > 0 &&
+      (!activeTeam || !teams.find((t) => t.name === activeTeam.name))
+    ) {
       setActiveTeam(teams[0])
     }
   }, [teams, activeTeam])
@@ -55,9 +60,11 @@ export function TeamSwitcher({
               </div>
               <div className="grid flex-1 text-left text-sm leading-tight">
                 <span className="truncate font-semibold">
-                  {activeTeam?.name || "No Team"}
+                  {activeTeam?.name || 'No Team'}
                 </span>
-                <span className="truncate text-xs">{activeTeam?.plan || "Select a team"}</span>
+                <span className="truncate text-xs">
+                  {activeTeam?.plan || 'Select a team'}
+                </span>
               </div>
               <ChevronsUpDown className="ml-auto" />
             </SidebarMenuButton>
@@ -65,7 +72,7 @@ export function TeamSwitcher({
           <DropdownMenuContent
             className="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg"
             align="start"
-            side={isMobile ? "bottom" : "right"}
+            side={isMobile ? 'bottom' : 'right'}
             sideOffset={4}
           >
             <DropdownMenuLabel className="text-xs text-muted-foreground">
@@ -94,12 +101,14 @@ export function TeamSwitcher({
               </DropdownMenuItem>
             )}
             <DropdownMenuSeparator />
-            <DropdownMenuItem className="gap-2 p-2 cursor-pointer" asChild>
+            <DropdownMenuItem className="cursor-pointer gap-2 p-2" asChild>
               <Link href="/dashboard/teams/create">
                 <div className="flex size-6 items-center justify-center rounded-md border bg-background">
                   <Plus className="size-4" />
                 </div>
-                <div className="font-medium text-muted-foreground">Add team</div>
+                <div className="font-medium text-muted-foreground">
+                  Add team
+                </div>
               </Link>
             </DropdownMenuItem>
           </DropdownMenuContent>

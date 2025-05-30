@@ -1,52 +1,59 @@
-import { getSessionFromCookie } from "@/utils/auth";
-import { getUserTeamsAction } from "@/actions/team-actions";
-import { redirect, notFound } from "next/navigation";
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { PlusIcon, Users } from "lucide-react";
-import type { Route } from "next";
-import { PageHeader } from "@/components/page-header";
-import { PendingInvitations } from "./pending-invitations";
+import { getSessionFromCookie } from '@/utils/auth'
+import { getUserTeamsAction } from '@/actions/team-actions'
+import { redirect, notFound } from 'next/navigation'
+import Link from 'next/link'
+import { Button } from '@/components/ui/button'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card'
+import { PlusIcon, Users } from 'lucide-react'
+import type { Route } from 'next'
+import { PageHeader } from '@/components/page-header'
+import { PendingInvitations } from './pending-invitations'
 
 export const metadata = {
-  title: "My Teams",
-  description: "Manage your teams and collaborations",
-};
+  title: 'My Teams',
+  description: 'Manage your teams and collaborations',
+}
 
 interface TeamRole {
-  name: string;
-  id: string;
+  name: string
+  id: string
 }
 
 interface TeamItem {
-  id: string;
-  name: string;
-  slug: string;
-  description: string | null;
-  avatarUrl: string | null;
-  creditBalance: number;
-  role?: TeamRole;
+  id: string
+  name: string
+  slug: string
+  description: string | null
+  avatarUrl: string | null
+  creditBalance: number
+  role?: TeamRole
 }
 
 export default async function TeamsIndexPage() {
   // Check if the user is authenticated
-  const session = await getSessionFromCookie();
+  const session = await getSessionFromCookie()
 
   if (!session) {
-    redirect("/sign-in?redirect=/dashboard/teams");
+    redirect('/sign-in?redirect=/dashboard/teams')
   }
 
   // Get teams data
-  const [result, error] = await getUserTeamsAction();
+  const [result, error] = await getUserTeamsAction()
 
-  let teams: TeamItem[] = [];
+  let teams: TeamItem[] = []
   if (result?.success && result.data) {
-    teams = result.data;
+    teams = result.data
   }
 
   if (error) {
-    return notFound();
+    return notFound()
   }
 
   return (
@@ -54,20 +61,22 @@ export default async function TeamsIndexPage() {
       <PageHeader
         items={[
           {
-            href: "/dashboard/teams",
-            label: "Teams"
-          }
+            href: '/dashboard/teams',
+            label: 'Teams',
+          },
         ]}
       />
       <div className="container mx-auto px-5 pb-12">
         <div className="mb-8 flex items-center justify-between">
           <div>
             <h1 className="text-4xl font-bold">My Teams</h1>
-            <p className="text-muted-foreground mt-2">Manage your teams and collaborations</p>
+            <p className="mt-2 text-muted-foreground">
+              Manage your teams and collaborations
+            </p>
           </div>
           <Button asChild>
-            <Link href={"/dashboard/teams/create" as Route}>
-              <PlusIcon className="h-4 w-4 mr-2" />
+            <Link href={'/dashboard/teams/create' as Route}>
+              <PlusIcon className="mr-2 h-4 w-4" />
               Create Team
             </Link>
           </Button>
@@ -77,11 +86,14 @@ export default async function TeamsIndexPage() {
         <PendingInvitations />
 
         {teams.length === 0 ? (
-          <Card className="border-dashed border-2">
+          <Card className="border-2 border-dashed">
             <CardHeader>
-              <CardTitle className="text-xl">You don&apos;t have any teams yet</CardTitle>
+              <CardTitle className="text-xl">
+                You don&apos;t have any teams yet
+              </CardTitle>
               <CardDescription>
-                Teams let you collaborate with others on projects and share resources.
+                Teams let you collaborate with others on projects and share
+                resources.
               </CardDescription>
             </CardHeader>
             <CardContent className="flex justify-center py-8">
@@ -89,8 +101,8 @@ export default async function TeamsIndexPage() {
             </CardContent>
             <CardFooter className="flex justify-center pb-8">
               <Button asChild>
-                <Link href={"/dashboard/teams/create" as Route}>
-                  <PlusIcon className="h-4 w-4 mr-2" />
+                <Link href={'/dashboard/teams/create' as Route}>
+                  <PlusIcon className="mr-2 h-4 w-4" />
                   Create your first team
                 </Link>
               </Button>
@@ -99,11 +111,14 @@ export default async function TeamsIndexPage() {
         ) : (
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {teams.map((team) => (
-              <Link key={team.id} href={`/dashboard/teams/${team.slug}` as Route}>
+              <Link
+                key={team.id}
+                href={`/dashboard/teams/${team.slug}` as Route}
+              >
                 <Card className="h-full transition-all hover:border-primary hover:shadow-md">
                   <CardHeader className="flex flex-row items-start gap-4">
                     {team.avatarUrl ? (
-                      <div className="h-12 w-12 rounded-md overflow-hidden">
+                      <div className="h-12 w-12 overflow-hidden rounded-md">
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img
                           src={team.avatarUrl}
@@ -120,23 +135,24 @@ export default async function TeamsIndexPage() {
                       <CardTitle>{team.name}</CardTitle>
                       {team.role && (
                         <CardDescription>
-                          Your role: <span className="capitalize">{team.role.name}</span>
+                          Your role:{' '}
+                          <span className="capitalize">{team.role.name}</span>
                         </CardDescription>
                       )}
                     </div>
                   </CardHeader>
                   <CardContent>
                     <p className="line-clamp-2 text-muted-foreground">
-                      {team.description || "No description provided"}
+                      {team.description || 'No description provided'}
                     </p>
                   </CardContent>
                 </Card>
               </Link>
             ))}
 
-            <Link href={"/dashboard/teams/create" as Route}>
-              <Card className="h-full border-dashed border-2 hover:border-primary transition-all">
-                <CardHeader className="text-center pt-8">
+            <Link href={'/dashboard/teams/create' as Route}>
+              <Card className="h-full border-2 border-dashed transition-all hover:border-primary">
+                <CardHeader className="pt-8 text-center">
                   <CardTitle className="text-xl">Create a new team</CardTitle>
                 </CardHeader>
                 <CardContent className="flex justify-center">
@@ -150,5 +166,5 @@ export default async function TeamsIndexPage() {
         )}
       </div>
     </>
-  );
+  )
 }

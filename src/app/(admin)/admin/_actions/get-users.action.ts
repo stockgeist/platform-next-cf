@@ -1,16 +1,20 @@
-"use server"
+'use server'
 
-import { createServerAction } from "zsa"
-import { getDB } from "@/db"
-import { requireAdmin } from "@/utils/auth"
-import { z } from "zod"
-import { sql } from "drizzle-orm"
-import { userTable } from "@/db/schema"
-import { PAGE_SIZE_OPTIONS } from "../admin-constants"
+import { createServerAction } from 'zsa'
+import { getDB } from '@/db'
+import { requireAdmin } from '@/utils/auth'
+import { z } from 'zod'
+import { sql } from 'drizzle-orm'
+import { userTable } from '@/db/schema'
+import { PAGE_SIZE_OPTIONS } from '../admin-constants'
 
 const getUsersSchema = z.object({
   page: z.number().min(1).default(1),
-  pageSize: z.number().min(1).max(Math.max(...PAGE_SIZE_OPTIONS)).default(10),
+  pageSize: z
+    .number()
+    .min(1)
+    .max(Math.max(...PAGE_SIZE_OPTIONS))
+    .default(10),
   emailFilter: z.string().optional(),
 })
 
@@ -54,14 +58,15 @@ export const getUsersAction = createServerAction()
     })
 
     // Transform the data to match our table's expected format
-    const transformedUsers = users.map(user => ({
+    const transformedUsers = users.map((user) => ({
       id: user.id,
       email: user.email,
-      name: user.firstName && user.lastName
-        ? `${user.firstName} ${user.lastName}`
-        : null,
+      name:
+        user.firstName && user.lastName
+          ? `${user.firstName} ${user.lastName}`
+          : null,
       role: user.role,
-      status: user.emailVerified ? "active" as const : "inactive" as const,
+      status: user.emailVerified ? ('active' as const) : ('inactive' as const),
       createdAt: user.createdAt,
     }))
 

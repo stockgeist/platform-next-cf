@@ -1,5 +1,5 @@
-import { z } from "zod"
-import { catchaSchema } from "./catcha.schema";
+import { z } from 'zod'
+import { catchaSchema } from './catcha.schema'
 
 export const signUpSchema = z.object({
   email: z.string().email(),

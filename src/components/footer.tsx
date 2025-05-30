@@ -1,25 +1,25 @@
-import Link from "next/link";
-import ThemeSwitch from "@/components/theme-switch";
-import { SITE_NAME } from "@/constants";
-import { Linkedin } from "lucide-react";
+import Link from 'next/link'
+import ThemeSwitch from '@/components/theme-switch'
+import { SITE_NAME } from '@/constants'
+import { Linkedin } from 'lucide-react'
 
 export function Footer() {
   return (
-    <footer className="border-t dark:bg-muted/30 bg-muted/60 shadow">
-      <div className="max-w-7xl mx-auto px-4 md:px-6 lg:px-8">
+    <footer className="border-t bg-muted/60 shadow dark:bg-muted/30">
+      <div className="mx-auto max-w-7xl px-4 md:px-6 lg:px-8">
         <div className="py-6 md:py-8">
           {/* Responsive grid with better mobile spacing */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-6">
+          <div className="grid grid-cols-1 gap-8 md:grid-cols-2 md:gap-6 lg:grid-cols-3">
             {/* Legal Links */}
-            <div className="space-y-3 md:space-y-4 flex flex-col items-center md:items-start">
-              <h3 className="text-sm font-semibold text-foreground text-center md:text-left">
+            <div className="flex flex-col items-center space-y-3 md:items-start md:space-y-4">
+              <h3 className="text-center text-sm font-semibold text-foreground md:text-left">
                 Legal
               </h3>
-              <ul className="space-y-2 flex flex-col items-center md:items-start">
+              <ul className="flex flex-col items-center space-y-2 md:items-start">
                 <li>
                   <Link
                     href="/terms"
-                    className="text-sm text-muted-foreground hover:text-foreground text-center md:text-left"
+                    className="text-center text-sm text-muted-foreground hover:text-foreground md:text-left"
                   >
                     Terms of Service
                   </Link>
@@ -27,7 +27,7 @@ export function Footer() {
                 <li>
                   <Link
                     href="/privacy"
-                    className="text-sm text-muted-foreground hover:text-foreground text-center md:text-left"
+                    className="text-center text-sm text-muted-foreground hover:text-foreground md:text-left"
                   >
                     Privacy Policy
                   </Link>
@@ -36,15 +36,15 @@ export function Footer() {
             </div>
 
             {/* Company Info */}
-            <div className="space-y-3 md:space-y-4 flex flex-col items-center md:items-start">
-              <h3 className="text-sm font-semibold text-foreground text-center md:text-left">
+            <div className="flex flex-col items-center space-y-3 md:items-start md:space-y-4">
+              <h3 className="text-center text-sm font-semibold text-foreground md:text-left">
                 Company
               </h3>
-              <ul className="space-y-2 flex flex-col items-center md:items-start">
+              <ul className="flex flex-col items-center space-y-2 md:items-start">
                 <li>
                   <Link
                     href="/"
-                    className="text-sm text-muted-foreground hover:text-foreground text-center md:text-left"
+                    className="text-center text-sm text-muted-foreground hover:text-foreground md:text-left"
                   >
                     Home
                   </Link>
@@ -53,8 +53,8 @@ export function Footer() {
             </div>
 
             {/* Social Links and Theme Switch */}
-            <div className="space-y-3 md:space-y-4 flex flex-col items-center md:items-start">
-              <h3 className="text-sm font-semibold text-foreground text-center md:text-left">
+            <div className="flex flex-col items-center space-y-3 md:items-start md:space-y-4">
+              <h3 className="text-center text-sm font-semibold text-foreground md:text-left">
                 Social
               </h3>
               <div className="flex items-center space-x-4">
@@ -72,13 +72,13 @@ export function Footer() {
           </div>
 
           {/* Copyright - Optimized for mobile */}
-          <div className="mt-6 pt-6 md:mt-8 md:pt-8 border-t">
+          <div className="mt-6 border-t pt-6 md:mt-8 md:pt-8">
             <div className="flex flex-col items-center gap-6 md:flex-row md:justify-between md:gap-4">
-              <p className="text-sm text-muted-foreground text-center md:text-left">
+              <p className="text-center text-sm text-muted-foreground md:text-left">
                 © {new Date().getFullYear()} {SITE_NAME}. All rights reserved.
               </p>
 
-              <div className="flex flex-col md:flex-row items-center gap-4 md:space-x-4">
+              <div className="flex flex-col items-center gap-4 md:flex-row md:space-x-4">
                 <div className="flex items-center gap-4">
                   <ThemeSwitch />
                 </div>
@@ -88,7 +88,7 @@ export function Footer() {
         </div>
       </div>
     </footer>
-  );
+  )
 }
 
 // This component will be wrapped in Suspense

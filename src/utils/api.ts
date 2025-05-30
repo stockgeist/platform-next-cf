@@ -5,14 +5,14 @@ export interface JsonResponseOptions {
 
 export function jsonResponse(
   data: Record<string, unknown>,
-  options: JsonResponseOptions = {}
+  options: JsonResponseOptions = {},
 ) {
   const { status = 200, headers = {} } = options
 
   return new Response(JSON.stringify(data), {
     status,
     headers: {
-      "Content-Type": "application/json",
+      'Content-Type': 'application/json',
       ...headers,
     },
   })

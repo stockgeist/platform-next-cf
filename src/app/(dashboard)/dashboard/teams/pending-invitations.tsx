@@ -1,96 +1,106 @@
-"use client";
+'use client'
 
-import { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Users, CheckCircle } from "lucide-react";
+import { useState, useEffect } from 'react'
+import { Button } from '@/components/ui/button'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card'
+import { Users, CheckCircle } from 'lucide-react'
 import {
   getPendingInvitationsForCurrentUserAction,
-  acceptInvitationAction
-} from "@/actions/team-membership-actions";
-import { toast } from "sonner";
-import { useRouter } from "next/navigation";
+  acceptInvitationAction,
+} from '@/actions/team-membership-actions'
+import { toast } from 'sonner'
+import { useRouter } from 'next/navigation'
 
 interface PendingInvitation {
-  id: string;
-  token: string;
-  teamId: string;
+  id: string
+  token: string
+  teamId: string
   team: {
-    id: string;
-    name: string;
-    slug: string;
-    avatarUrl: string | null;
-  };
-  roleId: string;
-  isSystemRole: boolean;
-  createdAt: Date;
-  expiresAt: Date | null;
+    id: string
+    name: string
+    slug: string
+    avatarUrl: string | null
+  }
+  roleId: string
+  isSystemRole: boolean
+  createdAt: Date
+  expiresAt: Date | null
   invitedBy: {
-    id: string;
-    firstName: string | null;
-    lastName: string | null;
-    email: string | null;
-    avatar: string | null;
-  };
+    id: string
+    firstName: string | null
+    lastName: string | null
+    email: string | null
+    avatar: string | null
+  }
 }
 
 export function PendingInvitations() {
-  const [pendingInvitations, setPendingInvitations] = useState<PendingInvitation[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isAccepting, setIsAccepting] = useState<Record<string, boolean>>({});
-  const router = useRouter();
+  const [pendingInvitations, setPendingInvitations] = useState<
+    PendingInvitation[]
+  >([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [isAccepting, setIsAccepting] = useState<Record<string, boolean>>({})
+  const router = useRouter()
 
   useEffect(() => {
     const fetchPendingInvitations = async () => {
-      setIsLoading(true);
+      setIsLoading(true)
       try {
-        const [result] = await getPendingInvitationsForCurrentUserAction();
+        const [result] = await getPendingInvitationsForCurrentUserAction()
 
         if (result?.success && result.data) {
-          setPendingInvitations(result.data as PendingInvitation[]);
+          setPendingInvitations(result.data as PendingInvitation[])
         }
       } catch (err) {
-        console.error("Failed to fetch pending invitations:", err);
+        console.error('Failed to fetch pending invitations:', err)
       } finally {
-        setIsLoading(false);
+        setIsLoading(false)
       }
-    };
+    }
 
-    fetchPendingInvitations();
-  }, []);
+    fetchPendingInvitations()
+  }, [])
 
   const handleAccept = async (token: string) => {
-    setIsAccepting(prev => ({ ...prev, [token]: true }));
+    setIsAccepting((prev) => ({ ...prev, [token]: true }))
 
     try {
-      const [result] = await acceptInvitationAction({ token });
+      const [result] = await acceptInvitationAction({ token })
 
       if (result?.success) {
-        toast.success("You have successfully joined the team");
+        toast.success('You have successfully joined the team')
 
         // Remove from pending list
-        setPendingInvitations(prev => prev.filter(inv => inv.token !== token));
+        setPendingInvitations((prev) =>
+          prev.filter((inv) => inv.token !== token),
+        )
 
         // Refresh the page to show the new team
-        router.refresh();
+        router.refresh()
       }
     } catch {
-      toast.error("Failed to accept invitation");
+      toast.error('Failed to accept invitation')
     } finally {
-      setIsAccepting(prev => ({ ...prev, [token]: false }));
+      setIsAccepting((prev) => ({ ...prev, [token]: false }))
     }
-  };
+  }
 
   if (isLoading) {
-    return null; // Don't show anything while loading
+    return null // Don't show anything while loading
   }
 
   if (pendingInvitations.length === 0) {
-    return null; // Don't show anything if no pending invitations
+    return null // Don't show anything if no pending invitations
   }
 
   return (
-    <Card className="mb-8 border-orange-200 dark:border-orange-900 bg-orange-50 dark:bg-orange-950/20">
+    <Card className="mb-8 border-orange-200 bg-orange-50 dark:border-orange-900 dark:bg-orange-950/20">
       <CardHeader>
         <CardTitle className="text-xl">Pending Team Invitations</CardTitle>
         <CardDescription>
@@ -99,10 +109,13 @@ export function PendingInvitations() {
       </CardHeader>
       <CardContent className="space-y-4">
         {pendingInvitations.map((invitation) => (
-          <div key={invitation.id} className="flex items-center justify-between p-3 bg-background rounded-md border">
+          <div
+            key={invitation.id}
+            className="flex items-center justify-between rounded-md border bg-background p-3"
+          >
             <div className="flex items-center gap-3">
               {invitation.team.avatarUrl ? (
-                <div className="h-10 w-10 rounded-md overflow-hidden">
+                <div className="h-10 w-10 overflow-hidden rounded-md">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={invitation.team.avatarUrl}
@@ -118,7 +131,8 @@ export function PendingInvitations() {
               <div>
                 <h3 className="font-medium">{invitation.team.name}</h3>
                 <p className="text-sm text-muted-foreground">
-                  Invited by {invitation.invitedBy.firstName || ''} {invitation.invitedBy.lastName || ''}
+                  Invited by {invitation.invitedBy.firstName || ''}{' '}
+                  {invitation.invitedBy.lastName || ''}
                 </p>
               </div>
             </div>
@@ -128,7 +142,7 @@ export function PendingInvitations() {
               size="sm"
             >
               {isAccepting[invitation.token] ? (
-                "Accepting..."
+                'Accepting...'
               ) : (
                 <>
                   <CheckCircle className="mr-2 h-4 w-4" />
@@ -140,5 +154,5 @@ export function PendingInvitations() {
         ))}
       </CardContent>
     </Card>
-  );
+  )
 }

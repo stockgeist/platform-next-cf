@@ -1,4 +1,3 @@
-
 type SeparatorWithTextProps = {
   leftBorderProps?: React.HTMLAttributes<HTMLDivElement>
   rightBorderProps?: React.HTMLAttributes<HTMLDivElement>
@@ -12,9 +11,15 @@ export default function SeparatorWithText({
 }: SeparatorWithTextProps) {
   return (
     <div className="relative flex items-center" {...props}>
-      <div className="flex-grow border-t border-foreground-muted" {...leftBorderProps}></div>
-      <span className="flex-shrink mx-4">{children}</span>
-      <div className="flex-grow border-t border-foreground-muted" {...rightBorderProps}></div>
+      <div
+        className="border-foreground-muted flex-grow border-t"
+        {...leftBorderProps}
+      ></div>
+      <span className="mx-4 flex-shrink">{children}</span>
+      <div
+        className="border-foreground-muted flex-grow border-t"
+        {...rightBorderProps}
+      ></div>
     </div>
   )
 }

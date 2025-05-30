@@ -1,9 +1,11 @@
-import "server-only"
+import 'server-only'
 
-import { cache } from "react"
+import { cache } from 'react'
 
 export async function isGoogleSSOEnabled() {
-  return Boolean(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET)
+  return Boolean(
+    process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET,
+  )
 }
 
 export async function isTurnstileEnabled() {

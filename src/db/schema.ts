@@ -1,34 +1,34 @@
-import { sqliteTable, integer, text, index } from "drizzle-orm/sqlite-core";
-import { relations, sql } from "drizzle-orm";
-import type { InferSelectModel } from "drizzle-orm";
+import { sqliteTable, integer, text, index } from 'drizzle-orm/sqlite-core'
+import { relations, sql } from 'drizzle-orm'
+import type { InferSelectModel } from 'drizzle-orm'
 
-import { createId } from "@paralleldrive/cuid2";
+import { createId } from '@paralleldrive/cuid2'
 
 export const ROLES_ENUM = {
-  ADMIN: "admin",
-  USER: "user",
-} as const;
+  ADMIN: 'admin',
+  USER: 'user',
+} as const
 
-const roleTuple = Object.values(ROLES_ENUM) as [string, ...string[]];
+const roleTuple = Object.values(ROLES_ENUM) as [string, ...string[]]
 
 const commonColumns = {
   createdAt: integer({
-    mode: "timestamp",
+    mode: 'timestamp',
   })
     .$defaultFn(() => new Date())
     .notNull(),
   updatedAt: integer({
-    mode: "timestamp",
+    mode: 'timestamp',
   })
     .$onUpdateFn(() => new Date())
     .notNull(),
   updateCounter: integer()
     .default(0)
     .$onUpdate(() => sql`updateCounter + 1`),
-};
+}
 
 export const userTable = sqliteTable(
-  "user",
+  'user',
   {
     ...commonColumns,
     id: text()
@@ -51,7 +51,7 @@ export const userTable = sqliteTable(
       .default(ROLES_ENUM.USER)
       .notNull(),
     emailVerified: integer({
-      mode: "timestamp",
+      mode: 'timestamp',
     }),
     signUpIpAddress: text({
       length: 100,
@@ -68,18 +68,18 @@ export const userTable = sqliteTable(
     // Credit system fields
     currentCredits: integer().default(0).notNull(),
     lastCreditRefreshAt: integer({
-      mode: "timestamp",
+      mode: 'timestamp',
     }),
   },
   (table) => [
-    index("email_idx").on(table.email),
-    index("google_account_id_idx").on(table.googleAccountId),
-    index("role_idx").on(table.role),
-  ]
-);
+    index('email_idx').on(table.email),
+    index('google_account_id_idx').on(table.googleAccountId),
+    index('role_idx').on(table.role),
+  ],
+)
 
 export const passKeyCredentialTable = sqliteTable(
-  "passkey_credential",
+  'passkey_credential',
   {
     ...commonColumns,
     id: text()
@@ -116,24 +116,24 @@ export const passKeyCredentialTable = sqliteTable(
     }),
   },
   (table) => [
-    index("user_id_idx").on(table.userId),
-    index("credential_id_idx").on(table.credentialId),
-  ]
-);
+    index('user_id_idx').on(table.userId),
+    index('credential_id_idx').on(table.credentialId),
+  ],
+)
 
 // Credit transaction types
 export const CREDIT_TRANSACTION_TYPE = {
-  PURCHASE: "PURCHASE",
-  USAGE: "USAGE",
-  MONTHLY_REFRESH: "MONTHLY_REFRESH",
-} as const;
+  PURCHASE: 'PURCHASE',
+  USAGE: 'USAGE',
+  MONTHLY_REFRESH: 'MONTHLY_REFRESH',
+} as const
 
 export const creditTransactionTypeTuple = Object.values(
-  CREDIT_TRANSACTION_TYPE
-) as [string, ...string[]];
+  CREDIT_TRANSACTION_TYPE,
+) as [string, ...string[]]
 
 export const creditTransactionTable = sqliteTable(
-  "credit_transaction",
+  'credit_transaction',
   {
     ...commonColumns,
     id: text()
@@ -153,36 +153,36 @@ export const creditTransactionTable = sqliteTable(
       length: 255,
     }).notNull(),
     expirationDate: integer({
-      mode: "timestamp",
+      mode: 'timestamp',
     }),
     expirationDateProcessedAt: integer({
-      mode: "timestamp",
+      mode: 'timestamp',
     }),
     paymentIntentId: text({
       length: 255,
     }),
   },
   (table) => [
-    index("credit_transaction_user_id_idx").on(table.userId),
-    index("credit_transaction_type_idx").on(table.type),
-    index("credit_transaction_created_at_idx").on(table.createdAt),
-    index("credit_transaction_expiration_date_idx").on(table.expirationDate),
-    index("credit_transaction_payment_intent_id_idx").on(table.paymentIntentId),
-  ]
-);
+    index('credit_transaction_user_id_idx').on(table.userId),
+    index('credit_transaction_type_idx').on(table.type),
+    index('credit_transaction_created_at_idx').on(table.createdAt),
+    index('credit_transaction_expiration_date_idx').on(table.expirationDate),
+    index('credit_transaction_payment_intent_id_idx').on(table.paymentIntentId),
+  ],
+)
 
 // Define item types that can be purchased
 export const PURCHASABLE_ITEM_TYPE = {
-  COMPONENT: "COMPONENT",
+  COMPONENT: 'COMPONENT',
   // Add more types in the future (e.g., TEMPLATE, PLUGIN, etc.)
-} as const;
+} as const
 
 export const purchasableItemTypeTuple = Object.values(
-  PURCHASABLE_ITEM_TYPE
-) as [string, ...string[]];
+  PURCHASABLE_ITEM_TYPE,
+) as [string, ...string[]]
 
 export const purchasedItemsTable = sqliteTable(
-  "purchased_item",
+  'purchased_item',
   {
     ...commonColumns,
     id: text()
@@ -199,68 +199,68 @@ export const purchasedItemsTable = sqliteTable(
     // The ID of the item within its type (e.g., componentId)
     itemId: text().notNull(),
     purchasedAt: integer({
-      mode: "timestamp",
+      mode: 'timestamp',
     })
       .$defaultFn(() => new Date())
       .notNull(),
   },
   (table) => [
-    index("purchased_item_user_id_idx").on(table.userId),
-    index("purchased_item_type_idx").on(table.itemType),
+    index('purchased_item_user_id_idx').on(table.userId),
+    index('purchased_item_type_idx').on(table.itemType),
     // Composite index for checking if a user owns a specific item of a specific type
-    index("purchased_item_user_item_idx").on(
+    index('purchased_item_user_item_idx').on(
       table.userId,
       table.itemType,
-      table.itemId
+      table.itemId,
     ),
-  ]
-);
+  ],
+)
 
 // System-defined roles - these are always available
 export const SYSTEM_ROLES_ENUM = {
-  OWNER: "owner",
-  ADMIN: "admin",
-  MEMBER: "member",
-  GUEST: "guest",
-} as const;
+  OWNER: 'owner',
+  ADMIN: 'admin',
+  MEMBER: 'member',
+  GUEST: 'guest',
+} as const
 
 export const systemRoleTuple = Object.values(SYSTEM_ROLES_ENUM) as [
   string,
-  ...string[]
-];
+  ...string[],
+]
 
 // Define available permissions
 export const TEAM_PERMISSIONS = {
   // Resource access
-  ACCESS_DASHBOARD: "access_dashboard",
-  ACCESS_BILLING: "access_billing",
+  ACCESS_DASHBOARD: 'access_dashboard',
+  ACCESS_BILLING: 'access_billing',
 
   // User management
-  INVITE_MEMBERS: "invite_members",
-  REMOVE_MEMBERS: "remove_members",
-  CHANGE_MEMBER_ROLES: "change_member_roles",
+  INVITE_MEMBERS: 'invite_members',
+  REMOVE_MEMBERS: 'remove_members',
+  CHANGE_MEMBER_ROLES: 'change_member_roles',
 
   // Team management
-  EDIT_TEAM_SETTINGS: "edit_team_settings",
-  DELETE_TEAM: "delete_team",
+  EDIT_TEAM_SETTINGS: 'edit_team_settings',
+  DELETE_TEAM: 'delete_team',
 
   // Role management
-  CREATE_ROLES: "create_roles",
-  EDIT_ROLES: "edit_roles",
-  DELETE_ROLES: "delete_roles",
-  ASSIGN_ROLES: "assign_roles",
+  CREATE_ROLES: 'create_roles',
+  EDIT_ROLES: 'edit_roles',
+  DELETE_ROLES: 'delete_roles',
+  ASSIGN_ROLES: 'assign_roles',
 
   // Content permissions
-  CREATE_COMPONENTS: "create_components",
-  EDIT_COMPONENTS: "edit_components",
-  DELETE_COMPONENTS: "delete_components",
+  CREATE_COMPONENTS: 'create_components',
+  EDIT_COMPONENTS: 'edit_components',
+  DELETE_COMPONENTS: 'delete_components',
 
   // Add more as needed
-} as const;
+} as const
 
 // Team table
 export const teamTable = sqliteTable(
-  "team",
+  'team',
   {
     ...commonColumns,
     id: text()
@@ -276,15 +276,15 @@ export const teamTable = sqliteTable(
     // Optional billing-related fields
     billingEmail: text({ length: 255 }),
     planId: text({ length: 100 }),
-    planExpiresAt: integer({ mode: "timestamp" }),
+    planExpiresAt: integer({ mode: 'timestamp' }),
     creditBalance: integer().default(0).notNull(),
   },
-  (table) => [index("team_slug_idx").on(table.slug)]
-);
+  (table) => [index('team_slug_idx').on(table.slug)],
+)
 
 // Team membership table
 export const teamMembershipTable = sqliteTable(
-  "team_membership",
+  'team_membership',
   {
     ...commonColumns,
     id: text()
@@ -302,22 +302,22 @@ export const teamMembershipTable = sqliteTable(
     // Flag to indicate if this is a system role
     isSystemRole: integer().default(1).notNull(),
     invitedBy: text().references(() => userTable.id),
-    invitedAt: integer({ mode: "timestamp" }),
-    joinedAt: integer({ mode: "timestamp" }),
-    expiresAt: integer({ mode: "timestamp" }),
+    invitedAt: integer({ mode: 'timestamp' }),
+    joinedAt: integer({ mode: 'timestamp' }),
+    expiresAt: integer({ mode: 'timestamp' }),
     isActive: integer().default(1).notNull(),
   },
   (table) => [
-    index("team_membership_team_id_idx").on(table.teamId),
-    index("team_membership_user_id_idx").on(table.userId),
+    index('team_membership_team_id_idx').on(table.teamId),
+    index('team_membership_user_id_idx').on(table.userId),
     // Instead of unique() which causes linter errors, we'll create a unique constraint on columns
-    index("team_membership_unique_idx").on(table.teamId, table.userId),
-  ]
-);
+    index('team_membership_unique_idx').on(table.teamId, table.userId),
+  ],
+)
 
 // Team role table
 export const teamRoleTable = sqliteTable(
-  "team_role",
+  'team_role',
   {
     ...commonColumns,
     id: text()
@@ -330,22 +330,22 @@ export const teamRoleTable = sqliteTable(
     name: text({ length: 255 }).notNull(),
     description: text({ length: 1000 }),
     // Store permissions as a JSON array of permission keys
-    permissions: text({ mode: "json" }).notNull().$type<string[]>(),
+    permissions: text({ mode: 'json' }).notNull().$type<string[]>(),
     // A JSON field for storing UI-specific settings like color, icon, etc.
     metadata: text({ length: 5000 }),
     // Optional flag to mark some roles as non-editable
     isEditable: integer().default(1).notNull(),
   },
   (table) => [
-    index("team_role_team_id_idx").on(table.teamId),
+    index('team_role_team_id_idx').on(table.teamId),
     // Instead of unique() which causes linter errors, we'll create a unique constraint on columns
-    index("team_role_name_unique_idx").on(table.teamId, table.name),
-  ]
-);
+    index('team_role_name_unique_idx').on(table.teamId, table.name),
+  ],
+)
 
 // Team invitation table
 export const teamInvitationTable = sqliteTable(
-  "team_invitation",
+  'team_invitation',
   {
     ...commonColumns,
     id: text()
@@ -364,29 +364,29 @@ export const teamInvitationTable = sqliteTable(
     invitedBy: text()
       .notNull()
       .references(() => userTable.id),
-    expiresAt: integer({ mode: "timestamp" }).notNull(),
-    acceptedAt: integer({ mode: "timestamp" }),
+    expiresAt: integer({ mode: 'timestamp' }).notNull(),
+    acceptedAt: integer({ mode: 'timestamp' }),
     acceptedBy: text().references(() => userTable.id),
   },
   (table) => [
-    index("team_invitation_team_id_idx").on(table.teamId),
-    index("team_invitation_email_idx").on(table.email),
-    index("team_invitation_token_idx").on(table.token),
-  ]
-);
+    index('team_invitation_team_id_idx').on(table.teamId),
+    index('team_invitation_email_idx').on(table.email),
+    index('team_invitation_token_idx').on(table.token),
+  ],
+)
 
 export const teamRelations = relations(teamTable, ({ many }) => ({
   memberships: many(teamMembershipTable),
   invitations: many(teamInvitationTable),
   roles: many(teamRoleTable),
-}));
+}))
 
 export const teamRoleRelations = relations(teamRoleTable, ({ one }) => ({
   team: one(teamTable, {
     fields: [teamRoleTable.teamId],
     references: [teamTable.id],
   }),
-}));
+}))
 
 export const teamMembershipRelations = relations(
   teamMembershipTable,
@@ -403,8 +403,8 @@ export const teamMembershipRelations = relations(
       fields: [teamMembershipTable.invitedBy],
       references: [userTable.id],
     }),
-  })
-);
+  }),
+)
 
 export const teamInvitationRelations = relations(
   teamInvitationTable,
@@ -421,8 +421,8 @@ export const teamInvitationRelations = relations(
       fields: [teamInvitationTable.acceptedBy],
       references: [userTable.id],
     }),
-  })
-);
+  }),
+)
 
 export const creditTransactionRelations = relations(
   creditTransactionTable,
@@ -431,8 +431,8 @@ export const creditTransactionRelations = relations(
       fields: [creditTransactionTable.userId],
       references: [userTable.id],
     }),
-  })
-);
+  }),
+)
 
 export const purchasedItemsRelations = relations(
   purchasedItemsTable,
@@ -441,15 +441,15 @@ export const purchasedItemsRelations = relations(
       fields: [purchasedItemsTable.userId],
       references: [userTable.id],
     }),
-  })
-);
+  }),
+)
 
 export const userRelations = relations(userTable, ({ many }) => ({
   passkeys: many(passKeyCredentialTable),
   creditTransactions: many(creditTransactionTable),
   purchasedItems: many(purchasedItemsTable),
   teamMemberships: many(teamMembershipTable),
-}));
+}))
 
 export const passKeyCredentialRelations = relations(
   passKeyCredentialTable,
@@ -458,14 +458,14 @@ export const passKeyCredentialRelations = relations(
       fields: [passKeyCredentialTable.userId],
       references: [userTable.id],
     }),
-  })
-);
+  }),
+)
 
-export type User = InferSelectModel<typeof userTable>;
-export type PassKeyCredential = InferSelectModel<typeof passKeyCredentialTable>;
-export type CreditTransaction = InferSelectModel<typeof creditTransactionTable>;
-export type PurchasedItem = InferSelectModel<typeof purchasedItemsTable>;
-export type Team = InferSelectModel<typeof teamTable>;
-export type TeamMembership = InferSelectModel<typeof teamMembershipTable>;
-export type TeamRole = InferSelectModel<typeof teamRoleTable>;
-export type TeamInvitation = InferSelectModel<typeof teamInvitationTable>;
+export type User = InferSelectModel<typeof userTable>
+export type PassKeyCredential = InferSelectModel<typeof passKeyCredentialTable>
+export type CreditTransaction = InferSelectModel<typeof creditTransactionTable>
+export type PurchasedItem = InferSelectModel<typeof purchasedItemsTable>
+export type Team = InferSelectModel<typeof teamTable>
+export type TeamMembership = InferSelectModel<typeof teamMembershipTable>
+export type TeamRole = InferSelectModel<typeof teamRoleTable>
+export type TeamInvitation = InferSelectModel<typeof teamInvitationTable>

@@ -7,58 +7,58 @@ import {
   CommandLineIcon,
   SunIcon,
   UserGroupIcon,
-} from "@heroicons/react/24/outline";
+} from '@heroicons/react/24/outline'
 
 const features = [
   {
-    name: "Authentication Ready",
+    name: 'Authentication Ready',
     description:
-      "Complete authentication system with email/password sign in, sign up, forgot password flow, and session management using Lucia Auth.",
+      'Complete authentication system with email/password sign in, sign up, forgot password flow, and session management using Lucia Auth.',
     icon: ShieldCheckIcon,
   },
   {
-    name: "Database & Email",
+    name: 'Database & Email',
     description:
-      "Drizzle ORM with Cloudflare D1 for the database, and React Email with Resend for beautiful email templates.",
+      'Drizzle ORM with Cloudflare D1 for the database, and React Email with Resend for beautiful email templates.',
     icon: EnvelopeIcon,
   },
   {
-    name: "Modern Stack",
+    name: 'Modern Stack',
     description:
-      "Next.js 15 App Router with React Server Components, Server Actions, and Edge Runtime for optimal performance.",
+      'Next.js 15 App Router with React Server Components, Server Actions, and Edge Runtime for optimal performance.',
     icon: BoltIcon,
   },
   {
-    name: "Beautiful UI",
+    name: 'Beautiful UI',
     description:
-      "Polished UI with Tailwind CSS, Shadcn UI components, dark/light mode, and responsive design out of the box.",
+      'Polished UI with Tailwind CSS, Shadcn UI components, dark/light mode, and responsive design out of the box.',
     icon: SunIcon,
   },
   {
-    name: "Edge Deployment",
+    name: 'Edge Deployment',
     description:
       "Deploy globally with Cloudflare Workers for zero cold starts and leverage Cloudflare's edge network for blazing-fast performance.",
     icon: CloudIcon,
   },
   {
-    name: "Developer Experience",
+    name: 'Developer Experience',
     description:
-      "GitHub Actions for deployment, comprehensive documentation, and TypeScript for type safety.",
+      'GitHub Actions for deployment, comprehensive documentation, and TypeScript for type safety.',
     icon: CommandLineIcon,
   },
   {
-    name: "Form Handling",
+    name: 'Form Handling',
     description:
-      "Built-in form validation with Zod and React Hook Form for a smooth user experience.",
+      'Built-in form validation with Zod and React Hook Form for a smooth user experience.',
     icon: RocketLaunchIcon,
   },
   {
-    name: "Team Ready",
+    name: 'Team Ready',
     description:
       "Built with collaboration in mind. Easy to customize and extend with your team's requirements.",
     icon: UserGroupIcon,
   },
-];
+]
 
 export function Features() {
   return (
@@ -72,8 +72,8 @@ export function Features() {
             Everything you need to build a SaaS
           </p>
           <p className="mt-6 text-lg leading-8 text-muted-foreground">
-            Start with a complete foundation. All the essential features are built-in,
-            so you can focus on what makes your SaaS unique.
+            Start with a complete foundation. All the essential features are
+            built-in, so you can focus on what makes your SaaS unique.
           </p>
         </div>
         <div className="mx-auto mt-16 max-w-2xl sm:mt-20 lg:mt-24 lg:max-w-none">
@@ -96,5 +96,5 @@ export function Features() {
         </div>
       </div>
     </div>
-  );
+  )
 }

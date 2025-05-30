@@ -1,17 +1,17 @@
-import type { Metadata } from "next";
-import { Inter } from "next/font/google";
-import "./globals.css";
-import "server-only";
+import type { Metadata } from 'next'
+import { Inter } from 'next/font/google'
+import './globals.css'
+import 'server-only'
 
-import { ThemeProvider } from "@/components/providers";
-import { Toaster } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import NextTopLoader from "nextjs-toploader";
-import { SITE_NAME, SITE_DESCRIPTION, SITE_URL } from "@/constants";
+import { ThemeProvider } from '@/components/providers'
+import { Toaster } from '@/components/ui/sonner'
+import { TooltipProvider } from '@/components/ui/tooltip'
+import NextTopLoader from 'nextjs-toploader'
+import { SITE_NAME, SITE_DESCRIPTION, SITE_URL } from '@/constants'
 
-export const dynamic = "force-dynamic";
+export const dynamic = 'force-dynamic'
 
-const inter = Inter({ subsets: ["latin"] });
+const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
   title: {
@@ -21,28 +21,28 @@ export const metadata: Metadata = {
   description: SITE_DESCRIPTION,
   metadataBase: new URL(SITE_URL),
   keywords: [
-    "NLP",
-    "speech to text",
-    "text to speech",
-    "sentiment analysis",
-    "entity extraction",
-    "NLP Platform",
+    'NLP',
+    'speech to text',
+    'text to speech',
+    'sentiment analysis',
+    'entity extraction',
+    'NLP Platform',
   ],
-  authors: [{ name: "Neurotechnology" }],
-  creator: "Neurotechnology",
+  authors: [{ name: 'Neurotechnology' }],
+  creator: 'Neurotechnology',
   openGraph: {
-    type: "website",
-    locale: "en_US",
+    type: 'website',
+    locale: 'en_US',
     url: SITE_URL,
     title: SITE_NAME,
     description: SITE_DESCRIPTION,
     siteName: SITE_NAME,
   },
   twitter: {
-    card: "summary_large_image",
+    card: 'summary_large_image',
     title: SITE_NAME,
     description: SITE_DESCRIPTION,
-    creator: "@Neurotechnology",
+    creator: '@Neurotechnology',
   },
   robots: {
     index: true,
@@ -50,17 +50,17 @@ export const metadata: Metadata = {
     googleBot: {
       index: true,
       follow: true,
-      "max-video-preview": -1,
-      "max-image-preview": "large",
-      "max-snippet": -1,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
     },
   },
-};
+}
 
 export default function BaseLayout({
   children,
 }: Readonly<{
-  children: React.ReactNode;
+  children: React.ReactNode
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
@@ -84,5 +84,5 @@ export default function BaseLayout({
         />
       </body>
     </html>
-  );
+  )
 }

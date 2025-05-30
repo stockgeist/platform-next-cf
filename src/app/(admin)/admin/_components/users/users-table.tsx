@@ -1,21 +1,26 @@
-"use client"
+'use client'
 
-import { useState, useEffect } from "react"
-import { DataTable } from "@/components/data-table"
-import { columns } from "./columns"
-import { getUsersAction } from "../../_actions/get-users.action"
-import { useServerAction } from "zsa-react"
-import { toast } from "sonner"
-import { Input } from "@/components/ui/input"
-import { PAGE_SIZE_OPTIONS } from "../../admin-constants"
+import { useState, useEffect } from 'react'
+import { DataTable } from '@/components/data-table'
+import { columns } from './columns'
+import { getUsersAction } from '../../_actions/get-users.action'
+import { useServerAction } from 'zsa-react'
+import { toast } from 'sonner'
+import { Input } from '@/components/ui/input'
+import { PAGE_SIZE_OPTIONS } from '../../admin-constants'
 export function UsersTable() {
   const [page, setPage] = useState(1)
   const [pageSize, setPageSize] = useState(10)
-  const [emailFilter, setEmailFilter] = useState("")
+  const [emailFilter, setEmailFilter] = useState('')
 
-  const { execute: fetchUsers, data, error, status } = useServerAction(getUsersAction, {
+  const {
+    execute: fetchUsers,
+    data,
+    error,
+    status,
+  } = useServerAction(getUsersAction, {
     onError: () => {
-      toast.error("Failed to fetch users")
+      toast.error('Failed to fetch users')
     },
   })
 
@@ -28,7 +33,7 @@ export function UsersTable() {
   }
 
   return (
-    <div className="container mx-auto py-10 px-6">
+    <div className="container mx-auto px-6 py-10">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <h1 className="text-3xl font-bold">Users</h1>
         <Input

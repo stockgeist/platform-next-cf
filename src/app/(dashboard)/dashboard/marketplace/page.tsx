@@ -1,28 +1,30 @@
-import { PageHeader } from "@/components/page-header"
-import { Alert } from "@heroui/react"
-import { COMPONENTS } from "./components-catalog"
-import { MarketplaceCard } from "@/components/marketplace-card"
-import { getSessionFromCookie } from "@/utils/auth"
-import { getUserPurchasedItems } from "@/utils/credits"
+import { PageHeader } from '@/components/page-header'
+import { Alert } from '@heroui/react'
+import { COMPONENTS } from './components-catalog'
+import { MarketplaceCard } from '@/components/marketplace-card'
+import { getSessionFromCookie } from '@/utils/auth'
+import { getUserPurchasedItems } from '@/utils/credits'
 
 export default async function MarketplacePage() {
-  const session = await getSessionFromCookie();
-  const purchasedItems = session ? await getUserPurchasedItems(session.userId) : new Set();
+  const session = await getSessionFromCookie()
+  const purchasedItems = session
+    ? await getUserPurchasedItems(session.userId)
+    : new Set()
 
   return (
     <>
       <PageHeader
         items={[
           {
-            href: "/dashboard/marketplace",
-            label: "Marketplace"
-          }
+            href: '/dashboard/marketplace',
+            label: 'Marketplace',
+          },
         ]}
       />
       <div className="container mx-auto px-5 pb-12">
         <div className="mb-8">
-          <h1 className="text-4xl font-bold mt-4">Component Marketplace</h1>
-          <p className="text-muted-foreground mt-2">
+          <h1 className="mt-4 text-4xl font-bold">Component Marketplace</h1>
+          <p className="mt-2 text-muted-foreground">
             Purchase and use our premium components using your credits
           </p>
         </div>

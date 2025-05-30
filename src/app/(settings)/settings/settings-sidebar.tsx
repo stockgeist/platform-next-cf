@@ -1,16 +1,11 @@
-"use client";
+'use client'
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { cn } from "@/lib/utils";
+import Link from 'next/link'
+import { usePathname } from 'next/navigation'
+import { cn } from '@/lib/utils'
 import { ScrollShadow } from '@heroui/react'
-import {
-  User,
-  Smartphone,
-  Lock,
-  LogOut
-} from "lucide-react";
-import { useMediaQuery } from "@/hooks/useMediaQuery";
+import { User, Smartphone, Lock, LogOut } from 'lucide-react'
+import { useMediaQuery } from '@/hooks/useMediaQuery'
 import {
   Dialog,
   DialogContent,
@@ -20,64 +15,64 @@ import {
   DialogTitle,
   DialogTrigger,
   DialogClose,
-} from "@/components/ui/dialog";
-import { Button, buttonVariants } from "@/components/ui/button";
-import { useRef } from "react";
-import type { Route } from "next";
-import useSignOut from "@/hooks/useSignOut";
+} from '@/components/ui/dialog'
+import { Button, buttonVariants } from '@/components/ui/button'
+import { useRef } from 'react'
+import type { Route } from 'next'
+import useSignOut from '@/hooks/useSignOut'
 
 interface SidebarNavItem {
-  title: string;
-  href: Route;
-  icon: React.ComponentType<{ className?: string }>;
+  title: string
+  href: Route
+  icon: React.ComponentType<{ className?: string }>
 }
 
 const sidebarNavItems: SidebarNavItem[] = [
   {
-    title: "Profile",
-    href: "/settings",
+    title: 'Profile',
+    href: '/settings',
     icon: User,
   },
   {
-    title: "Security",
-    href: "/settings/security",
+    title: 'Security',
+    href: '/settings/security',
     icon: Lock,
   },
   {
-    title: "Sessions",
-    href: "/settings/sessions",
+    title: 'Sessions',
+    href: '/settings/sessions',
     icon: Smartphone,
   },
   {
-    title: "Change Password",
-    href: "/forgot-password",
+    title: 'Change Password',
+    href: '/forgot-password',
     icon: Lock,
   },
-];
+]
 
 export function SettingsSidebar() {
-  const pathname = usePathname();
+  const pathname = usePathname()
   const isLgAndSmaller = useMediaQuery('LG_AND_SMALLER')
-  const dialogCloseRef = useRef<HTMLButtonElement>(null);
-  const { signOut } = useSignOut();
+  const dialogCloseRef = useRef<HTMLButtonElement>(null)
+  const { signOut } = useSignOut()
 
   return (
     <ScrollShadow
-      className="w-full lg:w-auto whitespace-nowrap pb-2"
+      className="w-full whitespace-nowrap pb-2 lg:w-auto"
       orientation="horizontal"
       isEnabled={isLgAndSmaller}
     >
-      <nav className="flex items-center lg:items-stretch min-w-full space-x-2 pb-2 lg:pb-0 lg:flex-col lg:space-x-0 lg:space-y-1">
+      <nav className="flex min-w-full items-center space-x-2 pb-2 lg:flex-col lg:items-stretch lg:space-x-0 lg:space-y-1 lg:pb-0">
         {sidebarNavItems.map((item) => (
           <Link
             key={item.href}
             href={item.href}
             className={cn(
-              buttonVariants({ variant: "ghost" }),
+              buttonVariants({ variant: 'ghost' }),
               pathname === item.href
-                ? "bg-muted hover:bg-muted dark:text-foreground dark:hover:text-foreground/70"
-                : "hover:bg-transparent",
-              "justify-start hover:no-underline whitespace-nowrap"
+                ? 'bg-muted hover:bg-muted dark:text-foreground dark:hover:text-foreground/70'
+                : 'hover:bg-transparent',
+              'justify-start whitespace-nowrap hover:no-underline',
             )}
           >
             <item.icon className="mr-2 h-4 w-4" />
@@ -89,8 +84,8 @@ export function SettingsSidebar() {
           <DialogTrigger asChild>
             <button
               className={cn(
-                buttonVariants({ variant: "destructive" }),
-                "justify-start hover:no-underline whitespace-nowrap lg:mt-4 bg-red-700/25 hover:bg-red-600/40"
+                buttonVariants({ variant: 'destructive' }),
+                'justify-start whitespace-nowrap bg-red-700/25 hover:bg-red-600/40 hover:no-underline lg:mt-4',
               )}
             >
               <LogOut className="mr-2 h-4 w-4" />
@@ -111,8 +106,8 @@ export function SettingsSidebar() {
               <Button
                 variant="destructive"
                 onClick={() => {
-                  signOut();
-                  dialogCloseRef.current?.click();
+                  signOut()
+                  dialogCloseRef.current?.click()
                 }}
               >
                 Sign out
@@ -122,5 +117,5 @@ export function SettingsSidebar() {
         </Dialog>
       </nav>
     </ScrollShadow>
-  );
+  )
 }

@@ -1,4 +1,4 @@
-import { isTurnstileEnabled } from "@/flags"
+import { isTurnstileEnabled } from '@/flags'
 
 interface TurnstileResponse {
   success: boolean
@@ -21,10 +21,10 @@ export async function validateTurnstileToken(token: string) {
         secret: process.env.TURNSTILE_SECRET_KEY,
         response: token,
       }),
-    }
+    },
   )
 
-  const data = await response.json() as TurnstileResponse
+  const data = (await response.json()) as TurnstileResponse
 
   return data.success
 }

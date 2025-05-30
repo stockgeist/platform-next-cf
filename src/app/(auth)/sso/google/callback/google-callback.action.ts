@@ -1,18 +1,21 @@
-"use server";
+'use server'
 
-import { createServerAction, ZSAError } from "zsa";
-import { googleSSOCallbackSchema } from "@/schemas/google-sso-callback.schema";
-import { withRateLimit, RATE_LIMITS } from "@/utils/with-rate-limit";
-import { GOOGLE_OAUTH_CODE_VERIFIER_COOKIE_NAME, GOOGLE_OAUTH_STATE_COOKIE_NAME } from "@/constants";
-import { cookies } from "next/headers";
-import { getGoogleSSOClient } from "@/lib/sso/google-sso";
-import { decodeIdToken } from "arctic";
-import { getDB } from "@/db";
-import { eq } from "drizzle-orm";
-import { userTable } from "@/db/schema";
-import { createAndStoreSession, canSignUp } from "@/utils/auth";
-import { isGoogleSSOEnabled } from "@/flags";
-import { getIP } from "@/utils/get-IP";
+import { createServerAction, ZSAError } from 'zsa'
+import { googleSSOCallbackSchema } from '@/schemas/google-sso-callback.schema'
+import { withRateLimit, RATE_LIMITS } from '@/utils/with-rate-limit'
+import {
+  GOOGLE_OAUTH_CODE_VERIFIER_COOKIE_NAME,
+  GOOGLE_OAUTH_STATE_COOKIE_NAME,
+} from '@/constants'
+import { cookies } from 'next/headers'
+import { getGoogleSSOClient } from '@/lib/sso/google-sso'
+import { decodeIdToken } from 'arctic'
+import { getDB } from '@/db'
+import { eq } from 'drizzle-orm'
+import { userTable } from '@/db/schema'
+import { createAndStoreSession, canSignUp } from '@/utils/auth'
+import { isGoogleSSOEnabled } from '@/flags'
+import { getIP } from '@/utils/get-IP'
 
 type GoogleSSOResponse = {
   /**
@@ -55,68 +58,64 @@ export const googleSSOCallbackAction = createServerAction()
   .handler(async ({ input }) => {
     return withRateLimit(async () => {
       if (!(await isGoogleSSOEnabled())) {
-        throw new ZSAError(
-          "FORBIDDEN",
-          "Google SSO is not enabled"
-        );
+        throw new ZSAError('FORBIDDEN', 'Google SSO is not enabled')
       }
 
-      const cookieStore = await cookies();
-      const cookieState = cookieStore.get(GOOGLE_OAUTH_STATE_COOKIE_NAME)?.value ?? null;
-      const cookieCodeVerifier = cookieStore.get(GOOGLE_OAUTH_CODE_VERIFIER_COOKIE_NAME)?.value ?? null;
+      const cookieStore = await cookies()
+      const cookieState =
+        cookieStore.get(GOOGLE_OAUTH_STATE_COOKIE_NAME)?.value ?? null
+      const cookieCodeVerifier =
+        cookieStore.get(GOOGLE_OAUTH_CODE_VERIFIER_COOKIE_NAME)?.value ?? null
 
       if (!cookieState || !cookieCodeVerifier) {
-        throw new ZSAError(
-          "NOT_AUTHORIZED",
-          "Missing required cookies"
-        );
+        throw new ZSAError('NOT_AUTHORIZED', 'Missing required cookies')
       }
 
       if (input.state !== cookieState) {
-        throw new ZSAError(
-          "NOT_AUTHORIZED",
-          "Invalid state parameter"
-        );
+        throw new ZSAError('NOT_AUTHORIZED', 'Invalid state parameter')
       }
 
-      let tokens;
+      let tokens
       try {
-        const google = getGoogleSSOClient();
-        tokens = await google.validateAuthorizationCode(input.code, cookieCodeVerifier);
+        const google = getGoogleSSOClient()
+        tokens = await google.validateAuthorizationCode(
+          input.code,
+          cookieCodeVerifier,
+        )
       } catch (error) {
-        console.error("Google OAuth callback: Error validating authorization code", error);
-        throw new ZSAError(
-          "NOT_AUTHORIZED",
-          "Invalid authorization code"
-        );
+        console.error(
+          'Google OAuth callback: Error validating authorization code',
+          error,
+        )
+        throw new ZSAError('NOT_AUTHORIZED', 'Invalid authorization code')
       }
 
-      const claims = decodeIdToken(tokens.idToken()) as GoogleSSOResponse;
+      const claims = decodeIdToken(tokens.idToken()) as GoogleSSOResponse
 
-      const googleAccountId = claims.sub;
-      const avatarUrl = claims.picture;
-      const email = claims.email;
+      const googleAccountId = claims.sub
+      const avatarUrl = claims.picture
+      const email = claims.email
 
       // Check if email is disposable
-      await canSignUp({ email });
+      await canSignUp({ email })
 
-      const db = getDB();
+      const db = getDB()
 
       try {
         // First check if user exists with this Google account ID
         const existingUserWithGoogle = await db.query.userTable.findFirst({
-          where: eq(userTable.googleAccountId, googleAccountId)
-        });
+          where: eq(userTable.googleAccountId, googleAccountId),
+        })
 
         if (existingUserWithGoogle?.id) {
-          await createAndStoreSession(existingUserWithGoogle.id, "google-oauth");
-          return { success: true };
+          await createAndStoreSession(existingUserWithGoogle.id, 'google-oauth')
+          return { success: true }
         }
 
         // Then check if user exists with this email
         const existingUserWithEmail = await db.query.userTable.findFirst({
-          where: eq(userTable.email, email)
-        });
+          where: eq(userTable.email, email),
+        })
 
         if (existingUserWithEmail?.id) {
           // User exists but hasn't linked Google - let's link their account
@@ -125,17 +124,20 @@ export const googleSSOCallbackAction = createServerAction()
             .set({
               googleAccountId,
               avatar: existingUserWithEmail.avatar || avatarUrl,
-              emailVerified: existingUserWithEmail.emailVerified || (claims?.email_verified ? new Date() : null),
+              emailVerified:
+                existingUserWithEmail.emailVerified ||
+                (claims?.email_verified ? new Date() : null),
             })
             .where(eq(userTable.id, existingUserWithEmail.id))
-            .returning();
+            .returning()
 
-          await createAndStoreSession(updatedUser.id, "google-oauth");
-          return { success: true };
+          await createAndStoreSession(updatedUser.id, 'google-oauth')
+          return { success: true }
         }
 
         // No existing user found - create a new one
-        const [user] = await db.insert(userTable)
+        const [user] = await db
+          .insert(userTable)
           .values({
             googleAccountId,
             firstName: claims.given_name || claims.name || null,
@@ -145,25 +147,23 @@ export const googleSSOCallbackAction = createServerAction()
             emailVerified: claims?.email_verified ? new Date() : null,
             signUpIpAddress: await getIP(),
           })
-          .returning();
+          .returning()
 
         // TODO: If the user is not verified, send a verification email
 
-        await createAndStoreSession(user.id, "google-oauth");
-        return { success: true };
-
+        await createAndStoreSession(user.id, 'google-oauth')
+        return { success: true }
       } catch (error) {
-        console.error(error);
+        console.error(error)
 
         if (error instanceof ZSAError) {
-          throw error;
+          throw error
         }
 
         throw new ZSAError(
-          "INTERNAL_SERVER_ERROR",
-          "An unexpected error occurred"
-        );
+          'INTERNAL_SERVER_ERROR',
+          'An unexpected error occurred',
+        )
       }
-    }, RATE_LIMITS.GOOGLE_SSO_CALLBACK);
-  });
-
+    }, RATE_LIMITS.GOOGLE_SSO_CALLBACK)
+  })

@@ -63,6 +63,6 @@ const AgenticDevStudioLogo = (props: React.SVGProps<SVGSVGElement>) => (
       </clipPath>
     </defs>
   </svg>
-);
+)
 
-export default AgenticDevStudioLogo;
+export default AgenticDevStudioLogo

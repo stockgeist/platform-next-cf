@@ -1,20 +1,20 @@
-"use client"
+'use client'
 
-import Link from "next/link"
+import Link from 'next/link'
 import type { Route } from 'next'
-import { usePathname } from "next/navigation"
+import { usePathname } from 'next/navigation'
 import { ComponentIcon, Menu } from 'lucide-react'
-import { Button } from "@/components/ui/button"
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
-import { useSessionStore } from "@/state/session"
-import { cn } from "@/lib/utils"
-import { useNavStore } from "@/state/nav"
-import { Skeleton } from "@/components/ui/skeleton"
-import { SITE_NAME } from "@/constants"
+import { Button } from '@/components/ui/button'
+import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
+import { useSessionStore } from '@/state/session'
+import { cn } from '@/lib/utils'
+import { useNavStore } from '@/state/nav'
+import { Skeleton } from '@/components/ui/skeleton'
+import { SITE_NAME } from '@/constants'
 
 type NavItem = {
-  name: string;
-  href: Route;
+  name: string
+  href: Route
 }
 
 const ActionButtons = () => {
@@ -26,7 +26,7 @@ const ActionButtons = () => {
   }
 
   if (session) {
-    return null;
+    return null
   }
 
   return (
@@ -42,27 +42,32 @@ export function Navigation() {
   const pathname = usePathname()
 
   const navItems: NavItem[] = [
-    { name: "Home", href: "/" },
-    ...(session ? [
-      { name: "Settings", href: "/settings" },
-      { name: "Dashboard", href: "/dashboard" },
-    ] as NavItem[] : []),
+    { name: 'Home', href: '/' },
+    ...(session
+      ? ([
+          { name: 'Settings', href: '/settings' },
+          { name: 'Dashboard', href: '/dashboard' },
+        ] as NavItem[])
+      : []),
   ]
 
   const isActiveLink = (itemHref: string) => {
-    if (itemHref === "/") {
-      return pathname === "/"
+    if (itemHref === '/') {
+      return pathname === '/'
     }
     return pathname === itemHref || pathname.startsWith(`${itemHref}/`)
   }
 
   return (
-    <nav className="dark:bg-muted/30 bg-muted/60 shadow dark:shadow-xl z-10">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
+    <nav className="z-10 bg-muted/60 shadow dark:bg-muted/30 dark:shadow-xl">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="flex h-16 items-center justify-between">
           <div className="flex items-center">
-            <Link href="/" className="text-xl md:text-2xl font-bold text-primary flex items-center gap-2 md:gap-3">
-              <ComponentIcon className="w-6 h-6 md:w-7 md:h-7" />
+            <Link
+              href="/"
+              className="flex items-center gap-2 text-xl font-bold text-primary md:gap-3 md:text-2xl"
+            >
+              <ComponentIcon className="h-6 w-6 md:h-7 md:w-7" />
               {SITE_NAME}
             </Link>
           </div>
@@ -80,8 +85,9 @@ export function Navigation() {
                     key={item.name}
                     href={item.href}
                     className={cn(
-                      "text-muted-foreground hover:text-foreground no-underline px-3 h-16 flex items-center text-sm font-medium transition-colors relative",
-                      isActiveLink(item.href) && "text-foreground after:absolute after:left-0 after:bottom-0 after:h-0.5 after:w-full after:bg-foreground"
+                      'relative flex h-16 items-center px-3 text-sm font-medium text-muted-foreground no-underline transition-colors hover:text-foreground',
+                      isActiveLink(item.href) &&
+                        'text-foreground after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-full after:bg-foreground',
                     )}
                   >
                     {item.name}
@@ -91,11 +97,11 @@ export function Navigation() {
             </div>
             <ActionButtons />
           </div>
-          <div className="md:hidden flex items-center">
+          <div className="flex items-center md:hidden">
             <Sheet open={isOpen} onOpenChange={setIsOpen}>
               <SheetTrigger asChild>
                 <Button variant="ghost" size="icon" className="p-6">
-                  <Menu className="w-9 h-9" />
+                  <Menu className="h-9 w-9" />
                   <span className="sr-only">Open menu</span>
                 </Button>
               </SheetTrigger>
@@ -115,8 +121,8 @@ export function Navigation() {
                             key={item.name}
                             href={item.href}
                             className={cn(
-                              "block px-3 py-2 text-base font-medium text-muted-foreground hover:text-foreground hover:bg-muted/50 no-underline transition-colors relative",
-                              isActiveLink(item.href) && "text-foreground"
+                              'relative block px-3 py-2 text-base font-medium text-muted-foreground no-underline transition-colors hover:bg-muted/50 hover:text-foreground',
+                              isActiveLink(item.href) && 'text-foreground',
                             )}
                             onClick={() => setIsOpen(false)}
                           >
@@ -138,4 +144,3 @@ export function Navigation() {
     </nav>
   )
 }
-

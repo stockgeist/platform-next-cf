@@ -8,12 +8,15 @@ export const useConfigStore = create(
       isTurnstileEnabled: false,
     },
     (set) => ({
-      setConfig: (config: { isGoogleSSOEnabled: boolean, isTurnstileEnabled: boolean }) => {
+      setConfig: (config: {
+        isGoogleSSOEnabled: boolean
+        isTurnstileEnabled: boolean
+      }) => {
         set({
           isGoogleSSOEnabled: config.isGoogleSSOEnabled,
           isTurnstileEnabled: config.isTurnstileEnabled,
         })
       },
-    })
-  )
+    }),
+  ),
 )

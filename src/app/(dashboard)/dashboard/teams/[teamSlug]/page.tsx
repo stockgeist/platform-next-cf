@@ -1,16 +1,16 @@
-import { getDB } from "@/db";
-import { teamTable } from "@/db/schema";
-import { notFound, redirect } from "next/navigation";
-import { eq } from "drizzle-orm";
-import { hasTeamMembership, hasTeamPermission } from "@/utils/team-auth";
-import { TEAM_PERMISSIONS } from "@/db/schema";
-import { PageHeader } from "@/components/page-header";
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import { getSessionFromCookie } from "@/utils/auth";
-import { InviteMemberModal } from "@/components/teams/invite-member-modal";
-import { Alert } from "@heroui/react";
-import { getTeamMembers } from "@/server/team-members";
+import { getDB } from '@/db'
+import { teamTable } from '@/db/schema'
+import { notFound, redirect } from 'next/navigation'
+import { eq } from 'drizzle-orm'
+import { hasTeamMembership, hasTeamPermission } from '@/utils/team-auth'
+import { TEAM_PERMISSIONS } from '@/db/schema'
+import { PageHeader } from '@/components/page-header'
+import Link from 'next/link'
+import { Button } from '@/components/ui/button'
+import { getSessionFromCookie } from '@/utils/auth'
+import { InviteMemberModal } from '@/components/teams/invite-member-modal'
+import { Alert } from '@heroui/react'
+import { getTeamMembers } from '@/server/team-members'
 import {
   Table,
   TableBody,
@@ -18,59 +18,62 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { formatDate } from "@/utils/format-date";
-import { RemoveMemberButton } from "@/components/teams/remove-member-button";
+} from '@/components/ui/table'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { formatDate } from '@/utils/format-date'
+import { RemoveMemberButton } from '@/components/teams/remove-member-button'
 
 interface TeamPageProps {
   params: Promise<{
-    teamSlug: string;
-  }>;
+    teamSlug: string
+  }>
 }
 
 // TODO Test the removal process
 export async function generateMetadata({ params }: TeamPageProps) {
-  const { teamSlug } = await params;
-  const db = getDB();
+  const { teamSlug } = await params
+  const db = getDB()
 
   const team = await db.query.teamTable.findFirst({
     where: eq(teamTable.slug, teamSlug),
-  });
+  })
 
   if (!team) {
     return {
-      title: "Team Not Found",
-    };
+      title: 'Team Not Found',
+    }
   }
 
   return {
     title: `${team.name} - Dashboard`,
     description: team.description || `Team dashboard for ${team.name}`,
-  };
+  }
 }
 
 export default async function TeamDashboardPage({ params }: TeamPageProps) {
-  const { teamSlug } = await params;
-  const db = getDB();
+  const { teamSlug } = await params
+  const db = getDB()
 
   // Find the team by slug
   const team = await db.query.teamTable.findFirst({
     where: eq(teamTable.slug, teamSlug),
-  });
+  })
 
   if (!team) {
-    notFound();
+    notFound()
   }
 
   // Check if user is authenticated
-  const session = await getSessionFromCookie();
+  const session = await getSessionFromCookie()
   if (!session) {
-    redirect("/auth/login?returnTo=" + encodeURIComponent(`/dashboard/teams/${teamSlug}`));
+    redirect(
+      '/auth/login?returnTo=' +
+        encodeURIComponent(`/dashboard/teams/${teamSlug}`),
+    )
   }
 
   // Check team membership using the new function
-  const { hasAccess, session: teamSession } = await hasTeamMembership(team.id);
+  const { hasAccess, session: teamSession } = await hasTeamMembership(team.id)
 
   // If user doesn't have access, show error message
   if (!hasAccess) {
@@ -79,9 +82,9 @@ export default async function TeamDashboardPage({ params }: TeamPageProps) {
         <PageHeader
           items={[
             {
-              href: "/dashboard/teams",
-              label: "Teams"
-            }
+              href: '/dashboard/teams',
+              label: 'Teams',
+            },
           ]}
         />
         <div className="container mx-auto px-5 py-12">
@@ -92,43 +95,47 @@ export default async function TeamDashboardPage({ params }: TeamPageProps) {
             className="mb-6"
           />
           <Button asChild className="mt-4">
-            <Link href="/dashboard/teams">
-              Return to Teams
-            </Link>
+            <Link href="/dashboard/teams">Return to Teams</Link>
           </Button>
         </div>
       </>
-    );
+    )
   }
 
   // Check permissions
-  const canInviteMembers = await hasTeamPermission(team.id, TEAM_PERMISSIONS.INVITE_MEMBERS);
-  const canRemoveMembers = await hasTeamPermission(team.id, TEAM_PERMISSIONS.REMOVE_MEMBERS);
+  const canInviteMembers = await hasTeamPermission(
+    team.id,
+    TEAM_PERMISSIONS.INVITE_MEMBERS,
+  )
+  const canRemoveMembers = await hasTeamPermission(
+    team.id,
+    TEAM_PERMISSIONS.REMOVE_MEMBERS,
+  )
 
   // Fetch team members
-  const teamMembers = await getTeamMembers(team.id);
+  const teamMembers = await getTeamMembers(team.id)
 
   return (
     <>
       <PageHeader
         items={[
           {
-            href: "/dashboard/teams",
-            label: "Teams"
+            href: '/dashboard/teams',
+            label: 'Teams',
           },
           {
             href: `/dashboard/teams/${teamSlug}`,
-            label: team.name
-          }
+            label: team.name,
+          },
         ]}
       />
       <div className="container mx-auto px-5 pb-12">
-        <div className="flex justify-between items-start mb-8">
+        <div className="mb-8 flex items-start justify-between">
           <div className="flex items-center gap-4">
             <div className="space-y-2">
-              <h1 className="text-4xl font-bold mt-4">{team.name}</h1>
+              <h1 className="mt-4 text-4xl font-bold">{team.name}</h1>
               {team.description && (
-                <p className="text-muted-foreground mt-2">{team.description}</p>
+                <p className="mt-2 text-muted-foreground">{team.description}</p>
               )}
             </div>
           </div>
@@ -137,17 +144,15 @@ export default async function TeamDashboardPage({ params }: TeamPageProps) {
             {canInviteMembers && (
               <InviteMemberModal
                 teamId={team.id}
-                trigger={
-                  <Button>Invite Members</Button>
-                }
+                trigger={<Button>Invite Members</Button>}
               />
             )}
 
             {team.avatarUrl ? (
-              <div className="h-16 w-16 rounded-md overflow-hidden">
+              <div className="h-16 w-16 overflow-hidden rounded-md">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
-                  src={team.avatarUrl || ""}
+                  src={team.avatarUrl || ''}
                   alt={`${team.name} avatar`}
                   className="h-full w-full object-cover"
                 />
@@ -156,23 +161,32 @@ export default async function TeamDashboardPage({ params }: TeamPageProps) {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
           {/* Quick stats */}
-          <div className="col-span-3 grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="p-6 border rounded-lg bg-card flex flex-col">
-              <span className="text-sm font-medium text-muted-foreground">Team Credits</span>
-              <span className="text-2xl font-bold">{team.creditBalance || 0}</span>
-            </div>
-
-            <div className="p-6 border rounded-lg bg-card flex flex-col">
-              <span className="text-sm font-medium text-muted-foreground">Your Role</span>
-              <span className="text-2xl font-bold capitalize">
-                {teamSession?.teams?.find(t => t.id === team.id)?.role.name || "Member"}
+          <div className="col-span-3 grid grid-cols-1 gap-4 md:grid-cols-3">
+            <div className="flex flex-col rounded-lg border bg-card p-6">
+              <span className="text-sm font-medium text-muted-foreground">
+                Team Credits
+              </span>
+              <span className="text-2xl font-bold">
+                {team.creditBalance || 0}
               </span>
             </div>
 
-            <div className="p-6 border rounded-lg bg-card flex flex-col">
-              <span className="text-sm font-medium text-muted-foreground">Created</span>
+            <div className="flex flex-col rounded-lg border bg-card p-6">
+              <span className="text-sm font-medium text-muted-foreground">
+                Your Role
+              </span>
+              <span className="text-2xl font-bold capitalize">
+                {teamSession?.teams?.find((t) => t.id === team.id)?.role.name ||
+                  'Member'}
+              </span>
+            </div>
+
+            <div className="flex flex-col rounded-lg border bg-card p-6">
+              <span className="text-sm font-medium text-muted-foreground">
+                Created
+              </span>
               <span className="text-2xl font-bold">
                 {new Date(team.createdAt).toLocaleDateString()}
               </span>
@@ -180,12 +194,11 @@ export default async function TeamDashboardPage({ params }: TeamPageProps) {
           </div>
 
           {/* Team actions */}
-          <div className="col-span-3 flex flex-wrap gap-4">
-          </div>
+          <div className="col-span-3 flex flex-wrap gap-4"></div>
 
           {/* Team Members Table */}
-          <div className="col-span-3 border rounded-lg p-6 bg-card">
-            <h2 className="text-xl font-semibold mb-4">Team Members</h2>
+          <div className="col-span-3 rounded-lg border bg-card p-6">
+            <h2 className="mb-4 text-xl font-semibold">Team Members</h2>
 
             <Table>
               <TableHeader>
@@ -195,13 +208,18 @@ export default async function TeamDashboardPage({ params }: TeamPageProps) {
                   <TableHead>Role</TableHead>
                   <TableHead>Joined</TableHead>
                   <TableHead>Status</TableHead>
-                  {canRemoveMembers && <TableHead className="text-right">Action</TableHead>}
+                  {canRemoveMembers && (
+                    <TableHead className="text-right">Action</TableHead>
+                  )}
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {teamMembers.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={canRemoveMembers ? 6 : 5} className="text-center py-6 text-muted-foreground">
+                    <TableCell
+                      colSpan={canRemoveMembers ? 6 : 5}
+                      className="py-6 text-center text-muted-foreground"
+                    >
                       No members found
                     </TableCell>
                   </TableRow>
@@ -215,7 +233,8 @@ export default async function TeamDashboardPage({ params }: TeamPageProps) {
                             alt={`${member.user.firstName || ''} ${member.user.lastName || ''}`}
                           />
                           <AvatarFallback>
-                            {member.user.firstName?.[0]}{member.user.lastName?.[0]}
+                            {member.user.firstName?.[0]}
+                            {member.user.lastName?.[0]}
                           </AvatarFallback>
                         </Avatar>
                         <span>
@@ -232,17 +251,29 @@ export default async function TeamDashboardPage({ params }: TeamPageProps) {
                           : 'Not joined'}
                       </TableCell>
                       <TableCell>
-                        {member.isActive
-                          ? <span className="text-green-600 dark:text-green-400">Active</span>
-                          : <span className="text-red-600 dark:text-red-400">Inactive</span>}
+                        {member.isActive ? (
+                          <span className="text-green-600 dark:text-green-400">
+                            Active
+                          </span>
+                        ) : (
+                          <span className="text-red-600 dark:text-red-400">
+                            Inactive
+                          </span>
+                        )}
                       </TableCell>
                       {canRemoveMembers && (
                         <TableCell className="text-right">
                           <RemoveMemberButton
                             teamId={team.id}
                             userId={member.userId}
-                            memberName={`${member.user.firstName || ''} ${member.user.lastName || ''}`.trim() || member.user.email || ''}
-                            isDisabled={member.isSystemRole && member.roleId === 'owner'}
+                            memberName={
+                              `${member.user.firstName || ''} ${member.user.lastName || ''}`.trim() ||
+                              member.user.email ||
+                              ''
+                            }
+                            isDisabled={
+                              member.isSystemRole && member.roleId === 'owner'
+                            }
                             tooltipText="Team owners cannot be removed"
                           />
                         </TableCell>
@@ -256,5 +287,5 @@ export default async function TeamDashboardPage({ params }: TeamPageProps) {
         </div>
       </div>
     </>
-  );
+  )
 }

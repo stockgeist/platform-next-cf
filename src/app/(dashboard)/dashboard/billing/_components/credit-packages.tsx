@@ -1,66 +1,75 @@
-"use client";
+'use client'
 
-import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { CREDIT_PACKAGES, FREE_MONTHLY_CREDITS } from "@/constants";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { StripePaymentForm } from "./stripe-payment-form";
-import { createPaymentIntent } from "@/actions/credits.action";
-import { Coins, Sparkles, Zap } from "lucide-react";
-import { useSessionStore } from "@/state/session";
-import { useTransactionStore } from "@/state/transaction";
-import { Separator } from "@/components/ui/separator";
-import { useRouter } from "next/navigation";
-import { Badge } from "@/components/ui/badge";
-import { Skeleton } from "@/components/ui/skeleton";
-import { toast } from "sonner";
-type CreditPackage = typeof CREDIT_PACKAGES[number];
+import { useState } from 'react'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { CREDIT_PACKAGES, FREE_MONTHLY_CREDITS } from '@/constants'
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
+import { StripePaymentForm } from './stripe-payment-form'
+import { createPaymentIntent } from '@/actions/credits.action'
+import { Coins, Sparkles, Zap } from 'lucide-react'
+import { useSessionStore } from '@/state/session'
+import { useTransactionStore } from '@/state/transaction'
+import { Separator } from '@/components/ui/separator'
+import { useRouter } from 'next/navigation'
+import { Badge } from '@/components/ui/badge'
+import { Skeleton } from '@/components/ui/skeleton'
+import { toast } from 'sonner'
+type CreditPackage = (typeof CREDIT_PACKAGES)[number]
 
 export const getPackageIcon = (index: number) => {
-  if (index === 2) return <Zap className="h-6 w-6 text-yellow-500" />;
-  if (index === 1) return <Sparkles className="h-6 w-6 text-blue-500" />;
-  return <Coins className="h-6 w-6 text-green-500" />;
-};
+  if (index === 2) return <Zap className="h-6 w-6 text-yellow-500" />
+  if (index === 1) return <Sparkles className="h-6 w-6 text-blue-500" />
+  return <Coins className="h-6 w-6 text-green-500" />
+}
 
 // Calculate savings percentage compared to the first package
 const calculateSavings = (pkg: CreditPackage) => {
-  const basePackage = CREDIT_PACKAGES[0];
-  const basePrice = basePackage.price / basePackage.credits;
-  const currentPrice = pkg.price / pkg.credits;
-  const savings = ((basePrice - currentPrice) / basePrice) * 100;
-  return Math.round(savings);
-};
+  const basePackage = CREDIT_PACKAGES[0]
+  const basePrice = basePackage.price / basePackage.credits
+  const currentPrice = pkg.price / pkg.credits
+  const savings = ((basePrice - currentPrice) / basePrice) * 100
+  return Math.round(savings)
+}
 
 export function CreditPackages() {
-  const router = useRouter();
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [selectedPackage, setSelectedPackage] = useState<CreditPackage | null>(null);
-  const [clientSecret, setClientSecret] = useState<string | null>(null);
-  const session = useSessionStore((state) => state);
-  const transactionsRefresh = useTransactionStore((state) => state.triggerRefresh);
-  const sessionIsLoading = session?.isLoading;
+  const router = useRouter()
+  const [isDialogOpen, setIsDialogOpen] = useState(false)
+  const [selectedPackage, setSelectedPackage] = useState<CreditPackage | null>(
+    null,
+  )
+  const [clientSecret, setClientSecret] = useState<string | null>(null)
+  const session = useSessionStore((state) => state)
+  const transactionsRefresh = useTransactionStore(
+    (state) => state.triggerRefresh,
+  )
+  const sessionIsLoading = session?.isLoading
 
   const handlePurchase = async (pkg: CreditPackage) => {
     try {
       const { clientSecret } = await createPaymentIntent({
         packageId: pkg.id,
-      });
-      setClientSecret(clientSecret);
-      setSelectedPackage(pkg);
-      setIsDialogOpen(true);
+      })
+      setClientSecret(clientSecret)
+      setSelectedPackage(pkg)
+      setIsDialogOpen(true)
     } catch (error) {
-      console.error("Error creating payment intent:", error);
+      console.error('Error creating payment intent:', error)
     }
-  };
+  }
 
   const handleSuccess = () => {
-    setIsDialogOpen(false);
-    setSelectedPackage(null);
-    setClientSecret(null);
-    router.refresh();
-    transactionsRefresh();
-  };
+    setIsDialogOpen(false)
+    setSelectedPackage(null)
+    setClientSecret(null)
+    router.refresh()
+    transactionsRefresh()
+  }
 
   return (
     <>
@@ -78,7 +87,8 @@ export function CreditPackages() {
                 </>
               ) : (
                 <div className="text-3xl font-bold">
-                  {session?.session?.user?.currentCredits.toLocaleString()} credits
+                  {session?.session?.user?.currentCredits.toLocaleString()}{' '}
+                  credits
                 </div>
               )}
             </div>
@@ -91,37 +101,46 @@ export function CreditPackages() {
 
           <div className="space-y-4">
             <div>
-              <h2 className="text-xl sm:text-2xl font-semibold">Top up your credits</h2>
-              <p className="text-sm text-muted-foreground mt-2 sm:mt-3">
-                Purchase additional credits to use our services. The more credits you buy, the better the value.
+              <h2 className="text-xl font-semibold sm:text-2xl">
+                Top up your credits
+              </h2>
+              <p className="mt-2 text-sm text-muted-foreground sm:mt-3">
+                Purchase additional credits to use our services. The more
+                credits you buy, the better the value.
               </p>
             </div>
 
             <div className="grid gap-4 xl:grid-cols-3">
               {CREDIT_PACKAGES.map((pkg, index) => (
-                <Card key={pkg.id} className="relative overflow-hidden transition-all hover:shadow-lg bg-muted dark:bg-background">
-                  <CardContent className="flex flex-col h-full pt-4 gap-6">
+                <Card
+                  key={pkg.id}
+                  className="relative overflow-hidden bg-muted transition-all hover:shadow-lg dark:bg-background"
+                >
+                  <CardContent className="flex h-full flex-col gap-6 pt-4">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-2">
                         {getPackageIcon(index)}
                         <div>
-                          <div className="text-xl sm:text-2xl font-bold">
+                          <div className="text-xl font-bold sm:text-2xl">
                             {pkg.credits.toLocaleString()}
                           </div>
-                          <div className="text-xs sm:text-sm text-muted-foreground">
+                          <div className="text-xs text-muted-foreground sm:text-sm">
                             credits
                           </div>
                         </div>
                       </div>
                       <div className="flex flex-col items-end">
-                        <div className="text-xl sm:text-2xl font-bold text-primary">
+                        <div className="text-xl font-bold text-primary sm:text-2xl">
                           ${pkg.price}
                         </div>
-                        <div className="text-xs sm:text-sm text-muted-foreground">
+                        <div className="text-xs text-muted-foreground sm:text-sm">
                           one-time payment
                         </div>
                         {index > 0 ? (
-                          <Badge variant="secondary" className="mt-1 text-xs sm:text-sm bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300">
+                          <Badge
+                            variant="secondary"
+                            className="mt-1 bg-green-100 text-xs text-green-700 dark:bg-green-900 dark:text-green-300 sm:text-sm"
+                          >
                             Save {calculateSavings(pkg)}%
                           </Badge>
                         ) : (
@@ -135,7 +154,9 @@ export function CreditPackages() {
                         if (process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY) {
                           handlePurchase(pkg)
                         } else {
-                          toast.error("Something went wrong with our payment provider. Please try again later.")
+                          toast.error(
+                            'Something went wrong with our payment provider. Please try again later.',
+                          )
                         }
                       }}
                       className="w-full text-sm sm:text-base"
@@ -155,7 +176,7 @@ export function CreditPackages() {
           <DialogHeader>
             <DialogTitle>Purchase Credits</DialogTitle>
           </DialogHeader>
-          {(clientSecret && selectedPackage) && (
+          {clientSecret && selectedPackage && (
             <StripePaymentForm
               packageId={selectedPackage.id}
               clientSecret={clientSecret}
@@ -168,5 +189,5 @@ export function CreditPackages() {
         </DialogContent>
       </Dialog>
     </>
-  );
+  )
 }

@@ -1,14 +1,11 @@
-"use client"
+'use client'
 
-import { type ComponentType } from "react"
+import { type ComponentType } from 'react'
 import type { Route } from 'next'
-import {
-  Users,
-  Shield,
-} from "lucide-react"
+import { Users, Shield } from 'lucide-react'
 
-import { NavMain } from "@/components/nav-main"
-import { NavUser } from "@/components/nav-user"
+import { NavMain } from '@/components/nav-main'
+import { NavUser } from '@/components/nav-user'
 import {
   Sidebar,
   SidebarContent,
@@ -18,7 +15,7 @@ import {
   SidebarMenuItem,
   SidebarRail,
   SidebarGroup,
-} from "@/components/ui/sidebar"
+} from '@/components/ui/sidebar'
 
 export type NavItem = {
   title: string
@@ -33,14 +30,16 @@ export type NavMainItem = NavItem & {
 
 const adminNavItems: NavMainItem[] = [
   {
-    title: "Users",
-    url: "/admin",
+    title: 'Users',
+    url: '/admin',
     icon: Users,
     isActive: true,
   },
 ]
 
-export function AdminSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+export function AdminSidebar({
+  ...props
+}: React.ComponentProps<typeof Sidebar>) {
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarContent>

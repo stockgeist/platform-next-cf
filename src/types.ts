@@ -1,35 +1,33 @@
-import type { KVSession } from "./utils/kv-session";
+import type { KVSession } from './utils/kv-session'
 
-export type SessionValidationResult =
-  | KVSession
-  | null;
+export type SessionValidationResult = KVSession | null
 
 export interface ParsedUserAgent {
-  ua: string;
+  ua: string
   browser: {
-    name?: string;
-    version?: string;
-    major?: string;
-  };
+    name?: string
+    version?: string
+    major?: string
+  }
   device: {
-    model?: string;
-    type?: string;
-    vendor?: string;
-  };
+    model?: string
+    type?: string
+    vendor?: string
+  }
   engine: {
-    name?: string;
-    version?: string;
-  };
+    name?: string
+    version?: string
+  }
   os: {
-    name?: string;
-    version?: string;
-  };
+    name?: string
+    version?: string
+  }
 }
 
 export interface SessionWithMeta extends KVSession {
-  isCurrentSession: boolean;
-  expiration?: Date;
-  createdAt: number;
-  userAgent?: string | null;
-  parsedUserAgent?: ParsedUserAgent;
+  isCurrentSession: boolean
+  expiration?: Date
+  createdAt: number
+  userAgent?: string | null
+  parsedUserAgent?: ParsedUserAgent
 }

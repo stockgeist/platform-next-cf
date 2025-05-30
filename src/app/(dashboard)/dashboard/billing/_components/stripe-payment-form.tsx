@@ -1,78 +1,85 @@
-"use client";
+'use client'
 
-import { useState, useMemo } from "react";
+import { useState, useMemo } from 'react'
 import {
   PaymentElement,
   useStripe,
   useElements,
   Elements,
-} from "@stripe/react-stripe-js";
-import { loadStripe } from "@stripe/stripe-js";
-import { Button } from "@/components/ui/button";
-import { toast } from "sonner";
-import { confirmPayment } from "@/actions/credits.action";
-import { useTheme } from "next-themes";
-import { Card, CardContent } from "@/components/ui/card";
-import { getPackageIcon } from "./credit-packages";
-import { CREDITS_EXPIRATION_YEARS } from "@/constants";
+} from '@stripe/react-stripe-js'
+import { loadStripe } from '@stripe/stripe-js'
+import { Button } from '@/components/ui/button'
+import { toast } from 'sonner'
+import { confirmPayment } from '@/actions/credits.action'
+import { useTheme } from 'next-themes'
+import { Card, CardContent } from '@/components/ui/card'
+import { getPackageIcon } from './credit-packages'
+import { CREDITS_EXPIRATION_YEARS } from '@/constants'
 
 interface StripePaymentFormProps {
-  packageId: string;
-  clientSecret: string;
-  onSuccess: () => void;
-  onCancel: () => void;
-  credits: number;
-  price: number;
+  packageId: string
+  clientSecret: string
+  onSuccess: () => void
+  onCancel: () => void
+  credits: number
+  price: number
 }
 
-function PaymentForm({ packageId, clientSecret, onSuccess, onCancel, credits, price }: StripePaymentFormProps) {
-  const stripe = useStripe();
-  const elements = useElements();
-  const [isProcessing, setIsProcessing] = useState(false);
+function PaymentForm({
+  packageId,
+  clientSecret,
+  onSuccess,
+  onCancel,
+  credits,
+  price,
+}: StripePaymentFormProps) {
+  const stripe = useStripe()
+  const elements = useElements()
+  const [isProcessing, setIsProcessing] = useState(false)
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+    e.preventDefault()
 
     if (!stripe || !elements) {
-      return;
+      return
     }
 
-    setIsProcessing(true);
+    setIsProcessing(true)
 
     try {
       const { error } = await stripe.confirmPayment({
         elements,
-        redirect: "if_required",
-      });
+        redirect: 'if_required',
+      })
 
       if (error) {
-        toast.error(error.message || "Payment failed");
+        toast.error(error.message || 'Payment failed')
       } else {
         // The payment was successful
-        const paymentIntent = await stripe.retrievePaymentIntent(clientSecret);
+        const paymentIntent = await stripe.retrievePaymentIntent(clientSecret)
         if (paymentIntent.paymentIntent) {
           const { success } = await confirmPayment({
             packageId,
             paymentIntentId: paymentIntent.paymentIntent.id,
-          });
+          })
 
           if (success) {
-            toast.success("Payment successful!");
-            onSuccess();
+            toast.success('Payment successful!')
+            onSuccess()
           } else {
-            toast.error("Payment failed");
+            toast.error('Payment failed')
           }
         } else {
-          throw new Error("No payment intent found");
+          throw new Error('No payment intent found')
         }
       }
     } catch (error) {
-      console.error("Payment error:", error);
-      toast.error("An unexpected error occurred");
+      console.error('Payment error:', error)
+      toast.error('An unexpected error occurred')
     } finally {
-      setIsProcessing(false);
+      setIsProcessing(false)
     }
-  };
+  }
 
   return (
     <div className="space-y-6">
@@ -88,20 +95,22 @@ function PaymentForm({ packageId, clientSecret, onSuccess, onCancel, credits, pr
                   </div>
                 </div>
               </div>
-              <div className="text-2xl font-bold text-primary">
-                ${price}
-              </div>
+              <div className="text-2xl font-bold text-primary">${price}</div>
             </div>
             <div className="h-px bg-border" />
-            <div className="text-xs text-muted-foreground space-y-2">
+            <div className="space-y-2 text-xs text-muted-foreground">
               <p>
-                Your payment is secure and encrypted. We use Stripe, a trusted global payment provider, to process your payment.
+                Your payment is secure and encrypted. We use Stripe, a trusted
+                global payment provider, to process your payment.
               </p>
               <p>
-                For your security, your payment details are handled directly by Stripe and never touch our servers.
+                For your security, your payment details are handled directly by
+                Stripe and never touch our servers.
               </p>
               <p>
-                Credits will be added to your account immediately after successful payment and will be valid for {CREDITS_EXPIRATION_YEARS} years from the purchase date.
+                Credits will be added to your account immediately after
+                successful payment and will be valid for{' '}
+                {CREDITS_EXPIRATION_YEARS} years from the purchase date.
               </p>
             </div>
           </div>
@@ -124,17 +133,23 @@ function PaymentForm({ packageId, clientSecret, onSuccess, onCancel, credits, pr
             disabled={isProcessing || !stripe || !elements}
             className="px-8"
           >
-            {isProcessing ? "Processing..." : "Pay Now"}
+            {isProcessing ? 'Processing...' : 'Pay Now'}
           </Button>
         </div>
       </form>
     </div>
-  );
+  )
 }
 
 export function StripePaymentForm(props: StripePaymentFormProps) {
-  const { resolvedTheme: theme } = useTheme();
-  const stripePromise = useMemo(() => process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY ? loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY) : null, []);
+  const { resolvedTheme: theme } = useTheme()
+  const stripePromise = useMemo(
+    () =>
+      process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
+        ? loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY)
+        : null,
+    [],
+  )
 
   return (
     <Elements
@@ -142,11 +157,11 @@ export function StripePaymentForm(props: StripePaymentFormProps) {
       options={{
         clientSecret: props.clientSecret,
         appearance: {
-          theme: theme === "dark" ? "night" : "stripe",
+          theme: theme === 'dark' ? 'night' : 'stripe',
         },
       }}
     >
       <PaymentForm {...props} />
     </Elements>
-  );
+  )
 }
