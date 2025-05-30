@@ -54,6 +54,8 @@ export function CreditPackages() {
     try {
       const { clientSecret } = await createPaymentIntent({
         packageId: pkg.id,
+        isBusiness: false, // Default to non-business, will be updated by VAT form
+        country: '', // Default to empty, will be updated by VAT form
       })
       setClientSecret(clientSecret)
       setSelectedPackage(pkg)
@@ -134,7 +136,7 @@ export function CreditPackages() {
                           ${pkg.price}
                         </div>
                         <div className="text-xs text-muted-foreground sm:text-sm">
-                          one-time payment
+                          one-time payment (Excl. VAT)
                         </div>
                         {index > 0 ? (
                           <Badge
@@ -179,7 +181,6 @@ export function CreditPackages() {
           {clientSecret && selectedPackage && (
             <StripePaymentForm
               packageId={selectedPackage.id}
-              clientSecret={clientSecret}
               onSuccess={handleSuccess}
               onCancel={() => setIsDialogOpen(false)}
               credits={selectedPackage.credits}

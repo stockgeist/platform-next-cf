@@ -43,7 +43,9 @@ export const userTable = sqliteTable(
     }),
     email: text({
       length: 255,
-    }).unique(),
+    })
+      .notNull()
+      .unique(),
     passwordHash: text(),
     role: text({
       enum: roleTuple,
@@ -69,6 +71,15 @@ export const userTable = sqliteTable(
     currentCredits: integer().default(0).notNull(),
     lastCreditRefreshAt: integer({
       mode: 'timestamp',
+    }),
+    isBusiness: integer('is_business', { mode: 'boolean' })
+      .default(false)
+      .notNull(),
+    vatNumber: text({
+      length: 255,
+    }),
+    country: text({
+      length: 2,
     }),
   },
   (table) => [

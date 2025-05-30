@@ -15,6 +15,7 @@ import {
 } from '@/constants'
 import ms from 'ms'
 import { withRateLimit, RATE_LIMITS } from '@/utils/with-rate-limit'
+import { calculateVatAmount } from '@/utils/vat'
 
 // Action types
 type GetTransactionsInput = {
@@ -24,6 +25,9 @@ type GetTransactionsInput = {
 
 type CreatePaymentIntentInput = {
   packageId: string
+  isBusiness: boolean
+  vatNumber?: string
+  country: string
 }
 
 type PurchaseCreditsInput = {
@@ -75,6 +79,9 @@ export async function getTransactions({
 
 export async function createPaymentIntent({
   packageId,
+  isBusiness,
+  vatNumber,
+  country,
 }: CreatePaymentIntentInput) {
   return withRateLimit(async () => {
     const session = await requireVerifiedEmail()
@@ -88,8 +95,15 @@ export async function createPaymentIntent({
         throw new Error('Invalid package')
       }
 
+      const vatAmount = calculateVatAmount(
+        creditPackage.price,
+        country,
+        isBusiness,
+      )
+      const totalAmount = creditPackage.price + vatAmount
+
       const paymentIntent = await getStripe().paymentIntents.create({
-        amount: creditPackage.price * 100,
+        amount: Math.round(totalAmount * 100), // Convert to cents
         currency: 'usd',
         automatic_payment_methods: {
           enabled: true,
@@ -99,6 +113,10 @@ export async function createPaymentIntent({
           userId: session.user.id,
           packageId: creditPackage.id,
           credits: creditPackage.credits.toString(),
+          isBusiness: isBusiness.toString(),
+          vatNumber: vatNumber || '',
+          country,
+          vatAmount: vatAmount.toString(),
         },
       })
 
