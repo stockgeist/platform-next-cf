@@ -1,4 +1,7 @@
 {
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "always"
+  },
   "terminal.integrated.profiles.linux": {
     "bash": {
       "path": "/bin/bash",
