@@ -480,3 +480,41 @@ export type Team = InferSelectModel<typeof teamTable>
 export type TeamMembership = InferSelectModel<typeof teamMembershipTable>
 export type TeamRole = InferSelectModel<typeof teamRoleTable>
 export type TeamInvitation = InferSelectModel<typeof teamInvitationTable>
+
+export const invoices = sqliteTable('invoices', {
+  id: text('id').primaryKey(),
+  userId: text('user_id')
+    .notNull()
+    .references(() => userTable.id, { onDelete: 'cascade' }),
+  packageId: text('package_id').notNull(),
+  amount: integer('amount').notNull(), // Amount in cents
+  vatAmount: integer('vat_amount').notNull(), // VAT amount in cents
+  totalAmount: integer('total_amount').notNull(), // Total amount in cents
+  currency: text('currency').notNull().default('usd'),
+  status: text('status', { enum: ['paid', 'pending', 'failed'] }).notNull(),
+  paymentIntentId: text('payment_intent_id').notNull(),
+  vatNumber: text('vat_number'),
+  country: text('country').notNull(),
+  isBusiness: integer('is_business', { mode: 'boolean' }).notNull(),
+  createdAt: integer('created_at', { mode: 'timestamp' })
+    .notNull()
+    .default(sql`CURRENT_TIMESTAMP`),
+  updatedAt: integer('updated_at', { mode: 'timestamp' })
+    .notNull()
+    .default(sql`CURRENT_TIMESTAMP`),
+})
+
+export const schema = {
+  userTable,
+  passKeyCredentialTable,
+  creditTransactionTable,
+  purchasedItemsTable,
+  teamTable,
+  teamMembershipTable,
+  teamRoleTable,
+  teamInvitationTable,
+  invoices,
+}
+
+export type Invoice = typeof invoices.$inferSelect
+export type NewInvoice = typeof invoices.$inferInsert

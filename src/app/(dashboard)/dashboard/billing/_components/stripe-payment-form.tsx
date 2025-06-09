@@ -17,6 +17,8 @@ import { getPackageIcon } from './credit-packages'
 import { CREDITS_EXPIRATION_YEARS } from '@/constants'
 import { VatDetailsForm } from './vat-details-form'
 import { formatVatAmount } from '@/utils/vat'
+import { createInvoice } from '@/services/invoice.service'
+import { useSessionStore } from '@/state/session'
 
 interface StripePaymentFormProps {
   packageId: string
@@ -33,17 +35,28 @@ function PaymentFormContent({
   clientSecret,
   onSuccess,
   onCancel,
+  price,
+  vatDetails,
 }: Omit<StripePaymentFormProps, 'credits' | 'price'> & {
   clientSecret: string
+  price: number
+  vatDetails: {
+    isBusiness: boolean
+    vatNumber?: string
+    country: string
+    vatAmount: number
+    totalAmount: number
+  }
 }) {
   const stripe = useStripe()
   const elements = useElements()
   const [isProcessing, setIsProcessing] = useState(false)
+  const { session } = useSessionStore()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    if (!stripe || !elements || !clientSecret) {
+    if (!stripe || !elements || !clientSecret || !session?.id) {
       return
     }
 
@@ -67,6 +80,20 @@ function PaymentFormContent({
           })
 
           if (success) {
+            // Create invoice
+            await createInvoice({
+              userId: session.id,
+              packageId,
+              amount: price * 100, // Convert to cents
+              vatAmount: vatDetails.vatAmount * 100,
+              totalAmount: vatDetails.totalAmount * 100,
+              currency: 'usd',
+              paymentIntentId: paymentIntent.paymentIntent.id,
+              vatNumber: vatDetails.vatNumber,
+              country: vatDetails.country,
+              isBusiness: vatDetails.isBusiness,
+            })
+
             toast.success('Payment successful!')
             onSuccess()
           } else {
@@ -225,6 +252,8 @@ function PaymentForm({
           clientSecret={clientSecret}
           onSuccess={onSuccess}
           onCancel={onCancel}
+          price={price}
+          vatDetails={vatDetails}
         />
       </Elements>
     )

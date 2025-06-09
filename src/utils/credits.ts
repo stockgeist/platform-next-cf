@@ -118,6 +118,17 @@ export async function logTransaction({
   paymentIntentId?: string
 }) {
   const db = getDB()
+
+  // Verify user exists first
+  const user = await db.query.userTable.findFirst({
+    where: eq(userTable.id, userId),
+    columns: { id: true },
+  })
+
+  if (!user) {
+    throw new Error(`User with ID ${userId} not found`)
+  }
+
   await db.insert(creditTransactionTable).values({
     userId,
     amount,

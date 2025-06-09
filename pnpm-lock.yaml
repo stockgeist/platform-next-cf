@@ -53,6 +53,7 @@ specifiers:
   lucide-react: ^0.471.0
   motion: ^11.18.0
   ms: ^2.1.3
+  nanoid: ^5.1.5
   next: 15.3.2
   next-themes: ^0.4.6
   nextjs-toploader: ^3.8.16
@@ -119,6 +120,7 @@ dependencies:
   lucide-react: 0.471.2_react@19.1.0
   motion: 11.18.2_j6k6oay3ugsr56slyfvma2drry
   ms: 2.1.3
+  nanoid: 5.1.5
   next: 15.3.2_j6k6oay3ugsr56slyfvma2drry
   next-themes: 0.4.6_j6k6oay3ugsr56slyfvma2drry
   nextjs-toploader: 3.8.16_vlqdltwfrthjibvc4sy2br5kfq
@@ -11771,6 +11773,12 @@ packages:
     resolution: {integrity: sha512-N8SpfPUnUp1bK+PMYW8qSWdl9U+wwNWI4QKxOYDy9JAro3WMX7p2OeVRF9v+347pnakNevPmiHhNmZ2HbFA76w==}
     engines: {node: ^10 || ^12 || ^13.7 || ^14 || >=15.0.1}
     hasBin: true
+
+  /nanoid/5.1.5:
+    resolution: {integrity: sha512-Ir/+ZpE9fDsNH0hQ3C68uyThDXzYcim2EqcZ8zn8Chtt1iylPT9xXJB0kPCnqzgcEGikO9RxSrh63MsmVCU7Fw==}
+    engines: {node: ^18 || >=20}
+    hasBin: true
+    dev: false
 
   /napi-postinstall/0.2.4:
     resolution: {integrity: sha512-ZEzHJwBhZ8qQSbknHqYcdtQVr8zUgGyM/q6h6qAyhtyVMNrSgDhrC4disf03dYW0e+czXyLnZINnCTEkWy0eJg==}
