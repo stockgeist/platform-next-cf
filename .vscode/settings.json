@@ -11,5 +11,8 @@
   "terminal.integrated.defaultProfile.linux": "bash",
   "terminal.integrated.env.linux": {
     "NVM_DIR": "$HOME/.nvm"
+  },
+  "files.associations": {
+    "wrangler.json": "jsonc"
   }
 }

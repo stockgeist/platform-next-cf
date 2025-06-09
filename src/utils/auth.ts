@@ -68,6 +68,14 @@ export function generateSessionToken(): string {
   return createId()
 }
 
+async function generateSessionId(token: string): Promise<string> {
+  const hashBuffer = await crypto.subtle.digest(
+    'SHA-256',
+    new TextEncoder().encode(token),
+  )
+  return encodeHexLowerCase(new Uint8Array(hashBuffer))
+}
+
 function encodeSessionCookie(userId: string, token: string): string {
   return `${userId}:${token}`
 }
@@ -161,7 +169,7 @@ export async function createSession({
   authenticationType,
   passkeyCredentialId,
 }: CreateSessionParams): Promise<KVSession> {
-  const sessionId = encodeHexLowerCase(sha256(new TextEncoder().encode(token)))
+  const sessionId = await generateSessionId(token)
   const expiresAt = new Date(Date.now() + getSessionLength())
 
   const user = await getUserFromDB(userId)
@@ -177,9 +185,9 @@ export async function createSession({
     userId,
     expiresAt,
     user,
+    teams: teamsWithPermissions,
     authenticationType,
     passkeyCredentialId,
-    teams: teamsWithPermissions,
   })
 }
 
