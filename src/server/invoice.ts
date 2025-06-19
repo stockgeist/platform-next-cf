@@ -1,5 +1,7 @@
+import 'server-only'
+
 import { getDB } from '@/db'
-import { invoices } from '@/db/schema'
+import { invoiceTable } from '@/db/schema'
 import { eq } from 'drizzle-orm'
 import { nanoid } from 'nanoid'
 import { format } from 'date-fns'
@@ -33,7 +35,7 @@ export async function createInvoice({
   const db = getDB()
 
   const [invoice] = await db
-    .insert(invoices)
+    .insert(invoiceTable)
     .values({
       id: nanoid(),
       userId,
@@ -58,8 +60,8 @@ export async function getInvoiceById(id: string) {
 
   const [invoice] = await db
     .select()
-    .from(invoices)
-    .where(eq(invoices.id, id))
+    .from(invoiceTable)
+    .where(eq(invoiceTable.id, id))
     .limit(1)
 
   return invoice
@@ -70,13 +72,13 @@ export async function getUserInvoices(userId: string) {
 
   return db
     .select()
-    .from(invoices)
-    .where(eq(invoices.userId, userId))
-    .orderBy(invoices.createdAt)
+    .from(invoiceTable)
+    .where(eq(invoiceTable.userId, userId))
+    .orderBy(invoiceTable.createdAt)
 }
 
 export async function generateInvoicePDF(
-  invoice: typeof invoices.$inferSelect,
+  invoice: typeof invoiceTable.$inferSelect,
 ) {
   // This is a placeholder for PDF generation
   // In a real implementation, you would use a PDF generation library

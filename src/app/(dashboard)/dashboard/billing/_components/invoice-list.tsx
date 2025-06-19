@@ -1,66 +1,29 @@
-'use client'
-
-import { useEffect, useState } from 'react'
-import { getUserInvoices } from '@/services/invoice.service'
+import { getUserInvoices } from '@/server/invoice'
 import { format } from 'date-fns'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Download } from 'lucide-react'
 import { formatVatAmount } from '@/utils/vat'
-import { useSessionStore } from '@/state/session'
-import type { Invoice } from '@/db/schema'
+import { getSessionFromCookie } from '@/utils/auth'
 
-export function InvoiceList() {
-  const [invoices, setInvoices] = useState<Invoice[]>([])
-  const [isLoading, setIsLoading] = useState(true)
-  const { session } = useSessionStore()
+export async function InvoiceList() {
+  const session = await getSessionFromCookie()
 
-  useEffect(() => {
-    async function loadInvoices() {
-      if (!session?.user?.id) return
-
-      try {
-        const userInvoices = await getUserInvoices(session.user.id)
-        setInvoices(userInvoices)
-      } catch (error) {
-        console.error('Error loading invoices:', error)
-      } finally {
-        setIsLoading(false)
-      }
-    }
-
-    loadInvoices()
-  }, [session?.user?.id])
-
-  const handleDownload = async (invoiceId: string) => {
-    try {
-      const response = await fetch(`/api/invoices/${invoiceId}`)
-      if (!response.ok) throw new Error('Failed to download invoice')
-
-      const invoiceData = await response.json()
-
-      // For now, we'll just log the invoice data
-      // In a real implementation, you would generate and download a PDF
-      console.log('Invoice data:', invoiceData)
-
-      // TODO: Implement PDF generation and download
-      // const blob = new Blob([pdfData], { type: 'application/pdf' })
-      // const url = window.URL.createObjectURL(blob)
-      // const a = document.createElement('a')
-      // a.href = url
-      // a.download = `invoice-${invoiceData.invoiceNumber}.pdf`
-      // document.body.appendChild(a)
-      // a.click()
-      // window.URL.revokeObjectURL(url)
-      // document.body.removeChild(a)
-    } catch (error) {
-      console.error('Error downloading invoice:', error)
-    }
+  if (!session) {
+    return (
+      <Card>
+        <CardContent className="pt-6">
+          <p className="text-center text-muted-foreground">
+            Please sign in to view your invoices
+          </p>
+        </CardContent>
+      </Card>
+    )
   }
 
-  if (isLoading) {
-    return <div>Loading invoices...</div>
-  }
+  const invoices = await getUserInvoices(session.userId)
+
+  console.log(invoices)
 
   if (invoices.length === 0) {
     return (
@@ -81,14 +44,12 @@ export function InvoiceList() {
               <CardTitle className="text-lg">
                 Invoice {invoice.id.slice(0, 8).toUpperCase()}
               </CardTitle>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => handleDownload(invoice.id)}
-              >
-                <Download className="mr-2 h-4 w-4" />
-                Download
-              </Button>
+              <form action={`/api/invoices/${invoice.id}`} method="GET">
+                <Button variant="outline" size="sm" type="submit">
+                  <Download className="mr-2 h-4 w-4" />
+                  Download
+                </Button>
+              </form>
             </div>
           </CardHeader>
           <CardContent>

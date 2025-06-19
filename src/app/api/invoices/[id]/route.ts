@@ -1,10 +1,10 @@
 import { NextResponse } from 'next/server'
-import { getInvoiceById, generateInvoicePDF } from '@/services/invoice.service'
+import { getInvoiceById, generateInvoicePDF } from '@/server/invoice'
 import { getSessionFromCookie } from '@/utils/auth'
 
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
   try {
     const session = await getSessionFromCookie()
@@ -12,7 +12,8 @@ export async function GET(
       return new NextResponse('Unauthorized', { status: 401 })
     }
 
-    const invoice = await getInvoiceById(params.id)
+    const { id } = await params
+    const invoice = await getInvoiceById(id)
     if (!invoice) {
       return new NextResponse('Invoice not found', { status: 404 })
     }

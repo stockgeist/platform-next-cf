@@ -10,7 +10,6 @@ import {
 } from '@/db/schema'
 import { init } from '@paralleldrive/cuid2'
 import { encodeHexLowerCase } from '@oslojs/encoding'
-import { sha256 } from '@oslojs/crypto/sha2'
 import ms from 'ms'
 import { getDB } from '@/db'
 import { eq } from 'drizzle-orm'
@@ -185,9 +184,9 @@ export async function createSession({
     userId,
     expiresAt,
     user,
-    teams: teamsWithPermissions,
     authenticationType,
     passkeyCredentialId,
+    teams: teamsWithPermissions,
   })
 }
 
@@ -214,7 +213,7 @@ async function validateSessionToken(
   token: string,
   userId: string,
 ): Promise<SessionValidationResult | null> {
-  const sessionId = encodeHexLowerCase(sha256(new TextEncoder().encode(token)))
+  const sessionId = await generateSessionId(token)
 
   const session = await getKVSession(sessionId, userId)
 

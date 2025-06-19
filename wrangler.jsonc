@@ -4,7 +4,7 @@
  */
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "account_id": "1ff3592da7e0c8824d28338f30749373",
+  "account_id": "52fdb8962dbc551e61d2f7d63870596b",
   "name": "nlp-platform",
   "main": ".open-next/worker.js",
   "compatibility_date": "2025-03-01",
@@ -13,10 +13,10 @@
   "minify": true,
   "assets": {
     "binding": "ASSETS",
-    "directory": ".open-next/assets"
+    "directory": ".open-next/assets",
   },
   "observability": {
-    "enabled": true
+    "enabled": true,
   },
   /**
    * Smart Placement
@@ -38,7 +38,7 @@
   "vars": {
     "EMAIL_FROM": "netgeist@neurotechnology.com",
     "EMAIL_FROM_NAME": "NetGeist.ai",
-    "EMAIL_REPLY_TO": "netgeist@neurotechnology.com"
+    "EMAIL_REPLY_TO": "netgeist@neurotechnology.com",
   },
   /**
    * Note: Use secrets to store sensitive data.
@@ -52,24 +52,24 @@
   "services": [
     {
       "binding": "WORKER_SELF_REFERENCE",
-      "service": "nlp-platform"
-    }
+      "service": "nlp-platform",
+    },
   ],
 
   "durable_objects": {
     "bindings": [
       {
         "name": "NEXT_CACHE_DO_QUEUE",
-        "class_name": "DOQueueHandler"
-      }
-    ]
+        "class_name": "DOQueueHandler",
+      },
+    ],
   },
 
   "migrations": [
     {
       "tag": "v1",
-      "new_sqlite_classes": ["DOQueueHandler"]
-    }
+      "new_sqlite_classes": ["DOQueueHandler"],
+    },
   ],
 
   "d1_databases": [
@@ -77,13 +77,13 @@
       "binding": "NEXT_TAG_CACHE_D1",
       "database_name": "nlp-platform-db",
       "database_id": "38519e71-0d08-4338-bdf0-db41a9ca4415",
-      "migrations_dir": "src/db/migrations"
-    }
+      "migrations_dir": "src/db/migrations",
+    },
   ],
   "kv_namespaces": [
     {
       "binding": "NEXT_INC_CACHE_KV",
-      "id": "8a5eda47f76f49e3bf743dd25da8bca8"
-    }
-  ]
+      "id": "8a5eda47f76f49e3bf743dd25da8bca8",
+    },
+  ],
 }

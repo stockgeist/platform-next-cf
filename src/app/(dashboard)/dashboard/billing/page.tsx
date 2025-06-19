@@ -32,13 +32,13 @@ export default async function BillingPage() {
             <h2 className="mb-4 text-xl font-semibold">Credit Packages</h2>
             <CreditPackages />
           </div>
-          <div>
-            <h2 className="mb-4 text-xl font-semibold">Invoices</h2>
-            <InvoiceList />
-          </div>
         </div>
         <div className="mt-4">
           <TransactionHistory />
+        </div>
+        <div>
+          <h2 className="mb-4 text-xl font-semibold">Invoices</h2>
+          <InvoiceList />
         </div>
       </div>
     </>

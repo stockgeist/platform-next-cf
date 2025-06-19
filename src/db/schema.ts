@@ -1,7 +1,6 @@
 import { sqliteTable, integer, text, index } from 'drizzle-orm/sqlite-core'
 import { relations, sql } from 'drizzle-orm'
-import type { InferSelectModel } from 'drizzle-orm'
-
+import type { InferInsertModel, InferSelectModel } from 'drizzle-orm'
 import { createId } from '@paralleldrive/cuid2'
 
 export const ROLES_ENUM = {
@@ -72,15 +71,6 @@ export const userTable = sqliteTable(
     lastCreditRefreshAt: integer({
       mode: 'timestamp',
     }),
-    isBusiness: integer('is_business', { mode: 'boolean' })
-      .default(false)
-      .notNull(),
-    vatNumber: text({
-      length: 255,
-    }),
-    country: text({
-      length: 2,
-    }),
   },
   (table) => [
     index('email_idx').on(table.email),
@@ -143,6 +133,7 @@ export const creditTransactionTypeTuple = Object.values(
   CREDIT_TRANSACTION_TYPE,
 ) as [string, ...string[]]
 
+// usage tracking should include service name, 3credits/hour, for how long, and the amount of credits used.
 export const creditTransactionTable = sqliteTable(
   'credit_transaction',
   {
@@ -385,6 +376,37 @@ export const teamInvitationTable = sqliteTable(
     index('team_invitation_token_idx').on(table.token),
   ],
 )
+// legal requirements:
+
+export const invoiceTable = sqliteTable('invoice', {
+  id: text()
+    .primaryKey()
+    .$defaultFn(() => `inv_${createId()}`)
+    .notNull(),
+  userId: text()
+    .notNull()
+    .references(() => userTable.id, { onDelete: 'cascade' }),
+  packageId: text().notNull(),
+  amount: integer().notNull(),
+  vatAmount: integer().notNull(),
+  totalAmount: integer().notNull(),
+  currency: text().notNull().default('usd'),
+  status: text({ enum: ['paid', 'pending', 'failed'] }).notNull(),
+  paymentIntentId: text().notNull(),
+  vatNumber: text(),
+  country: text().notNull(),
+  isBusiness: integer({ mode: 'boolean' }).notNull(),
+  createdAt: integer({
+    mode: 'timestamp',
+  })
+    .$defaultFn(() => new Date())
+    .notNull(),
+  updatedAt: integer({
+    mode: 'timestamp',
+  })
+    .$defaultFn(() => new Date())
+    .notNull(),
+})
 
 export const teamRelations = relations(teamTable, ({ many }) => ({
   memberships: many(teamMembershipTable),
@@ -409,10 +431,12 @@ export const teamMembershipRelations = relations(
     user: one(userTable, {
       fields: [teamMembershipTable.userId],
       references: [userTable.id],
+      relationName: 'teamMembershipUser',
     }),
     invitedByUser: one(userTable, {
       fields: [teamMembershipTable.invitedBy],
       references: [userTable.id],
+      relationName: 'teamMembershipInvitedBy',
     }),
   }),
 )
@@ -459,7 +483,12 @@ export const userRelations = relations(userTable, ({ many }) => ({
   passkeys: many(passKeyCredentialTable),
   creditTransactions: many(creditTransactionTable),
   purchasedItems: many(purchasedItemsTable),
-  teamMemberships: many(teamMembershipTable),
+  teamMemberships: many(teamMembershipTable, {
+    relationName: 'teamMembershipUser',
+  }),
+  invitedTeamMemberships: many(teamMembershipTable, {
+    relationName: 'teamMembershipInvitedBy',
+  }),
 }))
 
 export const passKeyCredentialRelations = relations(
@@ -480,29 +509,8 @@ export type Team = InferSelectModel<typeof teamTable>
 export type TeamMembership = InferSelectModel<typeof teamMembershipTable>
 export type TeamRole = InferSelectModel<typeof teamRoleTable>
 export type TeamInvitation = InferSelectModel<typeof teamInvitationTable>
-
-export const invoices = sqliteTable('invoices', {
-  id: text('id').primaryKey(),
-  userId: text('user_id')
-    .notNull()
-    .references(() => userTable.id, { onDelete: 'cascade' }),
-  packageId: text('package_id').notNull(),
-  amount: integer('amount').notNull(), // Amount in cents
-  vatAmount: integer('vat_amount').notNull(), // VAT amount in cents
-  totalAmount: integer('total_amount').notNull(), // Total amount in cents
-  currency: text('currency').notNull().default('usd'),
-  status: text('status', { enum: ['paid', 'pending', 'failed'] }).notNull(),
-  paymentIntentId: text('payment_intent_id').notNull(),
-  vatNumber: text('vat_number'),
-  country: text('country').notNull(),
-  isBusiness: integer('is_business', { mode: 'boolean' }).notNull(),
-  createdAt: integer('created_at', { mode: 'timestamp' })
-    .notNull()
-    .default(sql`CURRENT_TIMESTAMP`),
-  updatedAt: integer('updated_at', { mode: 'timestamp' })
-    .notNull()
-    .default(sql`CURRENT_TIMESTAMP`),
-})
+export type Invoice = InferSelectModel<typeof invoiceTable>
+export type NewInvoice = InferInsertModel<typeof invoiceTable>
 
 export const schema = {
   userTable,
@@ -513,8 +521,5 @@ export const schema = {
   teamMembershipTable,
   teamRoleTable,
   teamInvitationTable,
-  invoices,
+  invoiceTable,
 }
-
-export type Invoice = typeof invoices.$inferSelect
-export type NewInvoice = typeof invoices.$inferInsert

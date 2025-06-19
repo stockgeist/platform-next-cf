@@ -17,8 +17,7 @@ import { getPackageIcon } from './credit-packages'
 import { CREDITS_EXPIRATION_YEARS } from '@/constants'
 import { VatDetailsForm } from './vat-details-form'
 import { formatVatAmount } from '@/utils/vat'
-import { createInvoice } from '@/services/invoice.service'
-import { useSessionStore } from '@/state/session'
+import { createInvoiceAction } from '@/actions/invoice.action'
 
 interface StripePaymentFormProps {
   packageId: string
@@ -51,12 +50,11 @@ function PaymentFormContent({
   const stripe = useStripe()
   const elements = useElements()
   const [isProcessing, setIsProcessing] = useState(false)
-  const { session } = useSessionStore()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    if (!stripe || !elements || !clientSecret || !session?.id) {
+    if (!stripe || !elements || !clientSecret) {
       return
     }
 
@@ -81,12 +79,11 @@ function PaymentFormContent({
 
           if (success) {
             // Create invoice
-            await createInvoice({
-              userId: session.id,
+            await createInvoiceAction({
               packageId,
-              amount: price * 100, // Convert to cents
-              vatAmount: vatDetails.vatAmount * 100,
-              totalAmount: vatDetails.totalAmount * 100,
+              amount: price,
+              vatAmount: vatDetails.vatAmount,
+              totalAmount: vatDetails.totalAmount,
               currency: 'usd',
               paymentIntentId: paymentIntent.paymentIntent.id,
               vatNumber: vatDetails.vatNumber,
