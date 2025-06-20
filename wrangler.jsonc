@@ -76,14 +76,14 @@
     {
       "binding": "NEXT_TAG_CACHE_D1",
       "database_name": "nlp-platform-db",
-      "database_id": "38519e71-0d08-4338-bdf0-db41a9ca4415",
+      "database_id": "7ae268ee-4c36-438a-b664-52ffe636ac69",
       "migrations_dir": "src/db/migrations",
     },
   ],
   "kv_namespaces": [
     {
       "binding": "NEXT_INC_CACHE_KV",
-      "id": "8a5eda47f76f49e3bf743dd25da8bca8",
+      "id": "58f3226251f04a35b9a8be783645ea9e",
     },
   ],
 }
