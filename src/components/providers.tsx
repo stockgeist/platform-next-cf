@@ -109,8 +109,8 @@ export function ThemeProvider({
     'focus',
     () => {
       fetchSession()
-      // @ts-expect-error window is not defined in the server
     },
+    // @ts-expect-error window is not defined in the server
     windowRef,
   )
 
