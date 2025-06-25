@@ -178,7 +178,7 @@ export function FAQ() {
     <div className="py-24 sm:py-32">
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
         <div className="mx-auto max-w-4xl divide-y divide-gray-900/10 dark:divide-gray-100/10">
-          <h2 className="text-2xl font-bold leading-10 tracking-tight">
+          <h2 className="text-2xl leading-10 font-bold tracking-tight">
             Frequently asked questions
           </h2>
           <Accordion type="single" collapsible className="mt-10 w-full">
@@ -188,7 +188,7 @@ export function FAQ() {
                   {faq.question}
                 </AccordionTrigger>
                 <AccordionContent>
-                  <div className="prose w-full max-w-none dark:prose-invert">
+                  <div className="prose dark:prose-invert w-full max-w-none">
                     {faq.answer}
                   </div>
                 </AccordionContent>

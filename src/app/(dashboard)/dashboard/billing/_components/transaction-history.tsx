@@ -117,7 +117,7 @@ export function TransactionHistory() {
                           transaction.expirationDate && (
                             <Badge
                               variant="secondary"
-                              className={`ml-3 mt-1 text-[0.75rem] font-normal leading-[1rem] ${
+                              className={`mt-1 ml-3 text-[0.75rem] leading-4 font-normal ${
                                 isTransactionExpired(transaction)
                                   ? 'bg-orange-500 text-white hover:bg-orange-600'
                                   : 'bg-muted'
@@ -158,7 +158,7 @@ export function TransactionHistory() {
                 className="flex flex-col space-y-2 rounded-lg border p-4"
               >
                 <div className="flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground">
+                  <span className="text-muted-foreground text-sm">
                     {format(new Date(transaction.createdAt), 'MMM d, yyyy')}
                   </span>
                   <span className="text-sm capitalize">
@@ -183,7 +183,7 @@ export function TransactionHistory() {
                 {transaction.type !== 'USAGE' && transaction.expirationDate && (
                   <Badge
                     variant="secondary"
-                    className={`self-start text-[0.75rem] font-normal leading-[1rem] ${
+                    className={`self-start text-[0.75rem] leading-4 font-normal ${
                       isTransactionExpired(transaction)
                         ? 'bg-orange-500 text-white hover:bg-orange-600'
                         : 'bg-muted'
@@ -201,7 +201,7 @@ export function TransactionHistory() {
               </div>
             ))
           ) : (
-            <div className="py-8 text-center text-muted-foreground">
+            <div className="text-muted-foreground py-8 text-center">
               No transactions found
             </div>
           )}
@@ -217,7 +217,7 @@ export function TransactionHistory() {
             >
               <ChevronLeft className="h-4 w-4" />
             </Button>
-            <span className="text-sm text-muted-foreground">
+            <span className="text-muted-foreground text-sm">
               Page {page} of {data?.pagination.pages ?? 1}
             </span>
             <Button

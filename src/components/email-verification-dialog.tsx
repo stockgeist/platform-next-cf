@@ -90,7 +90,7 @@ export function EmailVerificationDialog() {
                 color="warning"
                 title="Development mode"
                 description="You can find the verification link in the console."
-                className="mb-2 mt-4"
+                className="mt-4 mb-2"
               />
             )}
           </DialogDescription>

@@ -58,11 +58,11 @@ export function SettingsSidebar() {
 
   return (
     <ScrollShadow
-      className="w-full whitespace-nowrap pb-2 lg:w-auto"
+      className="w-full pb-2 whitespace-nowrap lg:w-auto"
       orientation="horizontal"
       isEnabled={isLgAndSmaller}
     >
-      <nav className="flex min-w-full items-center space-x-2 pb-2 lg:flex-col lg:items-stretch lg:space-x-0 lg:space-y-1 lg:pb-0">
+      <nav className="flex min-w-full items-center space-x-2 pb-2 lg:flex-col lg:items-stretch lg:space-y-1 lg:space-x-0 lg:pb-0">
         {sidebarNavItems.map((item) => (
           <Link
             key={item.href}
@@ -85,7 +85,7 @@ export function SettingsSidebar() {
             <button
               className={cn(
                 buttonVariants({ variant: 'destructive' }),
-                'justify-start whitespace-nowrap bg-red-700/25 hover:bg-red-600/40 hover:no-underline lg:mt-4',
+                'justify-start bg-red-700/25 whitespace-nowrap hover:bg-red-600/40 hover:no-underline lg:mt-4',
               )}
             >
               <LogOut className="mr-2 h-4 w-4" />

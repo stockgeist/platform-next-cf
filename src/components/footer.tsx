@@ -5,21 +5,21 @@ import { Linkedin } from 'lucide-react'
 
 export function Footer() {
   return (
-    <footer className="border-t bg-muted/60 shadow dark:bg-muted/30">
+    <footer className="bg-muted/60 dark:bg-muted/30 border-t shadow">
       <div className="mx-auto max-w-7xl px-4 md:px-6 lg:px-8">
         <div className="py-6 md:py-8">
           {/* Responsive grid with better mobile spacing */}
           <div className="grid grid-cols-1 gap-8 md:grid-cols-2 md:gap-6 lg:grid-cols-3">
             {/* Legal Links */}
             <div className="flex flex-col items-center space-y-3 md:items-start md:space-y-4">
-              <h3 className="text-center text-sm font-semibold text-foreground md:text-left">
+              <h3 className="text-foreground text-center text-sm font-semibold md:text-left">
                 Legal
               </h3>
               <ul className="flex flex-col items-center space-y-2 md:items-start">
                 <li>
                   <Link
                     href="/terms"
-                    className="text-center text-sm text-muted-foreground hover:text-foreground md:text-left"
+                    className="text-muted-foreground hover:text-foreground text-center text-sm md:text-left"
                   >
                     Terms of Service
                   </Link>
@@ -27,7 +27,7 @@ export function Footer() {
                 <li>
                   <Link
                     href="/privacy"
-                    className="text-center text-sm text-muted-foreground hover:text-foreground md:text-left"
+                    className="text-muted-foreground hover:text-foreground text-center text-sm md:text-left"
                   >
                     Privacy Policy
                   </Link>
@@ -37,14 +37,14 @@ export function Footer() {
 
             {/* Company Info */}
             <div className="flex flex-col items-center space-y-3 md:items-start md:space-y-4">
-              <h3 className="text-center text-sm font-semibold text-foreground md:text-left">
+              <h3 className="text-foreground text-center text-sm font-semibold md:text-left">
                 Company
               </h3>
               <ul className="flex flex-col items-center space-y-2 md:items-start">
                 <li>
                   <Link
                     href="/"
-                    className="text-center text-sm text-muted-foreground hover:text-foreground md:text-left"
+                    className="text-muted-foreground hover:text-foreground text-center text-sm md:text-left"
                   >
                     Home
                   </Link>
@@ -54,7 +54,7 @@ export function Footer() {
 
             {/* Social Links and Theme Switch */}
             <div className="flex flex-col items-center space-y-3 md:items-start md:space-y-4">
-              <h3 className="text-center text-sm font-semibold text-foreground md:text-left">
+              <h3 className="text-foreground text-center text-sm font-semibold md:text-left">
                 Social
               </h3>
               <div className="flex items-center space-x-4">
@@ -74,7 +74,7 @@ export function Footer() {
           {/* Copyright - Optimized for mobile */}
           <div className="mt-6 border-t pt-6 md:mt-8 md:pt-8">
             <div className="flex flex-col items-center gap-6 md:flex-row md:justify-between md:gap-4">
-              <p className="text-center text-sm text-muted-foreground md:text-left">
+              <p className="text-muted-foreground text-center text-sm md:text-left">
                 © {new Date().getFullYear()} {SITE_NAME}. All rights reserved.
               </p>
 

@@ -8,21 +8,21 @@ import { Skeleton } from '@/components/ui/skeleton'
 export function Hero() {
   return (
     <div className="relative isolate pt-14 dark:bg-gray-900">
-      <div className="pb-24 pt-20 sm:pb-32 sm:pt-20 lg:pb-40">
+      <div className="pt-20 pb-24 sm:pt-20 sm:pb-32 lg:pb-40">
         <div className="mx-auto max-w-7xl px-6 lg:px-8">
           <div className="mx-auto max-w-2xl text-center">
             <div className="mb-10 flex flex-wrap justify-center gap-4">
-              <ShinyButton className="rounded-full bg-indigo-500/10 text-indigo-600 ring-1 ring-inset ring-indigo-500/20 dark:text-indigo-400">
+              <ShinyButton className="rounded-full bg-indigo-500/10 text-indigo-600 ring-1 ring-indigo-500/20 ring-inset dark:text-indigo-400">
                 Shiny Button
               </ShinyButton>
               <Suspense fallback={<TotalUsersButtonSkeleton />}>
                 <TotalUsersButton />
               </Suspense>
             </div>
-            <h1 className="bg-gradient-to-r from-indigo-500 to-purple-500 bg-clip-text text-4xl font-bold tracking-tight text-transparent sm:text-6xl">
+            <h1 className="bg-linear-to-r from-indigo-500 to-purple-500 bg-clip-text text-4xl font-bold tracking-tight text-transparent sm:text-6xl">
               Hero section
             </h1>
-            <p className="mt-6 text-lg leading-8 text-muted-foreground">
+            <p className="text-muted-foreground mt-6 text-lg leading-8">
               Lorem ipsum dolor sit amet consectetur, adipisicing elit. Rerum,
               vitae cupiditate repudiandae, dignissimos dolorum, quae ducimus
               exercitationem explicabo quasi autem voluptates? Similique id
@@ -54,7 +54,7 @@ async function TotalUsersButton() {
   if (!totalUsers) return null
 
   return (
-    <ShinyButton className="rounded-full bg-purple-500/10 text-purple-600 ring-1 ring-inset ring-purple-500/20 dark:text-purple-400">
+    <ShinyButton className="rounded-full bg-purple-500/10 text-purple-600 ring-1 ring-purple-500/20 ring-inset dark:text-purple-400">
       {totalUsers} Users & Growing
     </ShinyButton>
   )
@@ -63,7 +63,7 @@ async function TotalUsersButton() {
 // Skeleton fallback for the TotalUsersButton
 function TotalUsersButtonSkeleton() {
   return (
-    <div className="rounded-full bg-purple-500/10 px-4 py-1.5 text-sm font-medium ring-1 ring-inset ring-purple-500/20">
+    <div className="rounded-full bg-purple-500/10 px-4 py-1.5 text-sm font-medium ring-1 ring-purple-500/20 ring-inset">
       <Skeleton className="h-5 w-32" />
     </div>
   )

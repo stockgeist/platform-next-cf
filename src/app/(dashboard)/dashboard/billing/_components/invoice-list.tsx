@@ -13,7 +13,7 @@ export async function InvoiceList() {
     return (
       <Card>
         <CardContent className="pt-6">
-          <p className="text-center text-muted-foreground">
+          <p className="text-muted-foreground text-center">
             Please sign in to view your invoices
           </p>
         </CardContent>
@@ -29,7 +29,7 @@ export async function InvoiceList() {
     return (
       <Card>
         <CardContent className="pt-6">
-          <p className="text-center text-muted-foreground">No invoices found</p>
+          <p className="text-muted-foreground text-center">No invoices found</p>
         </CardContent>
       </Card>
     )

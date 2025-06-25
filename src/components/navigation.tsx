@@ -22,7 +22,7 @@ const ActionButtons = () => {
   const { setIsOpen } = useNavStore()
 
   if (isLoading) {
-    return <Skeleton className="h-10 w-[80px] bg-primary" />
+    return <Skeleton className="bg-primary h-10 w-[80px]" />
   }
 
   if (session) {
@@ -59,13 +59,13 @@ export function Navigation() {
   }
 
   return (
-    <nav className="z-10 bg-muted/60 shadow dark:bg-muted/30 dark:shadow-xl">
+    <nav className="bg-muted/60 dark:bg-muted/30 z-10 shadow dark:shadow-xl">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between">
           <div className="flex items-center">
             <Link
               href="/"
-              className="flex items-center gap-2 text-xl font-bold text-primary md:gap-3 md:text-2xl"
+              className="text-primary flex items-center gap-2 text-xl font-bold md:gap-3 md:text-2xl"
             >
               <ComponentIcon className="h-6 w-6 md:h-7 md:w-7" />
               {SITE_NAME}
@@ -85,9 +85,9 @@ export function Navigation() {
                     key={item.name}
                     href={item.href}
                     className={cn(
-                      'relative flex h-16 items-center px-3 text-sm font-medium text-muted-foreground no-underline transition-colors hover:text-foreground',
+                      'text-muted-foreground hover:text-foreground relative flex h-16 items-center px-3 text-sm font-medium no-underline transition-colors',
                       isActiveLink(item.href) &&
-                        'text-foreground after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-full after:bg-foreground',
+                        'text-foreground after:bg-foreground after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-full',
                     )}
                   >
                     {item.name}
@@ -121,7 +121,7 @@ export function Navigation() {
                             key={item.name}
                             href={item.href}
                             className={cn(
-                              'relative block px-3 py-2 text-base font-medium text-muted-foreground no-underline transition-colors hover:bg-muted/50 hover:text-foreground',
+                              'text-muted-foreground hover:bg-muted/50 hover:text-foreground relative block px-3 py-2 text-base font-medium no-underline transition-colors',
                               isActiveLink(item.href) && 'text-foreground',
                             )}
                             onClick={() => setIsOpen(false)}

@@ -71,7 +71,7 @@ export function RemoveMemberButton({
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-8 w-8 cursor-not-allowed text-muted-foreground opacity-50"
+                className="text-muted-foreground h-8 w-8 cursor-not-allowed opacity-50"
                 disabled
               >
                 <TrashIcon className="h-4 w-4" />

@@ -21,10 +21,10 @@ export default function NotFound() {
         </CardHeader>
         <CardContent>
           <div className="flex flex-col space-y-4">
-            <p className="text-sm text-muted-foreground">
+            <p className="text-muted-foreground text-sm">
               This could be because:
             </p>
-            <ul className="list-inside list-disc space-y-1 text-sm text-muted-foreground">
+            <ul className="text-muted-foreground list-inside list-disc space-y-1 text-sm">
               <li>The invitation URL is incorrect</li>
               <li>The invitation has been revoked by the team admin</li>
               <li>The invitation has expired</li>

@@ -111,7 +111,7 @@ export function PendingInvitations() {
         {pendingInvitations.map((invitation) => (
           <div
             key={invitation.id}
-            className="flex items-center justify-between rounded-md border bg-background p-3"
+            className="bg-background flex items-center justify-between rounded-md border p-3"
           >
             <div className="flex items-center gap-3">
               {invitation.team.avatarUrl ? (
@@ -124,13 +124,13 @@ export function PendingInvitations() {
                   />
                 </div>
               ) : (
-                <div className="flex h-10 w-10 items-center justify-center rounded-md bg-muted">
+                <div className="bg-muted flex h-10 w-10 items-center justify-center rounded-md">
                   <Users className="h-5 w-5" />
                 </div>
               )}
               <div>
                 <h3 className="font-medium">{invitation.team.name}</h3>
-                <p className="text-sm text-muted-foreground">
+                <p className="text-muted-foreground text-sm">
                   Invited by {invitation.invitedBy.firstName || ''}{' '}
                   {invitation.invitedBy.lastName || ''}
                 </p>

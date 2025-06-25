@@ -31,7 +31,7 @@ export function AgenticDevStudioStickyBanner() {
   return (
     <div
       className={cn(
-        'fixed bottom-4 left-1/2 z-[100] -translate-x-1/2 md:left-auto md:right-4 md:translate-x-0 print:hidden',
+        'fixed bottom-4 left-1/2 z-100 -translate-x-1/2 md:right-4 md:left-auto md:translate-x-0 print:hidden',
         isCollapsed && 'pointer-events-none', // Make entire container click-through when collapsed
       )}
     >
@@ -50,7 +50,7 @@ export function AgenticDevStudioStickyBanner() {
             className={cn(
               'absolute left-0 h-8 w-8 -translate-x-full rounded-full shadow-lg',
               'bg-background hover:bg-background',
-              'border-2 hover:border-border',
+              'hover:border-border border-2',
               isCollapsed ? 'pointer-events-auto opacity-100' : 'opacity-0', // Ensure button is clickable when collapsed
             )}
             onClick={() => toggleCollapsed(false)}
@@ -58,10 +58,10 @@ export function AgenticDevStudioStickyBanner() {
             <ChevronLeft className="h-4 w-4" />
           </Button>
 
-          <div className="relative rounded-lg border-2 bg-gray-100 shadow-xl dark:bg-background">
+          <div className="dark:bg-background relative rounded-lg border-2 bg-gray-100 shadow-xl">
             <Button
               size="icon"
-              className="absolute -right-3 -top-3 h-6 w-6 rounded-full border border-border shadow-md"
+              className="border-border absolute -top-3 -right-3 h-6 w-6 rounded-full border shadow-md"
               onClick={() => toggleCollapsed(true)}
             >
               <X className="h-4 w-4" />
@@ -70,7 +70,7 @@ export function AgenticDevStudioStickyBanner() {
               <a
                 href="https://agenticdev.agency?ref=saas-template-sticky-banner"
                 target="_blank"
-                className="flex flex-col items-center text-sm font-medium transition-colors hover:text-foreground"
+                className="hover:text-foreground flex flex-col items-center text-sm font-medium transition-colors"
               >
                 <div className="flex items-center">
                   <span className="whitespace-nowrap">Built by</span>
@@ -78,7 +78,7 @@ export function AgenticDevStudioStickyBanner() {
                   <span className="whitespace-nowrap">AgenticDev</span>
                 </div>
 
-                <div className="mt-3 text-tiny text-muted-foreground">
+                <div className="text-tiny text-muted-foreground mt-3">
                   Transform operations with AI solutions that adapt to your
                   actual needs—automating routine tasks or solving complex
                   challenges through customized systems. Focus on growth while

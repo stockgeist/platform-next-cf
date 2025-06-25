@@ -70,7 +70,7 @@ export default async function TeamsIndexPage() {
         <div className="mb-8 flex items-center justify-between">
           <div>
             <h1 className="text-4xl font-bold">My Teams</h1>
-            <p className="mt-2 text-muted-foreground">
+            <p className="text-muted-foreground mt-2">
               Manage your teams and collaborations
             </p>
           </div>
@@ -97,7 +97,7 @@ export default async function TeamsIndexPage() {
               </CardDescription>
             </CardHeader>
             <CardContent className="flex justify-center py-8">
-              <Users className="h-16 w-16 text-muted-foreground/50" />
+              <Users className="text-muted-foreground/50 h-16 w-16" />
             </CardContent>
             <CardFooter className="flex justify-center pb-8">
               <Button asChild>
@@ -115,7 +115,7 @@ export default async function TeamsIndexPage() {
                 key={team.id}
                 href={`/dashboard/teams/${team.slug}` as Route}
               >
-                <Card className="h-full transition-all hover:border-primary hover:shadow-md">
+                <Card className="hover:border-primary h-full transition-all hover:shadow-md">
                   <CardHeader className="flex flex-row items-start gap-4">
                     {team.avatarUrl ? (
                       <div className="h-12 w-12 overflow-hidden rounded-md">
@@ -127,7 +127,7 @@ export default async function TeamsIndexPage() {
                         />
                       </div>
                     ) : (
-                      <div className="flex h-12 w-12 items-center justify-center rounded-md bg-muted">
+                      <div className="bg-muted flex h-12 w-12 items-center justify-center rounded-md">
                         <Users className="h-6 w-6" />
                       </div>
                     )}
@@ -142,7 +142,7 @@ export default async function TeamsIndexPage() {
                     </div>
                   </CardHeader>
                   <CardContent>
-                    <p className="line-clamp-2 text-muted-foreground">
+                    <p className="text-muted-foreground line-clamp-2">
                       {team.description || 'No description provided'}
                     </p>
                   </CardContent>
@@ -151,13 +151,13 @@ export default async function TeamsIndexPage() {
             ))}
 
             <Link href={'/dashboard/teams/create' as Route}>
-              <Card className="h-full border-2 border-dashed transition-all hover:border-primary">
+              <Card className="hover:border-primary h-full border-2 border-dashed transition-all">
                 <CardHeader className="pt-8 text-center">
                   <CardTitle className="text-xl">Create a new team</CardTitle>
                 </CardHeader>
                 <CardContent className="flex justify-center">
-                  <div className="flex h-16 w-16 items-center justify-center rounded-full bg-muted">
-                    <PlusIcon className="h-8 w-8 text-muted-foreground" />
+                  <div className="bg-muted flex h-16 w-16 items-center justify-center rounded-full">
+                    <PlusIcon className="text-muted-foreground h-8 w-8" />
                   </div>
                 </CardContent>
               </Card>

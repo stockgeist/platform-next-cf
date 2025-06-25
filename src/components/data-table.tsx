@@ -200,7 +200,7 @@ export function DataTable<TData, TValue>({
         <div className="ml-auto flex items-center space-x-2">
           <div className="flex items-center justify-center text-sm font-medium">
             Page {pageIndex + 1} of {pageCount}
-            <span className="ml-2 text-muted">
+            <span className="text-muted ml-2">
               ({totalCount}{' '}
               {totalCount === 1 ? itemNameSingular : itemNamePlural} in total)
             </span>

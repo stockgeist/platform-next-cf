@@ -131,7 +131,7 @@ export default function ForgotPasswordClientComponent() {
 
                 <Button
                   type="submit"
-                  className="mb-2 mt-8"
+                  className="mt-8 mb-2"
                   disabled={Boolean(isTurnstileEnabled && !captchaToken)}
                 >
                   Send Reset Instructions

@@ -24,7 +24,7 @@ export default async function MarketplacePage() {
       <div className="container mx-auto px-5 pb-12">
         <div className="mb-8">
           <h1 className="mt-4 text-4xl font-bold">Component Marketplace</h1>
-          <p className="mt-2 text-muted-foreground">
+          <p className="text-muted-foreground mt-2">
             Purchase and use our premium components using your credits
           </p>
         </div>

@@ -94,7 +94,7 @@ export function CreditPackages() {
                 </div>
               )}
             </div>
-            <div className="text-sm text-muted-foreground">
+            <div className="text-muted-foreground text-sm">
               You get {FREE_MONTHLY_CREDITS} free credits every month.
             </div>
           </div>
@@ -106,7 +106,7 @@ export function CreditPackages() {
               <h2 className="text-xl font-semibold sm:text-2xl">
                 Top up your credits
               </h2>
-              <p className="mt-2 text-sm text-muted-foreground sm:mt-3">
+              <p className="text-muted-foreground mt-2 text-sm sm:mt-3">
                 Purchase additional credits to use our services. The more
                 credits you buy, the better the value.
               </p>
@@ -116,7 +116,7 @@ export function CreditPackages() {
               {CREDIT_PACKAGES.map((pkg, index) => (
                 <Card
                   key={pkg.id}
-                  className="relative overflow-hidden bg-muted transition-all hover:shadow-lg dark:bg-background"
+                  className="bg-muted dark:bg-background relative overflow-hidden transition-all hover:shadow-lg"
                 >
                   <CardContent className="flex h-full flex-col gap-6 pt-4">
                     <div className="flex items-center justify-between">
@@ -126,22 +126,22 @@ export function CreditPackages() {
                           <div className="text-xl font-bold sm:text-2xl">
                             {pkg.credits.toLocaleString()}
                           </div>
-                          <div className="text-xs text-muted-foreground sm:text-sm">
+                          <div className="text-muted-foreground text-xs sm:text-sm">
                             credits
                           </div>
                         </div>
                       </div>
                       <div className="flex flex-col items-end">
-                        <div className="text-xl font-bold text-primary sm:text-2xl">
+                        <div className="text-primary text-xl font-bold sm:text-2xl">
                           ${pkg.price}
                         </div>
-                        <div className="text-xs text-muted-foreground sm:text-sm">
+                        <div className="text-muted-foreground text-xs sm:text-sm">
                           one-time payment (Excl. VAT)
                         </div>
                         {index > 0 ? (
                           <Badge
                             variant="secondary"
-                            className="mt-1 bg-green-100 text-xs text-green-700 dark:bg-green-900 dark:text-green-300 sm:text-sm"
+                            className="mt-1 bg-green-100 text-xs text-green-700 sm:text-sm dark:bg-green-900 dark:text-green-300"
                           >
                             Save {calculateSavings(pkg)}%
                           </Badge>
@@ -150,7 +150,7 @@ export function CreditPackages() {
                         )}
                       </div>
                     </div>
-                    <div className="flex-grow" />
+                    <div className="grow" />
                     <Button
                       onClick={() => {
                         if (process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY) {

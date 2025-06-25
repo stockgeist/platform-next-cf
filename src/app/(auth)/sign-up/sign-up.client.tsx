@@ -140,17 +140,17 @@ const SignUpPage = ({ redirectPath }: SignUpClientProps) => {
   }
 
   return (
-    <div className="my-6 flex min-h-[90vh] items-center justify-center bg-background px-4 md:my-10">
-      <div className="w-full max-w-md space-y-8 rounded-xl border border-border bg-card p-6 shadow-lg md:p-10">
+    <div className="bg-background my-6 flex min-h-[90vh] items-center justify-center px-4 md:my-10">
+      <div className="border-border bg-card w-full max-w-md space-y-8 rounded-xl border p-6 shadow-lg md:p-10">
         <div className="text-center">
-          <h2 className="mt-6 text-2xl font-bold tracking-tight text-foreground md:text-3xl">
+          <h2 className="text-foreground mt-6 text-2xl font-bold tracking-tight md:text-3xl">
             Create your account
           </h2>
-          <p className="mt-2 text-muted-foreground">
+          <p className="text-muted-foreground mt-2">
             Already have an account?{' '}
             <Link
               href={`/sign-in?redirect=${encodeURIComponent(redirectPath)}`}
-              className="font-medium text-primary underline hover:text-primary/90"
+              className="text-primary hover:text-primary/90 font-medium underline"
             >
               Sign in
             </Link>
@@ -170,7 +170,7 @@ const SignUpPage = ({ redirectPath }: SignUpClientProps) => {
         </div>
 
         <SeparatorWithText>
-          <span className="uppercase text-muted-foreground">Or</span>
+          <span className="text-muted-foreground uppercase">Or</span>
         </SeparatorWithText>
 
         <Form {...form}>
@@ -266,18 +266,18 @@ const SignUpPage = ({ redirectPath }: SignUpClientProps) => {
         </Form>
 
         <div className="mt-6">
-          <p className="text-center text-xs text-muted-foreground">
+          <p className="text-muted-foreground text-center text-xs">
             By signing up, you agree to our{' '}
             <Link
               href="/terms"
-              className="font-medium text-primary underline hover:text-primary/90"
+              className="text-primary hover:text-primary/90 font-medium underline"
             >
               Terms of Service
             </Link>{' '}
             and{' '}
             <Link
               href="/privacy"
-              className="font-medium text-primary underline hover:text-primary/90"
+              className="text-primary hover:text-primary/90 font-medium underline"
             >
               Privacy Policy
             </Link>
@@ -376,7 +376,7 @@ const SignUpPage = ({ redirectPath }: SignUpClientProps) => {
                 </Button>
               </div>
               {!isRegistering && (
-                <p className="mt-4 text-center text-xs text-muted">
+                <p className="text-muted mt-4 text-center text-xs">
                   After clicking continue, your browser will prompt you to
                   create and save your Passkey. This will allow you to sign in
                   securely without a password in the future.

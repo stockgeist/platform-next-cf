@@ -142,17 +142,17 @@ const SignInPage = ({ redirectPath }: SignInClientProps) => {
   }
 
   return (
-    <div className="my-6 flex min-h-[90vh] flex-col items-center justify-center bg-background px-4 md:my-10">
-      <div className="w-full max-w-md space-y-8 rounded-xl border border-border bg-card p-6 shadow-lg md:p-10">
+    <div className="bg-background my-6 flex min-h-[90vh] flex-col items-center justify-center px-4 md:my-10">
+      <div className="border-border bg-card w-full max-w-md space-y-8 rounded-xl border p-6 shadow-lg md:p-10">
         <div className="text-center">
-          <h2 className="mt-2 text-2xl font-bold tracking-tight text-foreground md:text-3xl">
+          <h2 className="text-foreground mt-2 text-2xl font-bold tracking-tight md:text-3xl">
             Sign in to your account
           </h2>
-          <p className="mt-2 text-muted-foreground">
+          <p className="text-muted-foreground mt-2">
             Or{' '}
             <Link
               href={`/sign-up?redirect=${encodeURIComponent(redirectPath)}`}
-              className="font-medium text-primary underline hover:text-primary/90"
+              className="text-primary hover:text-primary/90 font-medium underline"
             >
               create a new account
             </Link>
@@ -172,7 +172,7 @@ const SignInPage = ({ redirectPath }: SignInClientProps) => {
         </div>
 
         <SeparatorWithText>
-          <span className="uppercase text-muted-foreground">Or</span>
+          <span className="text-muted-foreground uppercase">Or</span>
         </SeparatorWithText>
 
         <Form {...form}>
@@ -224,10 +224,10 @@ const SignInPage = ({ redirectPath }: SignInClientProps) => {
       </div>
 
       <div className="mt-6">
-        <p className="text-center text-sm text-muted-foreground">
+        <p className="text-muted-foreground text-center text-sm">
           <Link
             href="/forgot-password"
-            className="font-medium text-primary hover:text-primary/90"
+            className="text-primary hover:text-primary/90 font-medium"
           >
             Forgot your password?
           </Link>

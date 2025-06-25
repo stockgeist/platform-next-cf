@@ -10,16 +10,16 @@ export const metadata: Metadata = {
 export default function PrivacyPage() {
   return (
     <>
-      <h1 className="mb-8 text-4xl font-bold text-foreground">
+      <h1 className="text-foreground mb-8 text-4xl font-bold">
         Privacy Policy
       </h1>
 
-      <p className="mb-6 text-muted-foreground">
+      <p className="text-muted-foreground mb-6">
         Last updated: {new Date().toLocaleDateString()}
       </p>
 
       <section className="mb-8">
-        <h2 className="mb-4 text-2xl font-semibold text-foreground">
+        <h2 className="text-foreground mb-4 text-2xl font-semibold">
           1. Information We Collect
         </h2>
         <p className="text-muted-foreground">
@@ -30,13 +30,13 @@ export default function PrivacyPage() {
       </section>
 
       <section className="mb-8">
-        <h2 className="mb-4 text-2xl font-semibold text-foreground">
+        <h2 className="text-foreground mb-4 text-2xl font-semibold">
           2. How We Use Your Information
         </h2>
         <p className="text-muted-foreground">
           We use the information we collect to:
         </p>
-        <ul className="mt-2 list-disc pl-6 text-muted-foreground">
+        <ul className="text-muted-foreground mt-2 list-disc pl-6">
           <li>Provide, maintain, and improve our services</li>
           <li>Send you technical notices and support messages</li>
           <li>Respond to your comments and questions</li>
@@ -45,7 +45,7 @@ export default function PrivacyPage() {
       </section>
 
       <section className="mb-8">
-        <h2 className="mb-4 text-2xl font-semibold text-foreground">
+        <h2 className="text-foreground mb-4 text-2xl font-semibold">
           3. Data Security
         </h2>
         <p className="text-muted-foreground">
@@ -56,7 +56,7 @@ export default function PrivacyPage() {
       </section>
 
       <section className="mb-8">
-        <h2 className="mb-4 text-2xl font-semibold text-foreground">
+        <h2 className="text-foreground mb-4 text-2xl font-semibold">
           4. Contact Us
         </h2>
         <p className="text-muted-foreground">

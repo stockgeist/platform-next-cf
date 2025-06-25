@@ -135,7 +135,7 @@ export default async function TeamDashboardPage({ params }: TeamPageProps) {
             <div className="space-y-2">
               <h1 className="mt-4 text-4xl font-bold">{team.name}</h1>
               {team.description && (
-                <p className="mt-2 text-muted-foreground">{team.description}</p>
+                <p className="text-muted-foreground mt-2">{team.description}</p>
               )}
             </div>
           </div>
@@ -164,8 +164,8 @@ export default async function TeamDashboardPage({ params }: TeamPageProps) {
         <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
           {/* Quick stats */}
           <div className="col-span-3 grid grid-cols-1 gap-4 md:grid-cols-3">
-            <div className="flex flex-col rounded-lg border bg-card p-6">
-              <span className="text-sm font-medium text-muted-foreground">
+            <div className="bg-card flex flex-col rounded-lg border p-6">
+              <span className="text-muted-foreground text-sm font-medium">
                 Team Credits
               </span>
               <span className="text-2xl font-bold">
@@ -173,8 +173,8 @@ export default async function TeamDashboardPage({ params }: TeamPageProps) {
               </span>
             </div>
 
-            <div className="flex flex-col rounded-lg border bg-card p-6">
-              <span className="text-sm font-medium text-muted-foreground">
+            <div className="bg-card flex flex-col rounded-lg border p-6">
+              <span className="text-muted-foreground text-sm font-medium">
                 Your Role
               </span>
               <span className="text-2xl font-bold capitalize">
@@ -183,8 +183,8 @@ export default async function TeamDashboardPage({ params }: TeamPageProps) {
               </span>
             </div>
 
-            <div className="flex flex-col rounded-lg border bg-card p-6">
-              <span className="text-sm font-medium text-muted-foreground">
+            <div className="bg-card flex flex-col rounded-lg border p-6">
+              <span className="text-muted-foreground text-sm font-medium">
                 Created
               </span>
               <span className="text-2xl font-bold">
@@ -197,7 +197,7 @@ export default async function TeamDashboardPage({ params }: TeamPageProps) {
           <div className="col-span-3 flex flex-wrap gap-4"></div>
 
           {/* Team Members Table */}
-          <div className="col-span-3 rounded-lg border bg-card p-6">
+          <div className="bg-card col-span-3 rounded-lg border p-6">
             <h2 className="mb-4 text-xl font-semibold">Team Members</h2>
 
             <Table>
@@ -218,7 +218,7 @@ export default async function TeamDashboardPage({ params }: TeamPageProps) {
                   <TableRow>
                     <TableCell
                       colSpan={canRemoveMembers ? 6 : 5}
-                      className="py-6 text-center text-muted-foreground"
+                      className="text-muted-foreground py-6 text-center"
                     >
                       No members found
                     </TableCell>

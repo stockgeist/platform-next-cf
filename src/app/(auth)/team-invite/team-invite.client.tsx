@@ -102,7 +102,7 @@ export default function TeamInviteClientComponent() {
             </CardDescription>
           </CardHeader>
           <CardContent className="flex flex-col gap-4">
-            <p className="text-sm text-muted-foreground">
+            <p className="text-muted-foreground text-sm">
               {error?.code === 'CONFLICT'
                 ? 'You are already a member of this team.'
                 : error?.code === 'FORBIDDEN' &&

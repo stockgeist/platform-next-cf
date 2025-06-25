@@ -20,7 +20,7 @@ export default function NotFound() {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
-          <ul className="list-disc space-y-2 pl-6 text-muted-foreground">
+          <ul className="text-muted-foreground list-disc space-y-2 pl-6">
             <li>
               The link has expired (verification links are valid for 24 hours)
             </li>

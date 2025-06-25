@@ -46,7 +46,7 @@ export function MarketplaceCard({
         </div>
         <CardDescription>{description}</CardDescription>
       </CardHeader>
-      <CardContent className="flex justify-center bg-muted/50 p-6">
+      <CardContent className="bg-muted/50 flex justify-center p-6">
         <div className={containerClass}>{component.preview()}</div>
       </CardContent>
       <CardFooter className="mt-4 flex justify-between">

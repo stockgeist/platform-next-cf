@@ -131,7 +131,7 @@ export function PasskeysList({
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div className="space-y-1">
           <h2 className="text-lg font-semibold">Passkeys</h2>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-muted-foreground text-sm">
             Manage your passkeys for passwordless authentication.
           </p>
         </div>
@@ -150,7 +150,7 @@ export function PasskeysList({
             className={cn(
               !isCurrentPasskey(passkey)
                 ? 'bg-card/40'
-                : 'border-3 border-primary/20 bg-secondary/30 shadow-lg',
+                : 'border-primary/20 bg-secondary/30 border-3 shadow-lg',
             )}
           >
             <CardHeader>
@@ -167,7 +167,7 @@ export function PasskeysList({
                         <Badge>Current Passkey</Badge>
                       )}
                     </CardTitle>
-                    <div className="whitespace-nowrap text-sm text-muted-foreground">
+                    <div className="text-muted-foreground text-sm whitespace-nowrap">
                       · {formatDistanceToNow(passkey.createdAt)} ago
                     </div>
                   </div>
@@ -233,7 +233,7 @@ export function PasskeysList({
         ))}
 
         {passkeys.length === 0 && (
-          <div className="text-center text-muted-foreground">
+          <div className="text-muted-foreground text-center">
             No passkeys found. Add a passkey to enable passwordless
             authentication.
           </div>

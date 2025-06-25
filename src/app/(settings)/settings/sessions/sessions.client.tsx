@@ -49,7 +49,7 @@ export function SessionsClient({ sessions }: { sessions: SessionWithMeta[] }) {
           className={cn(
             !session.isCurrentSession
               ? 'bg-card/40'
-              : 'border-3 border-primary/20 bg-secondary/30 shadow-lg',
+              : 'border-primary/20 bg-secondary/30 border-3 shadow-lg',
           )}
         >
           <CardHeader>
@@ -70,7 +70,7 @@ export function SessionsClient({ sessions }: { sessions: SessionWithMeta[] }) {
                       )?.replace('-', ' ')}
                     </Badge>
                   )}
-                  <div className="whitespace-nowrap text-sm text-muted-foreground">
+                  <div className="text-muted-foreground text-sm whitespace-nowrap">
                     &nbsp;· &nbsp;{formatDistanceToNow(session.createdAt)} ago
                   </div>
                 </div>

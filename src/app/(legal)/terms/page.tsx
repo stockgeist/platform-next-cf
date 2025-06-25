@@ -11,16 +11,16 @@ export const metadata: Metadata = {
 export default function TermsPage() {
   return (
     <>
-      <h1 className="mb-8 text-4xl font-bold text-foreground">
+      <h1 className="text-foreground mb-8 text-4xl font-bold">
         Terms of Service
       </h1>
 
-      <p className="mb-6 text-muted-foreground">
+      <p className="text-muted-foreground mb-6">
         Last updated: {new Date().toLocaleDateString()}
       </p>
 
       <section className="mb-8">
-        <h2 className="mb-4 text-2xl font-semibold text-foreground">
+        <h2 className="text-foreground mb-4 text-2xl font-semibold">
           1. Acceptance of Terms
         </h2>
         <p className="text-muted-foreground">
@@ -30,7 +30,7 @@ export default function TermsPage() {
       </section>
 
       <section className="mb-8">
-        <h2 className="mb-4 text-2xl font-semibold text-foreground">
+        <h2 className="text-foreground mb-4 text-2xl font-semibold">
           2. Use License
         </h2>
         <p className="text-muted-foreground">
@@ -41,7 +41,7 @@ export default function TermsPage() {
       </section>
 
       <section className="mb-8">
-        <h2 className="mb-4 text-2xl font-semibold text-foreground">
+        <h2 className="text-foreground mb-4 text-2xl font-semibold">
           3. Disclaimer
         </h2>
         <p className="text-muted-foreground">
@@ -55,16 +55,16 @@ export default function TermsPage() {
       </section>
 
       <section className="mb-8">
-        <h2 className="mb-4 text-2xl font-semibold text-foreground">
+        <h2 className="text-foreground mb-4 text-2xl font-semibold">
           4. Credit System and Payments
         </h2>
-        <p className="mb-4 text-muted-foreground">
+        <p className="text-muted-foreground mb-4">
           Our service operates on a credit-based system. Credits purchased
           through our platform are valid for {CREDITS_EXPIRATION_YEARS} years
           from the date of purchase. All payments are processed securely through
           Stripe, our payment processing partner.
         </p>
-        <p className="mb-4 text-muted-foreground">
+        <p className="text-muted-foreground mb-4">
           Once a payment is successfully processed, credits will be immediately
           added to your account. We do not offer refunds for purchased credits.
           The price and availability of credit packages may change without prior
@@ -79,7 +79,7 @@ export default function TermsPage() {
       </section>
 
       <section className="mb-8">
-        <h2 className="mb-4 text-2xl font-semibold text-foreground">
+        <h2 className="text-foreground mb-4 text-2xl font-semibold">
           5. Limitations
         </h2>
         <p className="text-muted-foreground">

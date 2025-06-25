@@ -281,7 +281,7 @@ function PaymentForm({
                     </span>
                     <span>${formatVatAmount(vatAmount)}</span>
                   </div>
-                  <div className="h-px bg-border" />
+                  <div className="bg-border h-px" />
                   <div className="flex justify-between font-bold">
                     <span>Total</span>
                     <span>${formatVatAmount(totalAmount)}</span>
@@ -325,7 +325,7 @@ function PaymentForm({
                   </span>
                   <span>${formatVatAmount(vatAmount)}</span>
                 </div>
-                <div className="h-px bg-border" />
+                <div className="bg-border h-px" />
                 <div className="flex justify-between font-bold">
                   <span>Total</span>
                   <span>${formatVatAmount(totalAmount)}</span>
@@ -376,10 +376,10 @@ function PaymentForm({
                   </div>
                 </div>
               </div>
-              <div className="text-2xl font-bold text-primary">${price}</div>
+              <div className="text-primary text-2xl font-bold">${price}</div>
             </div>
-            <div className="h-px bg-border" />
-            <div className="space-y-2 text-xs text-muted-foreground">
+            <div className="bg-border h-px" />
+            <div className="text-muted-foreground space-y-2 text-xs">
               <p>
                 Your payment is secure and encrypted. We use Stripe, a trusted
                 global payment provider, to process your payment.

@@ -34,13 +34,13 @@ export default async function CreateTeamPage() {
         <div className="mx-auto max-w-xl">
           <div className="mb-8">
             <h1 className="mt-4 text-4xl font-bold">Create a new team</h1>
-            <p className="mt-2 text-muted-foreground">
+            <p className="text-muted-foreground mt-2">
               Create a team to collaborate with others on projects and share
               resources.
             </p>
           </div>
 
-          <div className="rounded-lg border bg-card p-6">
+          <div className="bg-card rounded-lg border p-6">
             <CreateTeamForm />
           </div>
         </div>

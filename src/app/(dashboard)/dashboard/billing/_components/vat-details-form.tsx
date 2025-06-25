@@ -140,7 +140,7 @@ export function VatDetailsForm({ form, amount }: VatDetailsFormProps) {
                     </FormControl>
                     <FormMessage />
                     {vatValidationError && (
-                      <p className="text-sm text-destructive">
+                      <p className="text-destructive text-sm">
                         {vatValidationError}
                       </p>
                     )}
@@ -155,17 +155,17 @@ export function VatDetailsForm({ form, amount }: VatDetailsFormProps) {
             )}
 
             {country && (
-              <div className="rounded-lg bg-muted p-4">
+              <div className="bg-muted rounded-lg p-4">
                 <div className="space-y-2">
                   {!isBusiness && vatRate > 0 ? (
                     <>
-                      <div className="text-sm text-muted-foreground">
+                      <div className="text-muted-foreground text-sm">
                         VAT will be applied at {vatRate * 100}% for{' '}
                         {country.name}
                       </div>
                     </>
                   ) : (
-                    <div className="text-sm text-muted-foreground">
+                    <div className="text-muted-foreground text-sm">
                       {isBusiness
                         ? 'No VAT will be applied for business customers.'
                         : 'No VAT will be applied for non-EU countries.'}
