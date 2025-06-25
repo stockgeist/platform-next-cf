@@ -6,6 +6,9 @@
   "$schema": "node_modules/wrangler/config-schema.json",
   "account_id": "52fdb8962dbc551e61d2f7d63870596b",
   "name": "nlp-platform",
+  // Fixes next-themes issue https://opennext.js.org/cloudflare/howtos/keep_names#how-to-fix-such-issues
+  // TODO: remove once next-themes is fixed https://github.com/pacocoursey/next-themes/pull/354
+  "keep_names": false,
   "main": ".open-next/worker.js",
   "compatibility_date": "2025-03-01",
   "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],

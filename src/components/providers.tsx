@@ -2,7 +2,6 @@
 
 import * as React from 'react'
 import { ThemeProvider as NextThemesProvider } from 'next-themes'
-import { HeroUIProvider } from '@heroui/react'
 import type { SessionValidationResult } from '@/types'
 import { useSessionStore } from '@/state/session'
 import { Suspense, useEffect, useRef, RefObject, useCallback } from 'react'
@@ -121,13 +120,11 @@ export function ThemeProvider({
 
   return (
     <NextThemesProvider {...props} attribute="class">
-      <HeroUIProvider>
-        <Suspense>
-          <RouterChecker />
-        </Suspense>
-        {children}
-        <EmailVerificationDialog />
-      </HeroUIProvider>
+      <Suspense>
+        <RouterChecker />
+      </Suspense>
+      {children}
+      <EmailVerificationDialog />
     </NextThemesProvider>
   )
 }

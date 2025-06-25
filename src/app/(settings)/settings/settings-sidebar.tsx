@@ -3,7 +3,6 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
-import { ScrollShadow } from '@heroui/react'
 import { User, Smartphone, Lock, LogOut } from 'lucide-react'
 import { useMediaQuery } from '@/hooks/useMediaQuery'
 import {
@@ -57,10 +56,11 @@ export function SettingsSidebar() {
   const { signOut } = useSignOut()
 
   return (
-    <ScrollShadow
-      className="w-full pb-2 whitespace-nowrap lg:w-auto"
-      orientation="horizontal"
-      isEnabled={isLgAndSmaller}
+    <div
+      className={cn(
+        'w-full pb-2 whitespace-nowrap lg:w-auto',
+        isLgAndSmaller && 'overflow-x-auto',
+      )}
     >
       <nav className="flex min-w-full items-center space-x-2 pb-2 lg:flex-col lg:items-stretch lg:space-y-1 lg:space-x-0 lg:pb-0">
         {sidebarNavItems.map((item) => (
@@ -116,6 +116,6 @@ export function SettingsSidebar() {
           </DialogContent>
         </Dialog>
       </nav>
-    </ScrollShadow>
+    </div>
   )
 }

@@ -14,7 +14,7 @@ import { resendVerificationAction } from '@/app/(auth)/resend-verification.actio
 import { toast } from 'sonner'
 import { useState } from 'react'
 import { EMAIL_VERIFICATION_TOKEN_EXPIRATION_SECONDS } from '@/constants'
-import { Alert } from '@heroui/react'
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import isProd from '@/utils/is-prod'
 import { usePathname } from 'next/navigation'
 import { Route } from 'next'
@@ -86,12 +86,12 @@ export function EmailVerificationDialog() {
             {Math.floor(EMAIL_VERIFICATION_TOKEN_EXPIRATION_SECONDS / 3600)}{' '}
             hours.
             {!isProd && (
-              <Alert
-                color="warning"
-                title="Development mode"
-                description="You can find the verification link in the console."
-                className="mt-4 mb-2"
-              />
+              <Alert variant="warning" className="mt-4 mb-2">
+                <AlertTitle>Development mode</AlertTitle>
+                <AlertDescription>
+                  You can find the verification link in the console.
+                </AlertDescription>
+              </Alert>
             )}
           </DialogDescription>
         </DialogHeader>
