@@ -86,7 +86,7 @@ export function EmailVerificationDialog() {
             {Math.floor(EMAIL_VERIFICATION_TOKEN_EXPIRATION_SECONDS / 3600)}{' '}
             hours.
             {!isProd && (
-              <Alert variant="warning" className="mt-4 mb-2">
+              <Alert variant="destructive" className="mt-4 mb-2">
                 <AlertTitle>Development mode</AlertTitle>
                 <AlertDescription>
                   You can find the verification link in the console.

@@ -1,13 +1,13 @@
 ---
-description:
-globs:
+description: 
+globs: 
 alwaysApply: true
 ---
 # UI and Styling
 
 ## Component Libraries
 
-- Use Shadcn UI, Hero-UI, and Tailwind for components and styling.
+- Use Shadcn UI and Tailwind for components and styling.
 - Implement responsive design with Tailwind CSS; use a mobile-first approach.
 - Optimize for light and dark mode.
 
