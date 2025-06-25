@@ -120,14 +120,14 @@ export function ThemeProvider({
   }, [doFetchSession])
 
   return (
-    <HeroUIProvider>
-      <Suspense>
-        <RouterChecker />
-      </Suspense>
-      <NextThemesProvider {...props} attribute="class">
+    <NextThemesProvider {...props} attribute="class">
+      <HeroUIProvider>
+        <Suspense>
+          <RouterChecker />
+        </Suspense>
         {children}
         <EmailVerificationDialog />
-      </NextThemesProvider>
-    </HeroUIProvider>
+      </HeroUIProvider>
+    </NextThemesProvider>
   )
 }

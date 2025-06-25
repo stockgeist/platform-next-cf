@@ -173,9 +173,6 @@ importers:
       tailwind-merge:
         specifier: ^2.6.0
         version: 2.6.0
-      tailwindcss-animate:
-        specifier: ^1.0.7
-        version: 1.0.7(tailwindcss@4.1.10)
       ua-parser-js:
         specifier: ^2.0.0
         version: 2.0.3
@@ -6692,11 +6689,6 @@ packages:
     engines: {node: '>=16.x', pnpm: '>=7.x'}
     peerDependencies:
       tailwindcss: '*'
-
-  tailwindcss-animate@1.0.7:
-    resolution: {integrity: sha512-bl6mpH3T7I3UFxuvDEXLxy/VuFxBk5bbzplh7tXI68mwMokNYd1t9qPBHlnyTwfa4JGC4zP516I1hYYtQ/vspA==}
-    peerDependencies:
-      tailwindcss: '>=3.0.0 || insiders'
 
   tailwindcss@4.1.10:
     resolution: {integrity: sha512-P3nr6WkvKV/ONsTzj6Gb57sWPMX29EPNPopo7+FcpkQaNsrNpZ1pv8QmrYI2RqEKD7mlGqLnGovlcYnBK0IqUA==}
@@ -15106,10 +15098,6 @@ snapshots:
   tailwind-variants@0.3.0(tailwindcss@4.1.10):
     dependencies:
       tailwind-merge: 2.6.0
-      tailwindcss: 4.1.10
-
-  tailwindcss-animate@1.0.7(tailwindcss@4.1.10):
-    dependencies:
       tailwindcss: 4.1.10
 
   tailwindcss@4.1.10: {}
