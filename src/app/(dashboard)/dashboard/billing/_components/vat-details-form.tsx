@@ -1,158 +1,181 @@
 'use client'
 
-import { useState } from 'react'
+import { UseFormReturn } from 'react-hook-form'
+import { useEffect } from 'react'
+import { checkVAT, countries } from 'jsvat-next'
 import { Card, CardContent } from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
 import { Input } from '@/components/ui/input'
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
-import {
-  EU_COUNTRIES,
-  calculateVatAmount,
-  formatVatAmount,
-  getVatRateForCountry,
-} from '@/utils/vat'
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form'
+import { calculateVatAmount, getVatRateForCountry } from '@/utils/vat'
+import { CountryDropdown } from '@/components/ui/coutry-dropdown'
 
 interface VatDetailsFormProps {
-  amount: number
-  onVatDetailsChange: (details: {
+  form: UseFormReturn<{
     isBusiness: boolean
     vatNumber?: string
-    country: string
+    country?: {
+      alpha2: string
+      alpha3: string
+      name: string
+    }
     vatAmount: number
     totalAmount: number
-  }) => void
+  }>
+  amount: number
 }
 
-export function VatDetailsForm({
-  amount,
-  onVatDetailsChange,
-}: VatDetailsFormProps) {
-  const [isBusiness, setIsBusiness] = useState(false)
-  const [vatNumber, setVatNumber] = useState('')
-  const [country, setCountry] = useState('')
+export function VatDetailsForm({ form, amount }: VatDetailsFormProps) {
+  const isBusiness = form.watch('isBusiness')
+  const country = form.watch('country')
+  const vatNumber = form.watch('vatNumber')
 
-  const handleBusinessChange = (checked: boolean) => {
-    setIsBusiness(checked)
-    if (!checked) {
-      setVatNumber('')
+  // Helper function to validate VAT number
+  const validateVatNumber = (vat: string, countryCode: string) => {
+    if (!vat || !countryCode) return null
+
+    // Basic format check first
+    const cleanVat = vat.replace(/[\s\-\.]/g, '').toUpperCase()
+    if (!/^[A-Z]{2}[0-9A-Z]+$/.test(cleanVat)) {
+      return 'VAT number must start with 2 letters'
     }
-    updateVatDetails(checked, vatNumber, country)
+
+    const vatResult = checkVAT(cleanVat, countries)
+
+    if (!vatResult.isValid) {
+      return 'Invalid VAT number - please check the format'
+    }
+
+    if (vatResult.country && vatResult.country.isoCode.short !== countryCode) {
+      return `VAT number belongs to ${vatResult.country.name}, not the selected country`
+    }
+
+    return null // Valid
   }
 
-  const handleVatNumberChange = (value: string) => {
-    setVatNumber(value)
-    updateVatDetails(isBusiness, value, country)
-  }
-
-  const handleCountryChange = (value: string) => {
-    setCountry(value)
-    updateVatDetails(isBusiness, vatNumber, value)
-  }
-
-  const updateVatDetails = (
-    isBusiness: boolean,
-    vatNumber: string,
-    country: string,
-  ) => {
-    const vatAmount = calculateVatAmount(amount, country, isBusiness)
+  // Update computed fields when form values change
+  useEffect(() => {
+    const vatAmount = calculateVatAmount(
+      amount,
+      country?.alpha2 || '',
+      isBusiness,
+    )
     const totalAmount = amount + vatAmount
 
-    onVatDetailsChange({
-      isBusiness,
-      vatNumber: isBusiness ? vatNumber : undefined,
-      country,
-      vatAmount,
-      totalAmount,
-    })
-  }
+    // Update the computed fields in the form
+    form.setValue('vatAmount', vatAmount, { shouldValidate: false })
+    form.setValue('totalAmount', totalAmount, { shouldValidate: false })
+  }, [isBusiness, country, amount, form])
 
-  const vatRate = country ? getVatRateForCountry(country) : 0
-  const vatAmount = calculateVatAmount(amount, country, isBusiness)
-  const totalAmount = amount + vatAmount
+  const vatRate = country ? getVatRateForCountry(country.alpha2) : 0
+  const vatValidationError =
+    isBusiness && vatNumber && country
+      ? validateVatNumber(vatNumber, country.alpha2)
+      : null
 
   return (
     <Card className="border-primary/20">
       <CardContent className="pt-6">
-        <div className="space-y-6">
-          <div className="flex items-center justify-between">
-            <Label htmlFor="business-toggle">Business Customer</Label>
-            <Switch
-              id="business-toggle"
-              checked={isBusiness}
-              onCheckedChange={handleBusinessChange}
-            />
-          </div>
-
-          {isBusiness && (
-            <div className="space-y-2">
-              <Label htmlFor="vat-number">VAT Number</Label>
-              <Input
-                id="vat-number"
-                placeholder="Enter your VAT number"
-                value={vatNumber}
-                onChange={(e) => handleVatNumberChange(e.target.value)}
+        <Form {...form}>
+          <div className="space-y-6">
+            <div className="flex items-center justify-between">
+              <Label htmlFor="business-toggle">Business Customer</Label>
+              <FormField
+                control={form.control}
+                name="isBusiness"
+                render={({ field }) => (
+                  <Switch
+                    id="business-toggle"
+                    checked={field.value}
+                    onCheckedChange={(checked) => {
+                      field.onChange(checked)
+                      if (!checked) {
+                        form.setValue('vatNumber', '')
+                      }
+                    }}
+                  />
+                )}
               />
             </div>
-          )}
 
-          <div className="space-y-2">
-            <Label htmlFor="country">Country</Label>
-            <Select value={country} onValueChange={handleCountryChange}>
-              <SelectTrigger id="country">
-                <SelectValue placeholder="Select your country" />
-              </SelectTrigger>
-              <SelectContent>
-                {EU_COUNTRIES.map((countryCode) => (
-                  <SelectItem key={countryCode} value={countryCode}>
-                    {countryCode}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+            <FormField
+              control={form.control}
+              name="country"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Country</FormLabel>
+                  <FormControl>
+                    <CountryDropdown
+                      defaultValue={field.value?.alpha3 || ''}
+                      onChange={(value) => field.onChange(value)}
+                      modal={true}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-          {country && (
-            <div className="rounded-lg bg-muted p-4">
-              <div className="space-y-2">
-                {!isBusiness && vatRate > 0 ? (
-                  <>
-                    <div className="text-sm text-muted-foreground">
-                      VAT will be applied at {vatRate * 100}% for {country}
-                    </div>
-                    <div className="flex flex-col space-y-1 text-sm">
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">Subtotal</span>
-                        <span>${amount}</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span className="text-muted-foreground">VAT</span>
-                        <span>${formatVatAmount(vatAmount)}</span>
-                      </div>
-                      <div className="h-px bg-border" />
-                      <div className="flex justify-between font-medium">
-                        <span>Total</span>
-                        <span>${formatVatAmount(totalAmount)}</span>
-                      </div>
-                    </div>
-                  </>
-                ) : (
-                  <div className="text-sm text-muted-foreground">
-                    {isBusiness
-                      ? 'No VAT will be applied for business customers.'
-                      : 'No VAT will be applied for non-EU countries.'}
-                  </div>
+            {isBusiness && (
+              <FormField
+                control={form.control}
+                name="vatNumber"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel htmlFor="vat-number">VAT Number</FormLabel>
+                    <FormControl>
+                      <Input
+                        id="vat-number"
+                        placeholder="Enter your VAT number"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                    {vatValidationError && (
+                      <p className="text-sm text-destructive">
+                        {vatValidationError}
+                      </p>
+                    )}
+                    {vatNumber && !vatValidationError && country && (
+                      <p className="text-sm text-green-600">
+                        ✓ Valid VAT number for {country.name}
+                      </p>
+                    )}
+                  </FormItem>
                 )}
+              />
+            )}
+
+            {country && (
+              <div className="rounded-lg bg-muted p-4">
+                <div className="space-y-2">
+                  {!isBusiness && vatRate > 0 ? (
+                    <>
+                      <div className="text-sm text-muted-foreground">
+                        VAT will be applied at {vatRate * 100}% for{' '}
+                        {country.name}
+                      </div>
+                    </>
+                  ) : (
+                    <div className="text-sm text-muted-foreground">
+                      {isBusiness
+                        ? 'No VAT will be applied for business customers.'
+                        : 'No VAT will be applied for non-EU countries.'}
+                    </div>
+                  )}
+                </div>
               </div>
-            </div>
-          )}
-        </div>
+            )}
+          </div>
+        </Form>
       </CardContent>
     </Card>
   )

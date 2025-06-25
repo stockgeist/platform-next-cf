@@ -39,6 +39,7 @@
     "EMAIL_FROM": "netgeist@neurotechnology.com",
     "EMAIL_FROM_NAME": "NetGeist.ai",
     "EMAIL_REPLY_TO": "netgeist@neurotechnology.com",
+    "NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY": "pk_test_51RRYm808nFNhjRwwJNUZ2rcokhnqQbB8j6CfLE8i9qQIkm4rCssisHODinaDF4olKtvSSQNUppzCVAPrUUTEG4UI00hnkWcVRL",
   },
   /**
    * Note: Use secrets to store sensitive data.

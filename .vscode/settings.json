@@ -2,17 +2,4 @@
   "editor.codeActionsOnSave": {
     "source.fixAll.eslint": "always"
   },
-  // "terminal.integrated.profiles.linux": {
-  //   "bash": {
-  //     "path": "/bin/bash",
-  //     "args": ["-l"]
-  //   }
-  // },
-  // "terminal.integrated.defaultProfile.linux": "bash",
-  // "terminal.integrated.env.linux": {
-  //   "NVM_DIR": "$HOME/.nvm"
-  // },
-  // "files.associations": {
-  //   "wrangler.json": "jsonc"
-  // }
 }

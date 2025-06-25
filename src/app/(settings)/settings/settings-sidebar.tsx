@@ -58,7 +58,7 @@ export function SettingsSidebar() {
 
   return (
     <ScrollShadow
-      className="w-full whitespace-nowrap pb-2 lg:w-auto"
+      className="w-full whitespace-nowrap bg-red-500 pb-2 lg:w-auto"
       orientation="horizontal"
       isEnabled={isLgAndSmaller}
     >

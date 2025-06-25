@@ -1,6 +1,10 @@
 'use client'
 
 import { useState, useMemo } from 'react'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { z } from 'zod'
+import { checkVAT, countries } from 'jsvat-next'
 import {
   PaymentElement,
   useStripe,
@@ -29,6 +33,66 @@ interface StripePaymentFormProps {
 
 type FormStep = 'vat' | 'payment'
 
+const paymentFormSchema = z
+  .object({
+    // VAT form fields
+    isBusiness: z.boolean().default(false),
+    vatNumber: z.string().optional(),
+    country: z
+      .object({
+        alpha2: z.string(),
+        alpha3: z.string(),
+        name: z.string(),
+      })
+      .optional(),
+    // Computed VAT fields
+    vatAmount: z.number().default(0),
+    totalAmount: z.number(),
+  })
+  .refine(
+    (data) => {
+      // If business customer, VAT number is required
+      if (data.isBusiness && !data.vatNumber) {
+        return false
+      }
+      return true
+    },
+    {
+      message: 'VAT number is required for business customers',
+      path: ['vatNumber'],
+    },
+  )
+  .refine(
+    (data) => {
+      // VAT number validation using jsvat-next for business customers
+      if (data.isBusiness && data.vatNumber && data.country) {
+        const vatResult = checkVAT(data.vatNumber, countries)
+
+        // Check if the VAT number is valid and matches the selected country
+        if (!vatResult.isValid) {
+          return false
+        }
+
+        // Verify the VAT number belongs to the selected country
+        if (
+          vatResult.country &&
+          vatResult.country.isoCode.short !== data.country.alpha2
+        ) {
+          return false
+        }
+
+        return true
+      }
+      return true
+    },
+    {
+      message: 'Please enter a valid VAT number for the selected country',
+      path: ['vatNumber'],
+    },
+  )
+
+type PaymentFormData = z.infer<typeof paymentFormSchema>
+
 function PaymentFormContent({
   packageId,
   clientSecret,
@@ -51,9 +115,11 @@ function PaymentFormContent({
   const elements = useElements()
   const [isProcessing, setIsProcessing] = useState(false)
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+  const { handleSubmit } = useForm<PaymentFormData>({
+    resolver: zodResolver(paymentFormSchema),
+  })
 
+  const onSubmit = async () => {
     if (!stripe || !elements || !clientSecret) {
       return
     }
@@ -109,7 +175,7 @@ function PaymentFormContent({
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-8">
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
       <PaymentElement />
       <div className="flex justify-end gap-3">
         <Button
@@ -150,21 +216,30 @@ function PaymentForm({
 
   const [currentStep, setCurrentStep] = useState<FormStep>('vat')
   const [clientSecret, setClientSecret] = useState<string | null>(null)
-  const [vatDetails, setVatDetails] = useState<{
-    isBusiness: boolean
-    vatNumber?: string
-    country: string
-    vatAmount: number
-    totalAmount: number
-  }>({
-    isBusiness: false,
-    country: '',
-    vatAmount: 0,
-    totalAmount: price,
+
+  const form = useForm<PaymentFormData>({
+    resolver: zodResolver(paymentFormSchema),
+    defaultValues: {
+      isBusiness: false,
+      vatNumber: '',
+      country: undefined,
+      vatAmount: 0,
+      totalAmount: price,
+    },
   })
 
+  const isBusiness = form.watch('isBusiness')
+  const country = form.watch('country')
+  const vatNumber = form.watch('vatNumber')
+  const vatAmount = form.watch('vatAmount')
+  const totalAmount = form.watch('totalAmount')
+
+  // Get form validation state
+  const formState = form.formState
+  const isFormValid = formState.isValid && !formState.isSubmitting
+
   const handleVatDetailsSubmit = async () => {
-    if (!vatDetails.country) {
+    if (!country) {
       toast.error('Please select your country')
       return
     }
@@ -172,9 +247,9 @@ function PaymentForm({
     try {
       const { clientSecret: newClientSecret } = await createPaymentIntent({
         packageId,
-        isBusiness: vatDetails.isBusiness,
-        vatNumber: vatDetails.vatNumber,
-        country: vatDetails.country,
+        isBusiness,
+        vatNumber,
+        country: country.alpha2,
       })
       if (newClientSecret) {
         setClientSecret(newClientSecret)
@@ -190,9 +265,9 @@ function PaymentForm({
     if (currentStep === 'vat') {
       return (
         <div className="space-y-6">
-          <VatDetailsForm amount={price} onVatDetailsChange={setVatDetails} />
+          <VatDetailsForm form={form} amount={price} />
 
-          {vatDetails.vatAmount > 0 && (
+          {vatAmount > 0 && (
             <Card className="border-primary/20">
               <CardContent className="pt-6">
                 <div className="flex flex-col space-y-2">
@@ -202,14 +277,14 @@ function PaymentForm({
                   </div>
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">
-                      VAT ({vatDetails.country})
+                      VAT ({country?.alpha2})
                     </span>
-                    <span>${formatVatAmount(vatDetails.vatAmount)}</span>
+                    <span>${formatVatAmount(vatAmount)}</span>
                   </div>
                   <div className="h-px bg-border" />
                   <div className="flex justify-between font-bold">
                     <span>Total</span>
-                    <span>${formatVatAmount(vatDetails.totalAmount)}</span>
+                    <span>${formatVatAmount(totalAmount)}</span>
                   </div>
                 </div>
               </CardContent>
@@ -223,7 +298,7 @@ function PaymentForm({
             <Button
               type="button"
               onClick={handleVatDetailsSubmit}
-              disabled={!vatDetails.country}
+              disabled={!isFormValid}
             >
               Continue to Payment
             </Button>
@@ -235,24 +310,55 @@ function PaymentForm({
     if (!clientSecret) return null
 
     return (
-      <Elements
-        stripe={stripePromise}
-        options={{
-          clientSecret,
-          appearance: {
-            theme: theme === 'dark' ? 'night' : 'stripe',
-          },
-        }}
-      >
-        <PaymentFormContent
-          packageId={packageId}
-          clientSecret={clientSecret}
-          onSuccess={onSuccess}
-          onCancel={onCancel}
-          price={price}
-          vatDetails={vatDetails}
-        />
-      </Elements>
+      <>
+        {vatAmount > 0 && (
+          <Card className="border-primary/20">
+            <CardContent className="pt-6">
+              <div className="flex flex-col space-y-2">
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Subtotal</span>
+                  <span>${price}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">
+                    VAT ({country?.alpha2})
+                  </span>
+                  <span>${formatVatAmount(vatAmount)}</span>
+                </div>
+                <div className="h-px bg-border" />
+                <div className="flex justify-between font-bold">
+                  <span>Total</span>
+                  <span>${formatVatAmount(totalAmount)}</span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+        <Elements
+          stripe={stripePromise}
+          options={{
+            clientSecret,
+            appearance: {
+              theme: theme === 'dark' ? 'night' : 'stripe',
+            },
+          }}
+        >
+          <PaymentFormContent
+            packageId={packageId}
+            clientSecret={clientSecret}
+            onSuccess={onSuccess}
+            onCancel={onCancel}
+            price={price}
+            vatDetails={{
+              isBusiness,
+              vatNumber,
+              country: country?.alpha2 || '',
+              vatAmount,
+              totalAmount,
+            }}
+          />
+        </Elements>
+      </>
     )
   }
 

@@ -4,6 +4,7 @@ import { PageHeader } from '@/components/page-header'
 import { TransactionHistory } from './_components/transaction-history'
 import { CreditPackages } from './_components/credit-packages'
 import { InvoiceList } from './_components/invoice-list'
+import { CountryDropdown } from '@/components/ui/coutry-dropdown'
 
 export default async function BillingPage() {
   const session = await getSessionFromCookie()
@@ -32,6 +33,7 @@ export default async function BillingPage() {
             <h2 className="mb-4 text-xl font-semibold">Credit Packages</h2>
             <CreditPackages />
           </div>
+          <CountryDropdown placeholder="Select country" />
         </div>
         <div className="mt-4">
           <TransactionHistory />
