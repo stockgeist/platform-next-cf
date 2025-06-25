@@ -29,7 +29,7 @@ export default async function MarketplacePage() {
           </p>
         </div>
 
-        <Alert variant="warning" className="mb-6">
+        <Alert variant="destructive" className="mb-6">
           <AlertTitle>Demo Template Feature</AlertTitle>
           <AlertDescription>
             This marketplace page demonstrates how to implement a credit-based
