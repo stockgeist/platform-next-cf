@@ -1,0 +1,1 @@
+ALTER TABLE `invoice` ADD `numberOfCredits` integer NOT NULL DEFAULT 0; 

@@ -3,9 +3,9 @@ import 'server-only'
 import { getDB } from '@/db'
 import { invoiceTable } from '@/db/schema'
 import { eq } from 'drizzle-orm'
-import { nanoid } from 'nanoid'
 import { format } from 'date-fns'
-import { formatVatAmount } from '@/utils/vat'
+import { getCreditPackage } from '@/utils/credits'
+import { centsToUnit } from '@/utils/money'
 
 interface CreateInvoiceParams {
   userId: string
@@ -23,6 +23,7 @@ interface CreateInvoiceParams {
 export async function createInvoice({
   userId,
   packageId,
+
   amount,
   vatAmount,
   totalAmount,
@@ -33,13 +34,17 @@ export async function createInvoice({
   isBusiness,
 }: CreateInvoiceParams) {
   const db = getDB()
+  const creditPackage = getCreditPackage(packageId)
+  if (!creditPackage) {
+    throw new Error('Package not found')
+  }
 
   const [invoice] = await db
     .insert(invoiceTable)
     .values({
-      id: nanoid(),
       userId,
       packageId,
+      numberOfCredits: creditPackage.credits,
       amount,
       vatAmount,
       totalAmount,
@@ -55,7 +60,7 @@ export async function createInvoice({
   return invoice
 }
 
-export async function getInvoiceById(id: string) {
+export async function getInvoiceById(id: number) {
   const db = getDB()
 
   const [invoice] = await db
@@ -84,14 +89,14 @@ export async function generateInvoicePDF(
   // In a real implementation, you would use a PDF generation library
   // like PDFKit or a service like DocRaptor
   const invoiceDate = format(new Date(invoice.createdAt), 'MMMM d, yyyy')
-  const invoiceNumber = `INV-${invoice.id.slice(0, 8).toUpperCase()}`
+  const invoiceNumber = `INV-${invoice.id}`
 
   return {
     invoiceNumber,
     invoiceDate,
-    amount: formatVatAmount(invoice.amount),
-    vatAmount: formatVatAmount(invoice.vatAmount),
-    totalAmount: formatVatAmount(invoice.totalAmount),
+    amount: centsToUnit(invoice.amount),
+    vatAmount: centsToUnit(invoice.vatAmount),
+    totalAmount: centsToUnit(invoice.totalAmount),
     currency: invoice.currency.toUpperCase(),
     vatNumber: invoice.vatNumber,
     country: invoice.country,

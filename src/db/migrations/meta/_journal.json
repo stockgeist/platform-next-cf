@@ -29,6 +29,27 @@
       "when": 1749722700713,
       "tag": "0003_invoice_renaming",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "6",
+      "when": 1751020358674,
+      "tag": "0004_add_number_of_credits",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "6",
+      "when": 1751026192796,
+      "tag": "0005_invoice_id",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "6",
+      "when": 1751026352216,
+      "tag": "0006_default_eur",
+      "breakpoints": true
     }
   ]
 }

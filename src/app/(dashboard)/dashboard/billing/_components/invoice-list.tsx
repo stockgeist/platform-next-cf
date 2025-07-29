@@ -3,8 +3,9 @@ import { format } from 'date-fns'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Download } from 'lucide-react'
-import { formatVatAmount } from '@/utils/vat'
 import { getSessionFromCookie } from '@/utils/auth'
+import { centsToUnit } from '@/utils/money'
+import { INVOICE_NUMBER_PREFIX } from '@/constants'
 
 export async function InvoiceList() {
   const session = await getSessionFromCookie()
@@ -23,8 +24,6 @@ export async function InvoiceList() {
 
   const invoices = await getUserInvoices(session.userId)
 
-  console.log(invoices)
-
   if (invoices.length === 0) {
     return (
       <Card>
@@ -42,7 +41,7 @@ export async function InvoiceList() {
           <CardHeader>
             <div className="flex items-center justify-between">
               <CardTitle className="text-lg">
-                Invoice {invoice.id.slice(0, 8).toUpperCase()}
+                Invoice: {INVOICE_NUMBER_PREFIX}-{invoice.id}
               </CardTitle>
               <form action={`/api/invoices/${invoice.id}`} method="GET">
                 <Button variant="outline" size="sm" type="submit">
@@ -62,15 +61,15 @@ export async function InvoiceList() {
               </div>
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Amount</span>
-                <span>${formatVatAmount(invoice.amount)}</span>
+                <span>${centsToUnit(invoice.amount)}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-muted-foreground">VAT</span>
-                <span>${formatVatAmount(invoice.vatAmount)}</span>
+                <span>${centsToUnit(invoice.vatAmount)}</span>
               </div>
               <div className="flex justify-between font-medium">
                 <span>Total</span>
-                <span>${formatVatAmount(invoice.totalAmount)}</span>
+                <span>${centsToUnit(invoice.totalAmount)}</span>
               </div>
               {invoice.vatNumber && (
                 <div className="flex justify-between">

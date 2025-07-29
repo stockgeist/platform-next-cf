@@ -356,6 +356,7 @@ export const requireAdmin = cache(
       throw new ZSAError('NOT_AUTHORIZED', 'Not authenticated')
     }
 
+    console.log('session.user.role', session.user.role)
     if (session.user.role !== ROLES_ENUM.ADMIN) {
       if (doNotThrowError) {
         return null

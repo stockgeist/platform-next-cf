@@ -20,8 +20,8 @@ import { Card, CardContent } from '@/components/ui/card'
 import { getPackageIcon } from './credit-packages'
 import { CREDITS_EXPIRATION_YEARS } from '@/constants'
 import { VatDetailsForm } from './vat-details-form'
-import { formatVatAmount } from '@/utils/vat'
 import { createInvoiceAction } from '@/actions/invoice.action'
+import { displayInCurency } from '@/utils/money'
 
 interface StripePaymentFormProps {
   packageId: string
@@ -38,13 +38,11 @@ const paymentFormSchema = z
     // VAT form fields
     isBusiness: z.boolean().default(false),
     vatNumber: z.string().optional(),
-    country: z
-      .object({
-        alpha2: z.string(),
-        alpha3: z.string(),
-        name: z.string(),
-      })
-      .optional(),
+    country: z.object({
+      alpha2: z.string(),
+      alpha3: z.string(),
+      name: z.string(),
+    }),
     // Computed VAT fields
     vatAmount: z.number().default(0),
     totalAmount: z.number(),
@@ -115,13 +113,9 @@ function PaymentFormContent({
   const elements = useElements()
   const [isProcessing, setIsProcessing] = useState(false)
 
-  const { handleSubmit } = useForm<PaymentFormData>({
-    resolver: zodResolver(paymentFormSchema),
-  })
-
   const onSubmit = async () => {
     if (!stripe || !elements || !clientSecret) {
-      return
+      return toast.error('Payment failed')
     }
 
     setIsProcessing(true)
@@ -150,7 +144,7 @@ function PaymentFormContent({
               amount: price,
               vatAmount: vatDetails.vatAmount,
               totalAmount: vatDetails.totalAmount,
-              currency: 'usd',
+              currency: 'eur',
               paymentIntentId: paymentIntent.paymentIntent.id,
               vatNumber: vatDetails.vatNumber,
               country: vatDetails.country,
@@ -175,7 +169,7 @@ function PaymentFormContent({
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
+    <div className="space-y-8">
       <PaymentElement />
       <div className="flex justify-end gap-3">
         <Button
@@ -187,14 +181,15 @@ function PaymentFormContent({
           Cancel
         </Button>
         <Button
-          type="submit"
+          type="button"
+          onClick={onSubmit}
           disabled={isProcessing || !stripe || !elements}
           className="px-8"
         >
           {isProcessing ? 'Processing...' : 'Pay Now'}
         </Button>
       </div>
-    </form>
+    </div>
   )
 }
 
@@ -222,7 +217,6 @@ function PaymentForm({
     defaultValues: {
       isBusiness: false,
       vatNumber: '',
-      country: undefined,
       vatAmount: 0,
       totalAmount: price,
     },
@@ -239,8 +233,14 @@ function PaymentForm({
   const isFormValid = formState.isValid && !formState.isSubmitting
 
   const handleVatDetailsSubmit = async () => {
-    if (!country) {
-      toast.error('Please select your country')
+    // Validate the form using React Hook Form
+    const isValid = await form.trigger()
+    if (!isValid) {
+      if (!country) {
+        toast.error('Please select your country')
+      } else {
+        toast.error('Please fill in all required fields')
+      }
       return
     }
 
@@ -261,145 +261,149 @@ function PaymentForm({
     }
   }
 
-  const renderContent = () => {
-    if (currentStep === 'vat') {
-      return (
-        <div className="space-y-6">
-          <VatDetailsForm form={form} amount={price} />
-
-          {vatAmount > 0 && (
+  return (
+    <div className="flex max-h-[80vh] flex-col gap-4">
+      <div className="flex-1 space-y-6 overflow-y-auto">
+        {currentStep === 'vat' ? (
+          <div className="space-y-4">
             <Card className="border-primary/20">
-              <CardContent className="pt-6">
-                <div className="flex flex-col space-y-2">
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Subtotal</span>
-                    <span>${price}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">
-                      VAT ({country?.alpha2})
-                    </span>
-                    <span>${formatVatAmount(vatAmount)}</span>
+              <CardContent>
+                <div className="flex flex-col space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-2">
+                      {getPackageIcon(credits)}
+                      <div>
+                        <div className="text-2xl font-bold">
+                          {credits.toLocaleString()} credits
+                        </div>
+                      </div>
+                    </div>
+                    <div className="text-primary text-2xl font-bold">
+                      {displayInCurency(price)}
+                    </div>
                   </div>
                   <div className="bg-border h-px" />
-                  <div className="flex justify-between font-bold">
-                    <span>Total</span>
-                    <span>${formatVatAmount(totalAmount)}</span>
+                  <div className="text-muted-foreground space-y-2 text-xs">
+                    <p>
+                      Your payment is secure and encrypted. We use Stripe, a
+                      trusted global payment provider, to process your payment.
+                    </p>
+                    <p>
+                      For your security, your payment details are handled
+                      directly by Stripe and never touch our servers.
+                    </p>
+                    <p>
+                      Credits will be added to your account immediately after
+                      successful payment and will be valid for{' '}
+                      {CREDITS_EXPIRATION_YEARS} years from the purchase date.
+                    </p>
                   </div>
                 </div>
               </CardContent>
             </Card>
-          )}
 
-          <div className="flex justify-end gap-3">
-            <Button type="button" variant="outline" onClick={onCancel}>
-              Cancel
-            </Button>
-            <Button
-              type="button"
-              onClick={handleVatDetailsSubmit}
-              disabled={!isFormValid}
-            >
-              Continue to Payment
-            </Button>
+            {vatAmount > 0 && country && (
+              <VatDetails
+                price={price}
+                vatAmount={vatAmount}
+                totalAmount={totalAmount}
+                country={country}
+              />
+            )}
+
+            <VatDetailsForm form={form} amount={price} />
+          </div>
+        ) : clientSecret ? (
+          <div className="space-y-6">
+            {country && (
+              <VatDetails
+                price={price}
+                vatAmount={vatAmount}
+                totalAmount={totalAmount}
+                country={country}
+              />
+            )}
+            <div className="overflow-hidden">
+              <Elements
+                stripe={stripePromise}
+                options={{
+                  clientSecret,
+                  appearance: {
+                    theme: theme === 'dark' ? 'night' : 'stripe',
+                  },
+                }}
+              >
+                <PaymentFormContent
+                  packageId={packageId}
+                  clientSecret={clientSecret}
+                  onSuccess={onSuccess}
+                  onCancel={onCancel}
+                  price={price}
+                  vatDetails={{
+                    isBusiness,
+                    vatNumber,
+                    country: country.alpha2,
+                    vatAmount,
+                    totalAmount,
+                  }}
+                />
+              </Elements>
+            </div>
+          </div>
+        ) : null}
+      </div>
+
+      {currentStep === 'vat' && (
+        <div className="flex justify-end gap-3">
+          <Button type="button" variant="outline" onClick={onCancel}>
+            Cancel
+          </Button>
+          <Button
+            type="button"
+            onClick={handleVatDetailsSubmit}
+            disabled={!isFormValid}
+          >
+            Continue to Payment
+          </Button>
+        </div>
+      )}
+    </div>
+  )
+}
+
+const VatDetails = ({
+  price,
+  vatAmount,
+  totalAmount,
+  country,
+}: {
+  price: number
+  vatAmount: number
+  totalAmount: number
+  country: PaymentFormData['country']
+}) => {
+  return (
+    <Card className="border-primary/20">
+      <CardContent>
+        <div className="flex flex-col space-y-2">
+          <div className="flex justify-between">
+            <span className="text-muted-foreground">Subtotal</span>
+            <span>{displayInCurency(price)}</span>
+          </div>
+          <div className="flex justify-between">
+            <span className="text-muted-foreground">
+              VAT ({country.alpha2})
+            </span>
+            <span>{displayInCurency(vatAmount)}</span>
+          </div>
+          <div className="bg-border h-px" />
+          <div className="flex justify-between font-bold">
+            <span>Total</span>
+            <span>{displayInCurency(totalAmount)}</span>
           </div>
         </div>
-      )
-    }
-
-    if (!clientSecret) return null
-
-    return (
-      <>
-        {vatAmount > 0 && (
-          <Card className="border-primary/20">
-            <CardContent className="pt-6">
-              <div className="flex flex-col space-y-2">
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Subtotal</span>
-                  <span>${price}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">
-                    VAT ({country?.alpha2})
-                  </span>
-                  <span>${formatVatAmount(vatAmount)}</span>
-                </div>
-                <div className="bg-border h-px" />
-                <div className="flex justify-between font-bold">
-                  <span>Total</span>
-                  <span>${formatVatAmount(totalAmount)}</span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        )}
-        <Elements
-          stripe={stripePromise}
-          options={{
-            clientSecret,
-            appearance: {
-              theme: theme === 'dark' ? 'night' : 'stripe',
-            },
-          }}
-        >
-          <PaymentFormContent
-            packageId={packageId}
-            clientSecret={clientSecret}
-            onSuccess={onSuccess}
-            onCancel={onCancel}
-            price={price}
-            vatDetails={{
-              isBusiness,
-              vatNumber,
-              country: country?.alpha2 || '',
-              vatAmount,
-              totalAmount,
-            }}
-          />
-        </Elements>
-      </>
-    )
-  }
-
-  return (
-    <div className="space-y-6">
-      <Card className="border-primary/20">
-        <CardContent className="pt-6">
-          <div className="flex flex-col space-y-4">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-2">
-                {getPackageIcon(credits)}
-                <div>
-                  <div className="text-2xl font-bold">
-                    {credits.toLocaleString()} credits
-                  </div>
-                </div>
-              </div>
-              <div className="text-primary text-2xl font-bold">${price}</div>
-            </div>
-            <div className="bg-border h-px" />
-            <div className="text-muted-foreground space-y-2 text-xs">
-              <p>
-                Your payment is secure and encrypted. We use Stripe, a trusted
-                global payment provider, to process your payment.
-              </p>
-              <p>
-                For your security, your payment details are handled directly by
-                Stripe and never touch our servers.
-              </p>
-              <p>
-                Credits will be added to your account immediately after
-                successful payment and will be valid for{' '}
-                {CREDITS_EXPIRATION_YEARS} years from the purchase date.
-              </p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {renderContent()}
-    </div>
+      </CardContent>
+    </Card>
   )
 }
 

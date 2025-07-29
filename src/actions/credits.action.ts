@@ -15,7 +15,7 @@ import {
 } from '@/constants'
 import ms from 'ms'
 import { withRateLimit, RATE_LIMITS } from '@/utils/with-rate-limit'
-import { calculateVatAmount } from '@/utils/vat'
+import { calculateVatAmountCents } from '@/utils/vat'
 
 // Action types
 type GetTransactionsInput = {
@@ -95,16 +95,16 @@ export async function createPaymentIntent({
         throw new Error('Invalid package')
       }
 
-      const vatAmount = calculateVatAmount(
+      const vatAmountCents = calculateVatAmountCents(
         creditPackage.price,
         country,
         isBusiness,
       )
-      const totalAmount = creditPackage.price + vatAmount
+      const totalAmountCents = creditPackage.price + vatAmountCents
 
       const paymentIntent = await getStripe().paymentIntents.create({
-        amount: Math.round(totalAmount * 100), // Convert to cents
-        currency: 'usd',
+        amount: totalAmountCents, // Already in cents
+        currency: 'eur',
         automatic_payment_methods: {
           enabled: true,
           allow_redirects: 'never',
@@ -116,7 +116,7 @@ export async function createPaymentIntent({
           isBusiness: isBusiness.toString(),
           vatNumber: vatNumber || '',
           country,
-          vatAmount: vatAmount.toString(),
+          vatAmount: vatAmountCents.toString(),
         },
       })
 

@@ -2,7 +2,7 @@
 
 import { type ComponentType } from 'react'
 import type { Route } from 'next'
-import { Users, Shield } from 'lucide-react'
+import { Users, Shield, CreditCard } from 'lucide-react'
 
 import { NavMain } from '@/components/nav-main'
 import { NavUser } from '@/components/nav-user'
@@ -33,6 +33,12 @@ const adminNavItems: NavMainItem[] = [
     title: 'Users',
     url: '/admin',
     icon: Users,
+    isActive: true,
+  },
+  {
+    title: 'Invoices',
+    url: '/admin/invoices',
+    icon: CreditCard,
     isActive: true,
   },
 ]

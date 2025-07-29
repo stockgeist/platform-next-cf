@@ -379,18 +379,16 @@ export const teamInvitationTable = sqliteTable(
 // legal requirements:
 
 export const invoiceTable = sqliteTable('invoice', {
-  id: text()
-    .primaryKey()
-    .$defaultFn(() => `inv_${createId()}`)
-    .notNull(),
+  id: integer({ mode: 'number' }).primaryKey({ autoIncrement: true }),
   userId: text()
     .notNull()
     .references(() => userTable.id, { onDelete: 'cascade' }),
   packageId: text().notNull(),
+  numberOfCredits: integer().notNull(),
   amount: integer().notNull(),
   vatAmount: integer().notNull(),
   totalAmount: integer().notNull(),
-  currency: text().notNull().default('usd'),
+  currency: text().notNull().default('eur'),
   status: text({ enum: ['paid', 'pending', 'failed'] }).notNull(),
   paymentIntentId: text().notNull(),
   vatNumber: text(),

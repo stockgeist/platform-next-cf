@@ -15,14 +15,14 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form'
-import { calculateVatAmount, getVatRateForCountry } from '@/utils/vat'
+import { calculateVatAmountCents, getVatRateForCountry } from '@/utils/vat'
 import { CountryDropdown } from '@/components/ui/coutry-dropdown'
 
 interface VatDetailsFormProps {
   form: UseFormReturn<{
     isBusiness: boolean
     vatNumber?: string
-    country?: {
+    country: {
       alpha2: string
       alpha3: string
       name: string
@@ -63,7 +63,7 @@ export function VatDetailsForm({ form, amount }: VatDetailsFormProps) {
 
   // Update computed fields when form values change
   useEffect(() => {
-    const vatAmount = calculateVatAmount(
+    const vatAmount = calculateVatAmountCents(
       amount,
       country?.alpha2 || '',
       isBusiness,

@@ -18,8 +18,9 @@ export async function GET(
       return new NextResponse('Invoice not found', { status: 404 })
     }
 
-    // Check if the user owns this invoice
-    if (invoice.userId !== session.id) {
+    // Check if the user owns this invoice or is an admin
+    const isAdmin = session.user.role === 'admin'
+    if (invoice.userId !== session.user.id && !isAdmin) {
       return new NextResponse('Unauthorized', { status: 401 })
     }
 

@@ -53,6 +53,20 @@ export function calculateVatAmount(
   return amount * vatRate
 }
 
+export function calculateVatAmountCents(
+  amountCents: number,
+  country: string,
+  isBusiness: boolean,
+): number {
+  // If it's a business customer or non-EU country, no VAT is applied
+  if (isBusiness || !EU_COUNTRIES.includes(country)) {
+    return 0
+  }
+
+  const vatRate = EU_VAT_RATES[country]
+  return Math.round(amountCents * vatRate)
+}
+
 export function calculateTotalWithVat(
   amount: number,
   country: string,
@@ -60,10 +74,6 @@ export function calculateTotalWithVat(
 ): number {
   const vatAmount = calculateVatAmount(amount, country, isBusiness)
   return amount + vatAmount
-}
-
-export function formatVatAmount(amount: number): string {
-  return amount.toFixed(2)
 }
 
 export function getVatRateForCountry(country: string): number {

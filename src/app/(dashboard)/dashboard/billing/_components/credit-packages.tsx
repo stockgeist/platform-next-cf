@@ -11,7 +11,6 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { StripePaymentForm } from './stripe-payment-form'
-import { createPaymentIntent } from '@/actions/credits.action'
 import { Coins, Sparkles, Zap } from 'lucide-react'
 import { useSessionStore } from '@/state/session'
 import { useTransactionStore } from '@/state/transaction'
@@ -20,6 +19,7 @@ import { useRouter } from 'next/navigation'
 import { Badge } from '@/components/ui/badge'
 import { Skeleton } from '@/components/ui/skeleton'
 import { toast } from 'sonner'
+import { displayInCurency } from '@/utils/money'
 type CreditPackage = (typeof CREDIT_PACKAGES)[number]
 
 export const getPackageIcon = (index: number) => {
@@ -43,7 +43,6 @@ export function CreditPackages() {
   const [selectedPackage, setSelectedPackage] = useState<CreditPackage | null>(
     null,
   )
-  const [clientSecret, setClientSecret] = useState<string | null>(null)
   const session = useSessionStore((state) => state)
   const transactionsRefresh = useTransactionStore(
     (state) => state.triggerRefresh,
@@ -51,24 +50,13 @@ export function CreditPackages() {
   const sessionIsLoading = session?.isLoading
 
   const handlePurchase = async (pkg: CreditPackage) => {
-    try {
-      const { clientSecret } = await createPaymentIntent({
-        packageId: pkg.id,
-        isBusiness: false, // Default to non-business, will be updated by VAT form
-        country: '', // Default to empty, will be updated by VAT form
-      })
-      setClientSecret(clientSecret)
-      setSelectedPackage(pkg)
-      setIsDialogOpen(true)
-    } catch (error) {
-      console.error('Error creating payment intent:', error)
-    }
+    setSelectedPackage(pkg)
+    setIsDialogOpen(true)
   }
 
   const handleSuccess = () => {
     setIsDialogOpen(false)
     setSelectedPackage(null)
-    setClientSecret(null)
     router.refresh()
     transactionsRefresh()
   }
@@ -133,7 +121,9 @@ export function CreditPackages() {
                       </div>
                       <div className="flex flex-col items-end">
                         <div className="text-primary text-xl font-bold sm:text-2xl">
-                          ${pkg.price}
+                          {displayInCurency(pkg.price, {
+                            minimumFractionDigits: 0,
+                          })}
                         </div>
                         <div className="text-muted-foreground text-xs sm:text-sm">
                           one-time payment (Excl. VAT)
@@ -178,7 +168,7 @@ export function CreditPackages() {
           <DialogHeader>
             <DialogTitle>Purchase Credits</DialogTitle>
           </DialogHeader>
-          {clientSecret && selectedPackage && (
+          {selectedPackage && (
             <StripePaymentForm
               packageId={selectedPackage.id}
               onSuccess={handleSuccess}
