@@ -8,7 +8,7 @@ import { hasEnoughCredits, consumeCredits } from '@/utils/credits'
 import { getDB } from '@/db'
 import { purchasedItemsTable, PURCHASABLE_ITEM_TYPE } from '@/db/schema'
 import { and, eq } from 'drizzle-orm'
-import { COMPONENTS } from '@/app/(dashboard)/dashboard/marketplace/components-catalog'
+import { COMPONENTS } from '@/app/(dashboard)/marketplace/components-catalog'
 
 const purchaseSchema = z.object({
   itemId: z.string(),

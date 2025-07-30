@@ -12,7 +12,7 @@ import {
 import PurchaseButton from '@/components/purchase-button'
 import type { PURCHASABLE_ITEM_TYPE } from '@/db/schema'
 import { Badge } from '@/components/ui/badge'
-import { COMPONENTS } from '@/app/(dashboard)/dashboard/marketplace/components-catalog'
+import { COMPONENTS } from '@/app/(dashboard)/marketplace/components-catalog'
 
 interface MarketplaceCardProps {
   id: string

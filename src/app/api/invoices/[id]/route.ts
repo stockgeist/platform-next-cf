@@ -13,7 +13,7 @@ export async function GET(
     }
 
     const { id } = await params
-    const invoice = await getInvoiceById(id)
+    const invoice = await getInvoiceById(Number(id))
     if (!invoice) {
       return new NextResponse('Invoice not found', { status: 404 })
     }

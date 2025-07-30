@@ -406,6 +406,45 @@ export const invoiceTable = sqliteTable('invoice', {
     .notNull(),
 })
 
+export const apiKeyTable = sqliteTable(
+  'api_key',
+  {
+    ...commonColumns,
+    id: text()
+      .primaryKey()
+      .$defaultFn(() => `apk_${createId()}`)
+      .notNull(),
+    userId: text()
+      .notNull()
+      .references(() => userTable.id, { onDelete: 'cascade' }),
+    name: text({
+      length: 255,
+    }).notNull(),
+    keyHash: text({
+      length: 255,
+    }).notNull(),
+    prefix: text({
+      length: 8,
+    }).notNull(),
+    isActive: integer({ mode: 'boolean' }).default(true).notNull(),
+    lastUsedAt: integer({
+      mode: 'timestamp',
+    }),
+    expiresAt: integer({
+      mode: 'timestamp',
+    }),
+    permissions: text({
+      length: 1000,
+    }), // JSON field for future permission system
+  },
+  (table) => [
+    index('api_key_user_id_idx').on(table.userId),
+    index('api_key_prefix_idx').on(table.prefix),
+    index('api_key_hash_idx').on(table.keyHash),
+    index('api_key_active_idx').on(table.isActive),
+  ],
+)
+
 export const teamRelations = relations(teamTable, ({ many }) => ({
   memberships: many(teamMembershipTable),
   invitations: many(teamInvitationTable),
@@ -481,6 +520,7 @@ export const userRelations = relations(userTable, ({ many }) => ({
   passkeys: many(passKeyCredentialTable),
   creditTransactions: many(creditTransactionTable),
   purchasedItems: many(purchasedItemsTable),
+  apiKeys: many(apiKeyTable),
   teamMemberships: many(teamMembershipTable, {
     relationName: 'teamMembershipUser',
   }),
@@ -499,10 +539,19 @@ export const passKeyCredentialRelations = relations(
   }),
 )
 
+export const apiKeyRelations = relations(apiKeyTable, ({ one }) => ({
+  user: one(userTable, {
+    fields: [apiKeyTable.userId],
+    references: [userTable.id],
+  }),
+}))
+
 export type User = InferSelectModel<typeof userTable>
 export type PassKeyCredential = InferSelectModel<typeof passKeyCredentialTable>
 export type CreditTransaction = InferSelectModel<typeof creditTransactionTable>
 export type PurchasedItem = InferSelectModel<typeof purchasedItemsTable>
+export type ApiKey = InferSelectModel<typeof apiKeyTable>
+export type NewApiKey = InferInsertModel<typeof apiKeyTable>
 export type Team = InferSelectModel<typeof teamTable>
 export type TeamMembership = InferSelectModel<typeof teamMembershipTable>
 export type TeamRole = InferSelectModel<typeof teamRoleTable>
@@ -515,6 +564,7 @@ export const schema = {
   passKeyCredentialTable,
   creditTransactionTable,
   purchasedItemsTable,
+  apiKeyTable,
   teamTable,
   teamMembershipTable,
   teamRoleTable,

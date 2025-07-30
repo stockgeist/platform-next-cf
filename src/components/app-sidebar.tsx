@@ -13,6 +13,7 @@ import {
   SquareTerminal,
   CreditCard,
   Users,
+  Key,
 } from 'lucide-react'
 
 import { NavMain } from '@/components/nav-main'
@@ -96,12 +97,17 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       },
       {
         title: 'Marketplace',
-        url: '/dashboard/marketplace',
+        url: '/marketplace',
         icon: ShoppingCart,
       },
       {
+        title: 'API Keys',
+        url: '/api-keys',
+        icon: Key,
+      },
+      {
         title: 'Billing',
-        url: '/dashboard/billing',
+        url: '/billing',
         icon: CreditCard,
       },
       {

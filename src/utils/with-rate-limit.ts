@@ -116,4 +116,9 @@ export const RATE_LIMITS = {
     limit: 5,
     windowInSeconds: Math.floor(ms('1 hour') / 1000),
   },
+  API_CREDIT_DEDUCTION: {
+    identifier: 'api-credit-deduction',
+    limit: 100,
+    windowInSeconds: Math.floor(ms('1 minute') / 1000),
+  },
 } as const
