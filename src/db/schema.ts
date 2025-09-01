@@ -71,6 +71,11 @@ export const userTable = sqliteTable(
     lastCreditRefreshAt: integer({
       mode: 'timestamp',
     }),
+    // Billing information fields
+    billingIsBusiness: integer({ mode: 'boolean' }),
+    billingVatNumber: text({ length: 255 }),
+    billingCountry: text({ length: 2 }), // ISO 3166-1 alpha-2 country code
+    billingAddress: text({ length: 1000 }),
   },
   (table) => [
     index('email_idx').on(table.email),

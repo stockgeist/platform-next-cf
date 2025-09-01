@@ -1,7 +1,7 @@
 import { getSessionFromCookie } from '@/utils/auth'
 import { redirect } from 'next/navigation'
 import { PageHeader } from '@/components/page-header'
-import { TransactionHistory } from './_components/transaction-history'
+import { TransactionHistory } from '@/components/billing/transaction-history'
 import { CreditPackages } from './_components/credit-packages'
 import { InvoiceList } from './_components/invoice-list'
 

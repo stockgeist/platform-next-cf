@@ -57,6 +57,13 @@
       "when": 1753784479975,
       "tag": "0007_add_api_keys_table",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "6",
+      "when": 1756720532382,
+      "tag": "0008_add_billing_info",
+      "breakpoints": true
     }
   ]
 }

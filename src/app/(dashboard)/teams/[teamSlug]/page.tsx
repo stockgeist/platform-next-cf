@@ -82,7 +82,7 @@ export default async function TeamDashboardPage({ params }: TeamPageProps) {
         <PageHeader
           items={[
             {
-              href: '/dashboard/teams',
+              href: '/teams',
               label: 'Teams',
             },
           ]}
@@ -96,7 +96,7 @@ export default async function TeamDashboardPage({ params }: TeamPageProps) {
             </AlertDescription>
           </Alert>
           <Button asChild className="mt-4">
-            <Link href="/dashboard/teams">Return to Teams</Link>
+            <Link href="/teams">Return to Teams</Link>
           </Button>
         </div>
       </>

@@ -41,6 +41,7 @@ const getSessionLength = () => {
 
 export async function getUserFromDB(userId: string) {
   const db = getDB()
+  console.log('getUserFromDB', userId)
   return await db.query.userTable.findFirst({
     where: eq(userTable.id, userId),
     columns: {
@@ -55,6 +56,10 @@ export async function getUserFromDB(userId: string) {
       updatedAt: true,
       currentCredits: true,
       lastCreditRefreshAt: true,
+      billingIsBusiness: true,
+      billingVatNumber: true,
+      billingCountry: true,
+      billingAddress: true,
     },
   })
 }

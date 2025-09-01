@@ -4,7 +4,8 @@ import { useState, useMemo } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
-import { checkVAT, countries } from 'jsvat-next'
+import { checkVAT, countries as vatCountries } from 'jsvat-next'
+import { countries } from 'country-data-list'
 import {
   PaymentElement,
   useStripe,
@@ -17,11 +18,14 @@ import { toast } from 'sonner'
 import { confirmPayment, createPaymentIntent } from '@/actions/credits.action'
 import { useTheme } from 'next-themes'
 import { Card, CardContent } from '@/components/ui/card'
-import { getPackageIcon } from './credit-packages'
 import { CREDITS_EXPIRATION_YEARS } from '@/constants'
 import { VatDetailsForm } from './vat-details-form'
 import { createInvoiceAction } from '@/actions/invoice.action'
 import { displayInCurency } from '@/utils/money'
+import { saveBillingInfo } from '@/actions/billing-info.action'
+import { useAction } from 'next-safe-action/hooks'
+import { useSessionStore } from '@/state/session'
+import { Country } from '../ui/coutry-dropdown'
 
 interface StripePaymentFormProps {
   packageId: string
@@ -46,6 +50,8 @@ const paymentFormSchema = z
     // Computed VAT fields
     vatAmount: z.number().default(0),
     totalAmount: z.number(),
+    saveForFuture: z.boolean().default(false),
+    address: z.string().min(1, 'Address is required'),
   })
   .refine(
     (data) => {
@@ -64,7 +70,7 @@ const paymentFormSchema = z
     (data) => {
       // VAT number validation using jsvat-next for business customers
       if (data.isBusiness && data.vatNumber && data.country) {
-        const vatResult = checkVAT(data.vatNumber, countries)
+        const vatResult = checkVAT(data.vatNumber, vatCountries)
 
         // Check if the VAT number is valid and matches the selected country
         if (!vatResult.isValid) {
@@ -201,6 +207,16 @@ function PaymentForm({
   price,
 }: StripePaymentFormProps) {
   const { resolvedTheme: theme } = useTheme()
+  const { session, fetchSession } = useSessionStore((state) => state)
+  console.log('session', session)
+
+  const { execute } = useAction(saveBillingInfo, {
+    onSuccess: async () => {
+      console.log('saveBillingInfo onSuccess')
+      await fetchSession?.()
+      console.log('session after fetchSession', session)
+    },
+  })
   const stripePromise = useMemo(
     () =>
       process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
@@ -215,10 +231,18 @@ function PaymentForm({
   const form = useForm<PaymentFormData>({
     resolver: zodResolver(paymentFormSchema),
     defaultValues: {
-      isBusiness: false,
-      vatNumber: '',
+      isBusiness: session?.user.billingIsBusiness || false,
+      vatNumber: session?.user.billingVatNumber || '',
       vatAmount: 0,
       totalAmount: price,
+      address: session?.user.billingAddress || '',
+      saveForFuture: session?.user.billingAddress ? true : false,
+      // ts does not work as expected
+      country: session?.user.billingCountry
+        ? (countries as unknown as Record<string, Country>)[
+            session.user.billingCountry
+          ]
+        : undefined,
     },
   })
 
@@ -227,7 +251,7 @@ function PaymentForm({
   const vatNumber = form.watch('vatNumber')
   const vatAmount = form.watch('vatAmount')
   const totalAmount = form.watch('totalAmount')
-
+  const address = form.watch('address')
   // Get form validation state
   const formState = form.formState
   const isFormValid = formState.isValid && !formState.isSubmitting
@@ -242,6 +266,16 @@ function PaymentForm({
         toast.error('Please fill in all required fields')
       }
       return
+    }
+    const save = form.getValues('saveForFuture')
+
+    if (save) {
+      execute({
+        address,
+        vatNumber,
+        country: country.alpha2,
+        isBusiness,
+      })
     }
 
     try {
@@ -262,8 +296,8 @@ function PaymentForm({
   }
 
   return (
-    <div className="flex max-h-[80vh] flex-col gap-4">
-      <div className="flex-1 space-y-6 overflow-y-auto">
+    <div className="flex flex-col gap-4">
+      <div className="max-h-full flex-1 space-y-6 overflow-y-auto">
         {currentStep === 'vat' ? (
           <div className="space-y-4">
             <Card className="border-primary/20">
@@ -271,7 +305,6 @@ function PaymentForm({
                 <div className="flex flex-col space-y-4">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-2">
-                      {getPackageIcon(credits)}
                       <div>
                         <div className="text-2xl font-bold">
                           {credits.toLocaleString()} credits

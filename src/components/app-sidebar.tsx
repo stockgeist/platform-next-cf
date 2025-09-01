@@ -1,23 +1,20 @@
 'use client'
 
-import { type ComponentType, useEffect, useState } from 'react'
 import type { Route } from 'next'
+import { type ComponentType, useEffect, useState } from 'react'
 
 import {
+  BadgeDollarSign,
   Building2,
-  Frame,
-  Map,
-  PieChart,
+  CreditCard,
+  Key,
   Settings2,
   ShoppingCart,
   SquareTerminal,
-  CreditCard,
   Users,
-  Key,
 } from 'lucide-react'
 
 import { NavMain } from '@/components/nav-main'
-import { NavProjects } from '@/components/nav-projects'
 import { NavUser } from '@/components/nav-user'
 import { TeamSwitcher } from '@/components/team-switcher'
 import {
@@ -51,7 +48,6 @@ type Data = {
     plan: string
   }[]
   navMain: NavMainItem[]
-  projects: NavItem[]
 }
 
 // TODO Add a theme switcher
@@ -92,7 +88,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       },
       {
         title: 'Teams',
-        url: '/dashboard/teams' as Route,
+        url: '/teams',
         icon: Users,
       },
       {
@@ -110,6 +106,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         url: '/billing',
         icon: CreditCard,
       },
+      { title: 'Pricing', url: '/pricing', icon: BadgeDollarSign },
       {
         title: 'Settings',
         url: '/settings',
@@ -134,23 +131,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         ],
       },
     ],
-    projects: [
-      {
-        title: 'Design Engineering',
-        url: '#',
-        icon: Frame,
-      },
-      {
-        title: 'Sales & Marketing',
-        url: '#',
-        icon: PieChart,
-      },
-      {
-        title: 'Travel',
-        url: '#',
-        icon: Map,
-      },
-    ],
   }
 
   return (
@@ -163,7 +143,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
       <SidebarContent>
         <NavMain items={data.navMain} />
-        <NavProjects projects={data.projects} />
       </SidebarContent>
       <SidebarFooter>
         <NavUser />

@@ -15,8 +15,9 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form'
-import { calculateVatAmountCents, getVatRateForCountry } from '@/utils/vat'
+import { calculateVatAmountCents } from '@/utils/vat'
 import { CountryDropdown } from '@/components/ui/coutry-dropdown'
+import { Textarea } from '@/components/ui/textarea'
 
 interface VatDetailsFormProps {
   form: UseFormReturn<{
@@ -29,6 +30,8 @@ interface VatDetailsFormProps {
     }
     vatAmount: number
     totalAmount: number
+    saveForFuture: boolean
+    address: string
   }>
   amount: number
 }
@@ -58,7 +61,7 @@ export function VatDetailsForm({ form, amount }: VatDetailsFormProps) {
       return `VAT number belongs to ${vatResult.country.name}, not the selected country`
     }
 
-    return null // Valid
+    return null
   }
 
   // Update computed fields when form values change
@@ -75,7 +78,7 @@ export function VatDetailsForm({ form, amount }: VatDetailsFormProps) {
     form.setValue('totalAmount', totalAmount, { shouldValidate: false })
   }, [isBusiness, country, amount, form])
 
-  const vatRate = country ? getVatRateForCountry(country.alpha2) : 0
+  // const vatRate = country ? getVatRateForCountry(country.alpha2) : 0
   const vatValidationError =
     isBusiness && vatNumber && country
       ? validateVatNumber(vatNumber, country.alpha2)
@@ -83,7 +86,7 @@ export function VatDetailsForm({ form, amount }: VatDetailsFormProps) {
 
   return (
     <Card className="border-primary/20">
-      <CardContent className="pt-6">
+      <CardContent className="">
         <Form {...form}>
           <div className="space-y-6">
             <div className="flex items-center justify-between">
@@ -105,24 +108,6 @@ export function VatDetailsForm({ form, amount }: VatDetailsFormProps) {
                 )}
               />
             </div>
-
-            <FormField
-              control={form.control}
-              name="country"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Country</FormLabel>
-                  <FormControl>
-                    <CountryDropdown
-                      defaultValue={field.value?.alpha3 || ''}
-                      onChange={(value) => field.onChange(value)}
-                      modal={true}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
 
             {isBusiness && (
               <FormField
@@ -154,7 +139,43 @@ export function VatDetailsForm({ form, amount }: VatDetailsFormProps) {
               />
             )}
 
-            {country && (
+            <FormField
+              control={form.control}
+              name="country"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Country</FormLabel>
+                  <FormControl>
+                    <CountryDropdown
+                      defaultValue={field.value?.alpha3 || ''}
+                      onChange={(value) => field.onChange(value)}
+                      modal={true}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="address"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Address</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      id="address"
+                      placeholder="Enter your address"
+                      value={field.value}
+                      onChange={(e) => field.onChange(e.target.value)}
+                      rows={3}
+                    />
+                  </FormControl>
+                </FormItem>
+              )}
+            />
+
+            {/* {country && (
               <div className="bg-muted rounded-lg p-4">
                 <div className="space-y-2">
                   {!isBusiness && vatRate > 0 ? (
@@ -173,7 +194,24 @@ export function VatDetailsForm({ form, amount }: VatDetailsFormProps) {
                   )}
                 </div>
               </div>
-            )}
+            )} */}
+
+            <div className="flex items-center justify-between">
+              <Label htmlFor="save-future-toggle">
+                Save billing information for future purchases
+              </Label>
+              <FormField
+                control={form.control}
+                name="saveForFuture"
+                render={({ field }) => (
+                  <Switch
+                    id="save-future-toggle"
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                  />
+                )}
+              />
+            </div>
           </div>
         </Form>
       </CardContent>

@@ -61,7 +61,7 @@ export default async function TeamsIndexPage() {
       <PageHeader
         items={[
           {
-            href: '/dashboard/teams',
+            href: '/teams',
             label: 'Teams',
           },
         ]}
@@ -101,7 +101,7 @@ export default async function TeamsIndexPage() {
             </CardContent>
             <CardFooter className="flex justify-center pb-8">
               <Button asChild>
-                <Link href={'/dashboard/teams/create' as Route}>
+                <Link href={'/teams/create'}>
                   <PlusIcon className="mr-2 h-4 w-4" />
                   Create your first team
                 </Link>
@@ -111,10 +111,7 @@ export default async function TeamsIndexPage() {
         ) : (
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {teams.map((team) => (
-              <Link
-                key={team.id}
-                href={`/dashboard/teams/${team.slug}` as Route}
-              >
+              <Link key={team.id} href={`/teams/${team.slug}`}>
                 <Card className="hover:border-primary h-full transition-all hover:shadow-md">
                   <CardHeader className="flex flex-row items-start gap-4">
                     {team.avatarUrl ? (
@@ -150,7 +147,7 @@ export default async function TeamsIndexPage() {
               </Link>
             ))}
 
-            <Link href={'/dashboard/teams/create' as Route}>
+            <Link href={'/teams/create'}>
               <Card className="hover:border-primary h-full border-2 border-dashed transition-all">
                 <CardHeader className="pt-8 text-center">
                   <CardTitle className="text-xl">Create a new team</CardTitle>

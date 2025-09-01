@@ -91,7 +91,7 @@ export function NavUser() {
                 <Badge
                   variant="secondary"
                   className="w-fit text-[10px]"
-                  onClick={() => router.push('/dashboard/billing')}
+                  onClick={() => router.push('/billing')}
                 >
                   {user.currentCredits} credits
                 </Badge>
@@ -138,7 +138,7 @@ export function NavUser() {
               </DropdownMenuItem>
               <DropdownMenuItem
                 className="cursor-pointer"
-                onClick={() => router.push('/dashboard/billing')}
+                onClick={() => router.push('/billing')}
               >
                 <CreditCard />
                 Billing

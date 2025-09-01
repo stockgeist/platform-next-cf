@@ -7,7 +7,6 @@ export const SITE_URL =
   process.env.NODE_ENV === 'development'
     ? 'http://localhost:3000'
     : 'https://nlp.netgeist.ai'
-export const GITHUB_REPO_URL = 'https://github.com/stockgeist/platform-next-cf'
 
 export const SITE_DOMAIN = new URL(SITE_URL).hostname
 export const PASSWORD_RESET_TOKEN_EXPIRATION_SECONDS = 24 * 60 * 60 // 24 hours
@@ -20,11 +19,52 @@ export const GOOGLE_OAUTH_STATE_COOKIE_NAME = 'google-oauth-state'
 export const GOOGLE_OAUTH_CODE_VERIFIER_COOKIE_NAME =
   'google-oauth-code-verifier'
 
+export const TTS_CHARS_PER_MINUTE = 1000
+export const TTS_CREDITS_PER_CHAR = 0.5
+
 export const CREDIT_PACKAGES = [
-  { id: 'package-1', credits: 500, price: 500 },
-  { id: 'package-2', credits: 1200, price: 1000 },
-  { id: 'package-3', credits: 3000, price: 2000 },
+  {
+    id: 'starter',
+    credits: 10000,
+    price: 1000,
+    info: {
+      title: 'Starter Pack',
+      description: 'Best for new users.',
+      features: [
+        'Access to models featuring Speech to Text and Text to speech capabilities.',
+        'Best for new users.',
+      ],
+    },
+  },
+  {
+    id: 'pro',
+    credits: 25000,
+    price: 2000,
+    info: {
+      title: 'Pro Pack',
+      description: 'Best for users who need more credits.',
+      features: [
+        'Access to models featuring Speech to Text and Text to speech capabilities.',
+        'Best for users who need more credits.',
+      ],
+    },
+  },
+  {
+    id: 'enterprise',
+    credits: 100000,
+    price: 5000,
+    info: {
+      title: 'Enterprise Pack',
+      description: 'Best for users who need a lot of credits.',
+      features: [
+        'Access to models featuring Speech to Text and Text to speech capabilities.',
+        'Best for users who need a lot of credits.',
+      ],
+    },
+  },
 ] as const
+
+export const STT_CREDITS_PER_SECOND = 8.3
 
 export const CREDITS_EXPIRATION_YEARS = 2
 

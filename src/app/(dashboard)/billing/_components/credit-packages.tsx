@@ -1,25 +1,22 @@
 'use client'
 
-import { useState } from 'react'
+import { PricingCard } from '@/components/billing/pricing-card'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { CREDIT_PACKAGES, FREE_MONTHLY_CREDITS } from '@/constants'
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
-import { StripePaymentForm } from './stripe-payment-form'
-import { Coins, Sparkles, Zap } from 'lucide-react'
+import { Separator } from '@/components/ui/separator'
+import { Skeleton } from '@/components/ui/skeleton'
+import { CREDIT_PACKAGES, FREE_MONTHLY_CREDITS } from '@/constants'
 import { useSessionStore } from '@/state/session'
 import { useTransactionStore } from '@/state/transaction'
-import { Separator } from '@/components/ui/separator'
+import { Coins, Sparkles, Zap } from 'lucide-react'
 import { useRouter } from 'next/navigation'
-import { Badge } from '@/components/ui/badge'
-import { Skeleton } from '@/components/ui/skeleton'
-import { toast } from 'sonner'
-import { displayInCurency } from '@/utils/money'
+import { useState } from 'react'
+import { StripePaymentForm } from '@/components/billing/stripe-payment-form'
 type CreditPackage = (typeof CREDIT_PACKAGES)[number]
 
 export const getPackageIcon = (index: number) => {
@@ -101,62 +98,22 @@ export function CreditPackages() {
             </div>
 
             <div className="grid gap-4 xl:grid-cols-3">
-              {CREDIT_PACKAGES.map((pkg, index) => (
-                <Card
+              {CREDIT_PACKAGES.map((pkg) => (
+                <PricingCard
                   key={pkg.id}
-                  className="bg-muted dark:bg-background relative overflow-hidden transition-all hover:shadow-lg"
-                >
-                  <CardContent className="flex h-full flex-col gap-6 pt-4">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center space-x-2">
-                        {getPackageIcon(index)}
-                        <div>
-                          <div className="text-xl font-bold sm:text-2xl">
-                            {pkg.credits.toLocaleString()}
-                          </div>
-                          <div className="text-muted-foreground text-xs sm:text-sm">
-                            credits
-                          </div>
-                        </div>
-                      </div>
-                      <div className="flex flex-col items-end">
-                        <div className="text-primary text-xl font-bold sm:text-2xl">
-                          {displayInCurency(pkg.price, {
-                            minimumFractionDigits: 0,
-                          })}
-                        </div>
-                        <div className="text-muted-foreground text-xs sm:text-sm">
-                          one-time payment (Excl. VAT)
-                        </div>
-                        {index > 0 ? (
-                          <Badge
-                            variant="secondary"
-                            className="mt-1 bg-green-100 text-xs text-green-700 sm:text-sm dark:bg-green-900 dark:text-green-300"
-                          >
-                            Save {calculateSavings(pkg)}%
-                          </Badge>
-                        ) : (
-                          <div className="h-[22px] sm:h-[26px]" /> /* Placeholder for badge height */
-                        )}
-                      </div>
-                    </div>
-                    <div className="grow" />
-                    <Button
-                      onClick={() => {
-                        if (process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY) {
-                          handlePurchase(pkg)
-                        } else {
-                          toast.error(
-                            'Something went wrong with our payment provider. Please try again later.',
-                          )
-                        }
-                      }}
-                      className="w-full text-sm sm:text-base"
-                    >
-                      Purchase Now
-                    </Button>
-                  </CardContent>
-                </Card>
+                  features={pkg.info.features as unknown as string[]}
+                  title={pkg.info.title}
+                  credits={pkg.credits}
+                  price={pkg.price}
+                  onClick={() => handlePurchase(pkg)}
+                  isFreePlan={false}
+                  badge={
+                    pkg.price > CREDIT_PACKAGES[0].price
+                      ? `Save ${calculateSavings(pkg)}%`
+                      : undefined
+                  }
+                  isPopular={pkg.id === 'pro'}
+                />
               ))}
             </div>
           </div>
