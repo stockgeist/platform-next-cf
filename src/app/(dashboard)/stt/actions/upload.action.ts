@@ -7,7 +7,10 @@ import { requireVerifiedEmail } from '@/utils/auth'
 import { validateAudioFile } from '@/utils/r2'
 import { generatePresignedUploadUrl } from '@/lib/r2-client'
 import { withRateLimit } from '@/utils/with-rate-limit'
-import { createTranscriptionRecord, updateTranscriptionRecord } from '@/server/transcriptions'
+import {
+  createTranscriptionRecord,
+  updateTranscriptionRecord,
+} from '@/server/transcriptions'
 // Real STT API call function
 async function transcribeAudio(
   audioBlob: Blob,
@@ -162,7 +165,11 @@ export const queueForProcessingAction = createServerAction()
 
           try {
             // Call real STT API
-            const transcriptionText = await transcribeAudio(audioBlob, language, fileName)
+            const transcriptionText = await transcribeAudio(
+              audioBlob,
+              language,
+              fileName,
+            )
 
             // Update transcription record with success
             await updateTranscriptionRecord(transcriptionRecord.id, {
@@ -187,7 +194,10 @@ export const queueForProcessingAction = createServerAction()
             // Update transcription record with error
             await updateTranscriptionRecord(transcriptionRecord.id, {
               status: 'failed',
-              errorMessage: transcriptionError instanceof Error ? transcriptionError.message : 'Unknown error',
+              errorMessage:
+                transcriptionError instanceof Error
+                  ? transcriptionError.message
+                  : 'Unknown error',
               processedAt: new Date(),
             })
 
