@@ -64,6 +64,13 @@
       "when": 1756720532382,
       "tag": "0008_add_billing_info",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "6",
+      "when": 1757683095358,
+      "tag": "0009_transcriptions",
+      "breakpoints": true
     }
   ]
 }

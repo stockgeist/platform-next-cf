@@ -178,6 +178,41 @@ const SignUpPage = ({ redirectPath }: SignUpClientProps) => {
             onSubmit={form.handleSubmit(onSubmit)}
             className="mt-8 space-y-4"
           >
+            <div className="flex gap-4">
+              <FormField
+                control={form.control}
+                name="firstName"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <Input
+                        placeholder="First Name"
+                        className="w-full px-3 py-2"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="lastName"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <Input
+                        placeholder="Last Name"
+                        className="w-full px-3 py-2"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
             <FormField
               control={form.control}
               name="email"
@@ -187,40 +222,6 @@ const SignUpPage = ({ redirectPath }: SignUpClientProps) => {
                     <Input
                       type="email"
                       placeholder="Email address"
-                      className="w-full px-3 py-2"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="firstName"
-              render={({ field }) => (
-                <FormItem>
-                  <FormControl>
-                    <Input
-                      placeholder="First Name"
-                      className="w-full px-3 py-2"
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="lastName"
-              render={({ field }) => (
-                <FormItem>
-                  <FormControl>
-                    <Input
-                      placeholder="Last Name"
                       className="w-full px-3 py-2"
                       {...field}
                     />

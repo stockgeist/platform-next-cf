@@ -450,6 +450,43 @@ export const apiKeyTable = sqliteTable(
   ],
 )
 
+export const transcriptionTable = sqliteTable(
+  'transcription',
+  {
+    ...commonColumns,
+    id: text()
+      .primaryKey()
+      .$defaultFn(() => `tr_${createId()}`)
+      .notNull(),
+    userId: text()
+      .notNull()
+      .references(() => userTable.id, { onDelete: 'cascade' }),
+    teamId: text().references(() => teamTable.id, { onDelete: 'cascade' }),
+    r2Key: text().notNull(), // R2 object key for the audio file
+    fileName: text().notNull(), // Original filename
+    fileSize: integer().notNull(), // File size in bytes
+    language: text().notNull(), // Language code (en, es, etc.)
+    status: text({
+      enum: ['processing', 'completed', 'failed'],
+    })
+      .default('processing')
+      .notNull(),
+    transcriptionText: text(), // The transcribed text
+    errorMessage: text(), // Error message if failed
+    processedAt: integer({
+      mode: 'timestamp',
+    }), // When processing completed
+    metadata: text(), // JSON string for additional metadata
+  },
+  (table) => [
+    index('transcription_user_id_idx').on(table.userId),
+    index('transcription_team_id_idx').on(table.teamId),
+    index('transcription_r2_key_idx').on(table.r2Key),
+    index('transcription_status_idx').on(table.status),
+    index('transcription_created_at_idx').on(table.createdAt),
+  ],
+)
+
 export const teamRelations = relations(teamTable, ({ many }) => ({
   memberships: many(teamMembershipTable),
   invitations: many(teamInvitationTable),
@@ -563,6 +600,8 @@ export type TeamRole = InferSelectModel<typeof teamRoleTable>
 export type TeamInvitation = InferSelectModel<typeof teamInvitationTable>
 export type Invoice = InferSelectModel<typeof invoiceTable>
 export type NewInvoice = InferInsertModel<typeof invoiceTable>
+export type Transcription = InferSelectModel<typeof transcriptionTable>
+export type NewTranscription = InferInsertModel<typeof transcriptionTable>
 
 export const schema = {
   userTable,
@@ -570,6 +609,7 @@ export const schema = {
   creditTransactionTable,
   purchasedItemsTable,
   apiKeyTable,
+  transcriptionTable,
   teamTable,
   teamMembershipTable,
   teamRoleTable,

@@ -89,4 +89,25 @@
       "id": "58f3226251f04a35b9a8be783645ea9e",
     },
   ],
+  "r2_buckets": [
+    {
+      "binding": "R2_BUCKET",
+      "bucket_name": "nlp-platform-files",
+    },
+  ],
+  "queues": {
+    "producers": [
+      {
+        "binding": "AUDIO_UPLOADS_QUEUE",
+        "queue": "audio-uploads",
+      },
+    ],
+    "consumers": [
+      {
+        "queue": "audio-uploads",
+        "max_batch_size": 10,
+        "max_batch_timeout": 30,
+      },
+    ],
+  },
 }

@@ -7,7 +7,9 @@ import {
   BadgeDollarSign,
   Building2,
   CreditCard,
+  FileText,
   Key,
+  Mic,
   Settings2,
   ShoppingCart,
   SquareTerminal,
@@ -85,6 +87,16 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         url: '/dashboard',
         icon: SquareTerminal,
         isActive: true,
+      },
+      {
+        title: 'Speech-to-Text',
+        url: '/stt',
+        icon: Mic,
+      },
+      {
+        title: 'Transcriptions',
+        url: '/transcriptions',
+        icon: FileText,
       },
       {
         title: 'Teams',

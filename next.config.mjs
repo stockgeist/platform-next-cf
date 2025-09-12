@@ -9,6 +9,9 @@ initOpenNextCloudflareForDev()
 const nextConfig = {
   experimental: {
     typedRoutes: true,
+    serverActions: {
+      bodySizeLimit: '100mb',
+    },
   },
   eslint: {
     ignoreDuringBuilds: process.env.SKIP_LINTER === 'true',

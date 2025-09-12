@@ -16,8 +16,9 @@ import { useState } from 'react'
 import { EMAIL_VERIFICATION_TOKEN_EXPIRATION_SECONDS } from '@/constants'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import isProd from '@/utils/is-prod'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { Route } from 'next'
+import useSignOut from '@/hooks/useSignOut'
 
 const pagesToBypass: Route[] = [
   '/verify-email',
@@ -34,6 +35,8 @@ export function EmailVerificationDialog() {
   const { session } = useSessionStore()
   const [lastResendTime, setLastResendTime] = useState<number | null>(null)
   const pathname = usePathname()
+  const { signOut } = useSignOut()
+  const router = useRouter()
 
   const { execute: resendVerification, status } = useServerAction(
     resendVerificationAction,
@@ -105,6 +108,16 @@ export function EmailVerificationDialog() {
               : !canResend
                 ? 'Please wait 1 minute before resending'
                 : 'Resend verification email'}
+          </Button>
+          <Button
+            variant="outline"
+            onClick={() => {
+              signOut().then(() => {
+                router.push('/')
+              })
+            }}
+          >
+            Sign out
           </Button>
         </div>
       </DialogContent>

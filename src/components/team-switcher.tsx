@@ -102,7 +102,7 @@ export function TeamSwitcher({
             )}
             <DropdownMenuSeparator />
             <DropdownMenuItem className="cursor-pointer gap-2 p-2" asChild>
-              <Link href="/dashboard/teams/create">
+              <Link href="/teams/create">
                 <div className="bg-background flex size-6 items-center justify-center rounded-md border">
                   <Plus className="size-4" />
                 </div>
