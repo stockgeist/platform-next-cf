@@ -13,7 +13,7 @@ interface ErrorContainerProps {
 
 export function ErrorContainer({ error }: ErrorContainerProps) {
   return (
-    <Alert variant="destructive">
+    <Alert variant="destructive" className="w-max border-none">
       <AlertCircle className="h-4 w-4" />
       <AlertDescription>{error.message}</AlertDescription>
     </Alert>

@@ -2,10 +2,7 @@
 @import "tw-animate-css";
 @import "tailwindcss-radix-colors/dist/teal.css";
 
-
-
 @custom-variant dark (&:is(.dark *));
-
 
 @theme {
   --color-background: 0 0% 100%;

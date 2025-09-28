@@ -8,8 +8,8 @@ import { toast } from 'sonner'
 import { Copy, Download, Pause, Play, X } from 'lucide-react'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import {
-  ErrorContainer,
   type ErrorState,
+  ErrorContainer,
 } from '@/components/stt/error-container'
 import { ProcessingState } from '@/components/stt/processing-state'
 import { LiveAudioVisualizer } from '@/components/live-audio-visualizer'
@@ -17,6 +17,7 @@ import { CustomSelect } from '@/components/stt/custom-select'
 import { useMediaQuery } from '@/hooks/useMediaQuery'
 import { useServerAction } from 'zsa-react'
 import { uploadAndTranscribeDirectAction } from '../actions/upload-direct.action'
+import toWav from 'audiobuffer-to-wav'
 
 const RECORDING_TIME_LIMIT = 60 * 60 // in seconds
 const FILE_SIZE_LIMIT = 100 * 1024 * 1024 // 100MB
@@ -46,7 +47,7 @@ const config = {
 }
 
 export function STTDirectClient() {
-  const [appState, setAppState] = useState<AppState>('idle')
+  const [appState, setAppState] = useState<AppState>('processing')
   const [error, setError] = useState<STTErrorState | null>(null)
   const [transcription, setTranscription] = useState<string | null>(null)
   const [timeRecorded, setTimeRecorded] = useState(0)
@@ -56,7 +57,6 @@ export function STTDirectClient() {
   const [selectedLanguage, setSelectedLanguage] = useState<string>(
     config.defaultSettings?.defaultLanguage || 'en',
   )
-  const [uploadedFiles, setUploadedFiles] = useState<File[]>([])
 
   const audioChunks = useRef<Blob[]>([])
   const timerRef = useRef<NodeJS.Timeout | null>(null)
@@ -76,11 +76,11 @@ export function STTDirectClient() {
       },
       onError: (error) => {
         const errorMessage = error.err?.message || 'Failed to process audio'
-        setError({
-          type: 'transcribe',
-          message: errorMessage,
-        })
         setAppState('error')
+        setError({
+          message: errorMessage,
+          type: 'transcribe',
+        })
         toast.error('Processing Failed', {
           description: errorMessage,
         })
@@ -113,6 +113,11 @@ export function STTDirectClient() {
       } catch (err) {
         // Error handling is done in the useServerAction onError callback
         console.error('Upload/transcription error:', err)
+        setAppState('error')
+        setError({
+          message: 'Failed to process audio',
+          type: 'transcribe',
+        })
       }
     },
     [uploadAndTranscribe, selectedLanguage],
@@ -126,7 +131,6 @@ export function STTDirectClient() {
 
     setError(null)
     setTranscription(null)
-    setUploadedFiles([file])
 
     const isValidAudioType =
       file.type === 'audio/wav' ||
@@ -134,17 +138,14 @@ export function STTDirectClient() {
       file.name.toLowerCase().endsWith('.wav')
 
     if (!isValidAudioType) {
-      setError({ type: 'upload', message: 'Please upload a WAV audio file' })
-      setUploadedFiles([])
+      toast.error('Please upload a WAV audio file')
       return
     }
 
     if (file.size > FILE_SIZE_LIMIT) {
-      setError({
-        type: 'upload',
-        message: `File is too large. Maximum size is ${FILE_SIZE_LIMIT / 1024 / 1024}MB.`,
-      })
-      setUploadedFiles([])
+      toast.error(
+        `File is too large. Maximum size is ${FILE_SIZE_LIMIT / 1024 / 1024}MB.`,
+      )
       return
     }
 
@@ -164,7 +165,7 @@ export function STTDirectClient() {
       )
 
       if (!hasAudioDevice) {
-        setError({ type: 'microphone', message: 'No microphone device found' })
+        toast.error('No microphone device found')
         return false
       }
 
@@ -172,19 +173,15 @@ export function STTDirectClient() {
         name: 'microphone' as PermissionName,
       })
       if (permission.state === 'denied') {
-        setError({
-          type: 'microphone',
-          message: 'Microphone access denied, please enable it in your browser',
-        })
+        toast.error(
+          'Microphone access denied, please enable it in your browser',
+        )
         return false
       }
 
       return true
     } catch {
-      setError({
-        type: 'microphone',
-        message: 'Unable to check microphone permissions',
-      })
+      toast.error('Unable to check microphone permissions')
       return false
     }
   }
@@ -225,8 +222,12 @@ export function STTDirectClient() {
         }
       }
 
-      setError({ type: 'microphone', message: errorMessage })
+      toast.error(errorMessage)
       setAppState('error')
+      setError({
+        message: errorMessage,
+        type: 'microphone',
+      })
     }
   }, [])
 
@@ -239,13 +240,17 @@ export function STTDirectClient() {
         ) {
           const originalOnStop = mediaRecorder.onstop
 
-          mediaRecorder.onstop = () => {
+          mediaRecorder.onstop = async () => {
             const audioBlob = new Blob(audioChunks.current, {
-              type: 'audio/wav',
+              type: mediaRecorder.mimeType,
             })
-
+            const audioContext = new window.AudioContext()
+            const arrayBuffer = await audioBlob.arrayBuffer()
+            const audioBuffer = await audioContext.decodeAudioData(arrayBuffer)
+            const wavArrayBuffer = toWav(audioBuffer)
+            const wavBlob = new Blob([wavArrayBuffer], { type: 'audio/wav' })
             // Create audio URL for preview
-            const url = URL.createObjectURL(audioBlob)
+            const url = URL.createObjectURL(wavBlob)
             setAudioUrl(url)
 
             audioChunks.current = []
@@ -262,8 +267,8 @@ export function STTDirectClient() {
               setTimeout(() => {
                 // TODO: maybe better naming?
                 const fileName = `recording-${Date.now()}.wav`
-                const audioFile = new File([audioBlob], fileName, {
-                  type: audioBlob.type || 'audio/wav',
+                const audioFile = new File([wavBlob], fileName, {
+                  type: wavBlob.type || 'audio/wav',
                 })
                 sendAudioForTranscription(audioFile)
               }, 100)
@@ -375,7 +380,6 @@ export function STTDirectClient() {
     setTranscription(null)
     setError(null)
     setAudioUrl(null)
-    setUploadedFiles([])
     setAppState('idle')
   }
 
@@ -383,7 +387,7 @@ export function STTDirectClient() {
     <div className="flex gap-4">
       <div className="w-full space-y-6">
         {/* Processing State */}
-        {isProcessing && (
+        {appState === 'processing' && (
           <ProcessingState
             message="Uploading and processing your audio..."
             onCancel={handleAbortClick}
@@ -395,82 +399,67 @@ export function STTDirectClient() {
         {appState === 'idle' && (
           <div>
             <STTDropzone
-              uploadedFiles={uploadedFiles}
               onFilesDropAction={handleFilesDrop}
               onRecordClickAction={startRecording}
               onErrorAction={(error) => {
-                setError({ type: 'upload', message: error.message })
+                toast.error(error.message)
               }}
               fileSizeLimit={FILE_SIZE_LIMIT}
             />
-
-            {error &&
-              (error.type === 'upload' || error.type === 'microphone') && (
-                <ErrorContainer error={error} />
-              )}
           </div>
         )}
 
         {/* Recording Controls */}
         {(appState === 'recording' || appState === 'paused') && (
-          <Card>
-            <CardContent className="pt-6">
-              <div className="space-y-4">
-                {mediaRecorder && (
-                  <LiveAudioVisualizer
-                    mediaRecorder={mediaRecorder}
-                    width={isMobile ? 320 : 450}
-                    barWidth={2}
-                    gap={1}
-                    backgroundColor="transparent"
-                    barColor="#037171"
-                  />
+          <div className="flex flex-col items-center space-y-4">
+            {mediaRecorder && (
+              <LiveAudioVisualizer
+                mediaRecorder={mediaRecorder}
+                width={isMobile ? 320 : 450}
+                barWidth={2}
+                gap={1}
+                backgroundColor="transparent"
+                barColor="#037171"
+              />
+            )}
+
+            <div className="flex items-center justify-center gap-4">
+              <span className="text-xl">{formatTime(timeRecorded)}</span>
+              <Button
+                variant="outline"
+                onClick={togglePause}
+                className="flex items-center gap-2"
+              >
+                {appState === 'paused' ? (
+                  <>
+                    <Play className="h-4 w-4" />
+                    Continue
+                  </>
+                ) : (
+                  <>
+                    <Pause className="h-4 w-4" />
+                    Pause
+                  </>
                 )}
-
-                <div className="flex items-center justify-center gap-4">
-                  <span className="font-mono text-2xl">
-                    {formatTime(timeRecorded)}
-                  </span>
-                  <Button
-                    variant="outline"
-                    onClick={togglePause}
-                    className="flex items-center gap-2"
-                  >
-                    {appState === 'paused' ? (
-                      <>
-                        <Play className="h-4 w-4" />
-                        Continue
-                      </>
-                    ) : (
-                      <>
-                        <Pause className="h-4 w-4" />
-                        Pause
-                      </>
-                    )}
-                  </Button>
-                  <Button onClick={handleStopAndTranscribe}>Transcribe</Button>
-                  <Button variant="outline" onClick={handleAbortClick}>
-                    <X className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+              </Button>
+              <Button onClick={handleStopAndTranscribe}>Transcribe</Button>
+              <Button variant="outline" onClick={handleAbortClick}>
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
         )}
 
-        {/* Transcribe Error */}
-        {error && error.type === 'transcribe' && (
-          <Card>
-            <CardContent className="pt-6">
-              <div className="space-y-4 text-center">
-                <ErrorContainer error={error} />
-                <Button variant="outline" onClick={handleAbortClick}>
-                  Try Again
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        )}
+        {/* Error Display */}
+        {error &&
+          (error.type === 'transcribe' || error.type === 'microphone') && (
+            <div className="flex flex-col items-center justify-center space-y-4">
+              <ErrorContainer error={error} />
+              <Button variant="outline" onClick={handleAbortClick}>
+                Try Again
+              </Button>
+            </div>
+          )}
 
         {/* Transcription Result */}
         {transcription && appState !== 'processing' && !isProcessing && (

@@ -1,8 +1,8 @@
 'use client'
 
 import { Button } from '@/components/ui/button'
-import { Card, CardContent } from '@/components/ui/card'
-import { Loader2, X } from 'lucide-react'
+
+import { LoadingSpinner } from '@/components/ui/LoadingSpinner'
 
 interface ProcessingStateProps {
   message: string
@@ -16,17 +16,12 @@ export function ProcessingState({
   cancelText,
 }: ProcessingStateProps) {
   return (
-    <Card className="w-full">
-      <CardContent className="flex flex-col items-center justify-center gap-4 p-8">
-        <div className="flex items-center gap-2">
-          <Loader2 className="h-6 w-6 animate-spin" />
-          <span className="text-lg font-medium">{message}</span>
-        </div>
-        <Button variant="outline" onClick={onCancel} size="sm">
-          <X className="mr-2 h-4 w-4" />
-          {cancelText}
-        </Button>
-      </CardContent>
-    </Card>
+    <div className="flex w-full flex-col items-center justify-center gap-8 p-8">
+      <span className="text-muted-foreground">{message}</span>
+      <LoadingSpinner size={110} />
+      <Button variant="outline" onClick={onCancel} size="sm">
+        {cancelText}
+      </Button>
+    </div>
   )
 }

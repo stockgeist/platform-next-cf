@@ -1,16 +1,20 @@
 'use client'
 
-import { Button } from '@/components/ui/button'
+import { Button, buttonVariants } from '@/components/ui/button'
 import {
   Dropzone,
-  DropzoneContent,
-  DropzoneEmptyState,
+  DropzoneDescription,
+  DropzoneGroup,
+  DropzoneInput,
+  DropzoneTrigger,
+  DropzoneUploadIcon,
+  DropzoneZone,
 } from '@/components/ui/dropzone'
-import { FolderOpen, MicIcon, Upload } from 'lucide-react'
-import React, { useRef } from 'react'
+import { FolderIcon, MicIcon } from 'lucide-react'
+import React from 'react'
+import type { FileRejection } from 'react-dropzone'
 
 interface STTDropzoneProps {
-  uploadedFiles: File[]
   onFilesDropAction: (files: File[]) => void
   onRecordClickAction: () => void
   onErrorAction: (error: Error) => void
@@ -19,120 +23,73 @@ interface STTDropzoneProps {
 }
 
 export function STTDropzone({
-  uploadedFiles,
   onFilesDropAction,
   onRecordClickAction,
   onErrorAction,
   fileSizeLimit,
   disabled = false,
 }: STTDropzoneProps) {
-  const fileInputRef = useRef<HTMLInputElement>(null)
+  const handleDropAccepted = (acceptedFiles: File[]) => {
+    onFilesDropAction(acceptedFiles)
+  }
 
-  const handleFileInputChange = (
-    event: React.ChangeEvent<HTMLInputElement>,
-  ) => {
-    const files = event.target.files
-    if (files) {
-      onFilesDropAction(Array.from(files))
+  const handleDropRejected = (fileRejections: FileRejection[]) => {
+    if (fileRejections.length > 0) {
+      const error = fileRejections[0].errors[0]
+      onErrorAction(new Error(error.message))
     }
   }
 
   return (
     <div>
       <Dropzone
-        accept={{ 'audio/wav': ['.wav'], 'audio/x-wav': ['.wav'] }}
-        maxFiles={1}
+        accept={{
+          'audio/wav': ['.wav'],
+          'audio/x-wav': ['.wav'],
+        }}
         maxSize={fileSizeLimit}
-        onDrop={onFilesDropAction}
-        onError={onErrorAction}
-        src={uploadedFiles}
-        className="text-center"
+        maxFiles={1}
+        onDropAccepted={handleDropAccepted}
+        onDropRejected={handleDropRejected}
         disabled={disabled}
       >
-        <DropzoneEmptyState>
-          <div className="flex flex-col items-center justify-center">
-            <Upload className="mx-auto mb-4 h-12 w-12 text-gray-400" />
-            <p className="mb-2 text-lg font-medium">
-              Drag and drop your audio file here
-            </p>
-            <p className="mb-4 text-sm text-gray-500">or</p>
-            <div className="flex justify-center gap-4">
-              <Button
-                onClick={(e) => {
-                  e.stopPropagation()
-                  fileInputRef.current?.click()
-                }}
-                variant="outline"
-                className="flex items-center gap-2"
-                disabled={disabled}
-              >
-                <FolderOpen className="h-4 w-4" />
-                Choose File
-              </Button>
-              <Button
-                onClick={(e) => {
-                  e.stopPropagation()
-                  onRecordClickAction()
-                }}
-                className="flex items-center gap-2"
-                disabled={disabled}
-              >
-                <MicIcon className="h-4 w-4" />
-                Record Audio
-              </Button>
+        <DropzoneZone className="min-h-[200px] p-8">
+          <DropzoneInput />
+          <DropzoneGroup className="gap-4">
+            <div className="flex items-center gap-2">
+              <DropzoneUploadIcon />
+              <p className="text-foreground text-sm">
+                Drag and drop your audio file here
+              </p>
             </div>
-            <p className="mt-4 text-xs text-gray-500">
+            <DropzoneGroup>
+              <p className="text-muted-foreground text-sm">or</p>
+            </DropzoneGroup>
+          </DropzoneGroup>
+          <div className="mt-6 flex justify-center gap-4">
+            <DropzoneTrigger className={buttonVariants()}>
+              <FolderIcon />
+              Choose File
+            </DropzoneTrigger>
+            <Button
+              onClick={(e) => {
+                e.stopPropagation()
+                onRecordClickAction()
+              }}
+              disabled={disabled}
+            >
+              <MicIcon />
+              Record
+            </Button>
+          </div>
+          <div className="mt-4 text-center">
+            <DropzoneDescription>
               Compatible formats: WAV • File size: up to{' '}
               {fileSizeLimit / 1024 / 1024}MB
-            </p>
-            <p className="mt-2 text-xs text-blue-600">
-              This uploads directly to the server and saves to R2
-            </p>
+            </DropzoneDescription>
           </div>
-        </DropzoneEmptyState>
-        <DropzoneContent>
-          <div className="flex flex-col items-center justify-center">
-            <p className="mb-4 text-sm text-gray-500">or</p>
-            <div className="flex justify-center gap-4">
-              <Button
-                onClick={(e) => {
-                  e.stopPropagation()
-                  fileInputRef.current?.click()
-                }}
-                variant="outline"
-                className="flex items-center gap-2"
-                disabled={disabled}
-              >
-                <FolderOpen className="h-4 w-4" />
-                Choose File
-              </Button>
-              <Button
-                onClick={(e) => {
-                  e.stopPropagation()
-                  onRecordClickAction()
-                }}
-                className="flex items-center gap-2"
-                disabled={disabled}
-              >
-                <MicIcon className="h-4 w-4" />
-                Record Audio
-              </Button>
-            </div>
-            <p className="mt-4 text-xs text-gray-500">
-              Drag and drop or click to replace
-            </p>
-          </div>
-        </DropzoneContent>
+        </DropzoneZone>
       </Dropzone>
-
-      <input
-        ref={fileInputRef}
-        type="file"
-        accept="audio/wav,audio/x-wav"
-        onChange={handleFileInputChange}
-        className="hidden"
-        disabled={disabled}
-      />
     </div>
   )
 }

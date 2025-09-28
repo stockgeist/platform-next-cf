@@ -61,7 +61,6 @@ export const uploadAndTranscribeDirectAction = createServerAction()
     return withRateLimit(
       async () => {
         const { audioFile, language } = input
-
         // Get user session
         const session = await requireVerifiedEmail()
         const userId = session?.user?.id
