@@ -16,6 +16,8 @@ import {
   useParams,
 } from 'next/navigation'
 import { useEventListener, useDebounceCallback } from 'usehooks-ts'
+import { ProgressProvider as NextProgressProvider } from '@bprogress/next/app'
+import { AudioPlayerProvider as ReactUseAudioPlayerProvider } from 'react-use-audio-player'
 
 function RouterChecker() {
   const { start, done } = useTopLoader()
@@ -127,4 +129,27 @@ export function ThemeProvider({
       <EmailVerificationDialog />
     </NextThemesProvider>
   )
+}
+
+export function ProgressProvider({
+  children,
+  ...props
+}: React.ComponentProps<typeof NextProgressProvider>) {
+  return (
+    <NextProgressProvider
+      height="5px"
+      color="var(--primary)"
+      options={{ showSpinner: false }}
+      shallowRouting
+      {...props}
+    >
+      {children}
+    </NextProgressProvider>
+  )
+}
+
+export function AudioPlayerProvider({
+  children,
+}: React.ComponentProps<typeof ReactUseAudioPlayerProvider>) {
+  return <ReactUseAudioPlayerProvider>{children}</ReactUseAudioPlayerProvider>
 }

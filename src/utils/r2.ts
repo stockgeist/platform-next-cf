@@ -28,10 +28,11 @@ export interface R2UploadOptions {
 }
 
 /**
- * Upload a file to R2 storage
+ * Upload a file to R2 storage with user-scoped key
  */
-export async function uploadToR2(
+export async function uploadUserScopedToR2(
   file: File | Blob,
+  userId: string,
   options: R2UploadOptions = {},
 ): Promise<R2UploadResult> {
   const { env } = getCloudflareContext()
@@ -42,12 +43,11 @@ export async function uploadToR2(
 
   const { contentType, customMetadata } = options
 
-  // Generate a unique key for the file
+  // Generate a unique key for the file with user scoping
   const fileId = generateId()
-  const timestamp = Date.now()
   const fileName = file instanceof File ? file.name : 'file'
   const extension = getFileExtension(fileName)
-  const key = `stt/${timestamp}-${fileId}${extension}`
+  const key = `${userId}/${fileId}${extension}`
 
   // Prepare upload options
   const uploadOptions: R2PutOptions = {
@@ -57,6 +57,7 @@ export async function uploadToR2(
     customMetadata: {
       uploadedAt: new Date().toISOString(),
       originalName: fileName,
+      userId,
       ...customMetadata,
     },
   }
@@ -77,12 +78,9 @@ export async function uploadToR2(
       throw new Error('Failed to upload file to R2')
     }
 
-    // Generate a public URL (you might want to use signed URLs in production)
-    const url = `https://pub-nlp-platform-files.r2.dev/${key}`
-
     return {
       key,
-      url,
+      url: `/api/files/${key}`,
       size: result.size,
       etag: result.etag,
     }
@@ -194,13 +192,13 @@ export function validateAudioFile(file: File): {
 }
 
 /**
- * Generate a presigned URL for direct client upload to R2
+ * Generate a presigned URL for direct client upload to R2 with user-scoped key
  */
 export async function generatePresignedUploadUrl(
   fileName: string,
   contentType: string,
-  language: string,
-  userId?: string,
+  userId: string,
+  language?: string,
 ): Promise<PresignedUploadResult> {
   const { env } = getCloudflareContext()
 
@@ -208,11 +206,10 @@ export async function generatePresignedUploadUrl(
     throw new Error('R2 bucket not configured')
   }
 
-  // Generate a unique key for the file
+  // Generate a unique key for the file with user scoping
   const fileId = generateId()
-  const timestamp = Date.now()
   const extension = getFileExtension(fileName)
-  const key = `stt/${timestamp}-${fileId}${extension}`
+  const key = `${userId}/${fileId}${extension}`
 
   try {
     // Generate presigned URL using AWS SDK
@@ -315,4 +312,64 @@ export async function getTranscriptionResult(key: string): Promise<{
   }
 
   return JSON.parse(resultStr)
+}
+
+/**
+ * Generate a signed URL for secure file access
+ */
+export async function generateSignedDownloadUrl(
+  key: string,
+  expiresIn: number = 3600, // 1 hour default
+): Promise<string> {
+  const { env } = getCloudflareContext()
+
+  if (!env?.R2_BUCKET) {
+    throw new Error('R2 bucket not configured')
+  }
+
+  try {
+    // Use the S3 client to generate a presigned URL
+    const { generatePresignedDownloadUrl } = await import('@/lib/r2-client')
+    return await generatePresignedDownloadUrl(key, expiresIn)
+  } catch (error) {
+    console.error('R2 signed URL error:', error)
+    throw new Error('Failed to generate signed URL')
+  }
+}
+
+/**
+ * Stream a file from R2 with proper headers
+ */
+export async function streamFileFromR2(key: string): Promise<{
+  body: ReadableStream
+  contentType: string
+  contentLength: number
+  lastModified?: Date
+  originalFilename?: string
+}> {
+  const { env } = getCloudflareContext()
+
+  if (!env?.R2_BUCKET) {
+    throw new Error('R2 bucket not configured')
+  }
+
+  try {
+    const object = await env.R2_BUCKET.get(key)
+
+    if (!object) {
+      throw new Error('File not found')
+    }
+
+    return {
+      body: object.body,
+      contentType:
+        object.httpMetadata?.contentType || 'application/octet-stream',
+      contentLength: object.size,
+      lastModified: object.uploaded,
+      originalFilename: object.customMetadata?.originalName,
+    }
+  } catch (error) {
+    console.error('R2 stream error:', error)
+    throw new Error('Failed to stream file from R2 storage')
+  }
 }

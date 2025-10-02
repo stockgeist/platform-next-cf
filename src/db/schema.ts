@@ -462,7 +462,7 @@ export const transcriptionTable = sqliteTable(
       .notNull()
       .references(() => userTable.id, { onDelete: 'cascade' }),
     teamId: text().references(() => teamTable.id, { onDelete: 'cascade' }),
-    r2Key: text().notNull(), // R2 object key for the audio file
+    r2Key: text().notNull(), // R2 object key for the audio file (user-scoped)
     fileName: text().notNull(), // Original filename
     fileSize: integer().notNull(), // File size in bytes
     language: text().notNull(), // Language code (en, es, etc.)
@@ -558,11 +558,26 @@ export const purchasedItemsRelations = relations(
   }),
 )
 
+export const transcriptionRelations = relations(
+  transcriptionTable,
+  ({ one }) => ({
+    user: one(userTable, {
+      fields: [transcriptionTable.userId],
+      references: [userTable.id],
+    }),
+    team: one(teamTable, {
+      fields: [transcriptionTable.teamId],
+      references: [teamTable.id],
+    }),
+  }),
+)
+
 export const userRelations = relations(userTable, ({ many }) => ({
   passkeys: many(passKeyCredentialTable),
   creditTransactions: many(creditTransactionTable),
   purchasedItems: many(purchasedItemsTable),
   apiKeys: many(apiKeyTable),
+  transcriptions: many(transcriptionTable),
   teamMemberships: many(teamMembershipTable, {
     relationName: 'teamMembershipUser',
   }),

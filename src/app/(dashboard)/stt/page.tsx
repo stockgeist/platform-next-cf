@@ -1,12 +1,13 @@
 import { Suspense } from 'react'
 import { getSessionFromCookie } from '@/utils/auth'
 import { redirect } from 'next/navigation'
-import { STTDirectClient } from './_components/stt-direct.client'
+import { STTDirectClient } from './_components/stt.client'
 import { getUserTranscriptions } from '@/server/transcriptions'
 import { TranscriptionList } from '@/components/transcriptions/transcription-list'
 import { Card, CardContent } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { PageHeader } from '@/components/page-header'
+import { Playbar } from '@/components/audio'
 
 function TranscriptionListSkeleton() {
   return (
@@ -42,7 +43,7 @@ export default async function STTPage() {
   const session = await getSessionFromCookie()
 
   if (!session) {
-    redirect('/auth/login')
+    redirect('/login')
   }
 
   return (
@@ -55,29 +56,26 @@ export default async function STTPage() {
           },
         ]}
       />
-      <div className="px-4 pt-4 pb-8">
-        <div className="mb-8">
-          <p className="text-muted-foreground">
-            Convert your audio files to text with AI-powered transcription.
-          </p>
-        </div>
-
-        <div className="mb-8">
-          <STTDirectClient />
-        </div>
-
-        <div className="space-y-6">
-          <div>
-            <h2 className="text-2xl font-semibold">Recent Transcriptions</h2>
-            <p className="text-muted-foreground">
-              View and manage your recent speech-to-text transcriptions.
-            </p>
+      <div className="flex flex-col">
+        <div className="px-4 pt-4 pb-8">
+          <div className="mb-8">
+            <STTDirectClient />
           </div>
 
-          <Suspense fallback={<TranscriptionListSkeleton />}>
-            <TranscriptionListWrapper />
-          </Suspense>
+          <div className="space-y-6">
+            <div>
+              <h2 className="text-2xl font-semibold">Recent Transcriptions</h2>
+              <p className="text-muted-foreground">
+                View and manage your recent speech-to-text transcriptions.
+              </p>
+            </div>
+
+            <Suspense fallback={<TranscriptionListSkeleton />}>
+              <TranscriptionListWrapper />
+            </Suspense>
+          </div>
         </div>
+        <Playbar />
       </div>
     </>
   )

@@ -41,55 +41,58 @@ export function STTDropzone({
   }
 
   return (
-    <div>
-      <Dropzone
-        accept={{
-          'audio/wav': ['.wav'],
-          'audio/x-wav': ['.wav'],
-        }}
-        maxSize={fileSizeLimit}
-        maxFiles={1}
-        onDropAccepted={handleDropAccepted}
-        onDropRejected={handleDropRejected}
-        disabled={disabled}
-      >
-        <DropzoneZone className="min-h-[200px] p-8">
-          <DropzoneInput />
-          <DropzoneGroup className="gap-4">
-            <div className="flex items-center gap-2">
-              <DropzoneUploadIcon />
-              <p className="text-foreground text-sm">
-                Drag and drop your audio file here
-              </p>
-            </div>
-            <DropzoneGroup>
-              <p className="text-muted-foreground text-sm">or</p>
-            </DropzoneGroup>
+    <Dropzone
+      accept={{
+        'audio/wav': ['.wav'],
+        'audio/x-wav': ['.wav'],
+      }}
+      maxSize={fileSizeLimit}
+      maxFiles={1}
+      onDropAccepted={handleDropAccepted}
+      onDropRejected={handleDropRejected}
+      disabled={disabled}
+    >
+      <DropzoneZone className="w-full p-8">
+        <DropzoneInput />
+        <DropzoneGroup className="gap-4">
+          <div className="flex items-center gap-2">
+            <DropzoneUploadIcon />
+            <p className="text-foreground text-sm">
+              Drag and drop your audio file here
+            </p>
+          </div>
+          <DropzoneGroup>
+            <p className="text-muted-foreground text-sm">or</p>
           </DropzoneGroup>
-          <div className="mt-6 flex justify-center gap-4">
-            <DropzoneTrigger className={buttonVariants()}>
-              <FolderIcon />
-              Choose File
-            </DropzoneTrigger>
-            <Button
-              onClick={(e) => {
-                e.stopPropagation()
-                onRecordClickAction()
-              }}
-              disabled={disabled}
-            >
-              <MicIcon />
-              Record
-            </Button>
-          </div>
-          <div className="mt-4 text-center">
-            <DropzoneDescription>
-              Compatible formats: WAV • File size: up to{' '}
-              {fileSizeLimit / 1024 / 1024}MB
-            </DropzoneDescription>
-          </div>
-        </DropzoneZone>
-      </Dropzone>
-    </div>
+        </DropzoneGroup>
+        <div className="mt-6 flex justify-center gap-4">
+          <DropzoneTrigger
+            className={buttonVariants()}
+            onClick={(e) => {
+              e.stopPropagation()
+            }}
+          >
+            <FolderIcon />
+            Choose File
+          </DropzoneTrigger>
+          <Button
+            onClick={(e) => {
+              e.stopPropagation()
+              onRecordClickAction()
+            }}
+            disabled={disabled}
+          >
+            <MicIcon />
+            Record
+          </Button>
+        </div>
+        <div className="mt-4 text-center">
+          <DropzoneDescription>
+            Compatible formats: WAV • File size: up to{' '}
+            {fileSizeLimit / 1024 / 1024}MB
+          </DropzoneDescription>
+        </div>
+      </DropzoneZone>
+    </Dropzone>
   )
 }

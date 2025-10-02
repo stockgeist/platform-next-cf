@@ -1,42 +1,27 @@
 'use client'
 
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Label } from '@/components/ui/label'
+import { Card, CardContent } from '@/components/ui/card'
+import { STTDropzone } from '@/components/stt/stt-dropzone'
 import { toast } from 'sonner'
-import {
-  Copy,
-  Download,
-  Pause,
-  Play,
-  Upload,
-  X,
-  FolderOpen,
-  MicIcon,
-} from 'lucide-react'
+import { ChevronLeft, Copy, Download, Pause, Play } from 'lucide-react'
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import {
-  ErrorContainer,
   type ErrorState,
+  ErrorContainer,
 } from '@/components/stt/error-container'
 import { ProcessingState } from '@/components/stt/processing-state'
 import { LiveAudioVisualizer } from '@/components/live-audio-visualizer'
 import { CustomSelect } from '@/components/stt/custom-select'
 import { useMediaQuery } from '@/hooks/useMediaQuery'
 import { useServerAction } from 'zsa-react'
-import {
-  getPresignedUploadUrlAction,
-  queueForProcessingAction,
-} from '../actions/upload.action'
+import { uploadAndTranscribeDirectAction } from '../actions/upload-direct.action'
+import toWav from 'audiobuffer-to-wav'
+import { useAudioStore } from '@/state/audio'
+import { useAudioPlayerContext } from 'react-use-audio-player'
 
 const RECORDING_TIME_LIMIT = 60 * 60 // in seconds
 const FILE_SIZE_LIMIT = 100 * 1024 * 1024 // 100MB
-const config = {
-  defaultSettings: {
-    defaultLanguage: 'lt',
-    supportedLanguages: ['lt'],
-  },
-}
 
 const formatTime = (seconds: number): string => {
   const mins = Math.floor(seconds / 60)
@@ -55,19 +40,18 @@ type AppState =
   | 'transcribed'
   | 'error'
 
-export function STTClient() {
+const config = {
+  defaultSettings: {
+    defaultLanguage: 'lt',
+    supportedLanguages: ['lt'],
+  },
+}
+
+export function STTDirectClient() {
   const [appState, setAppState] = useState<AppState>('idle')
   const [error, setError] = useState<STTErrorState | null>(null)
   const [transcription, setTranscription] = useState<string | null>(null)
   const [timeRecorded, setTimeRecorded] = useState(0)
-  const [pendingAudio, setPendingAudio] = useState<{
-    blob: Blob
-    source: 'record' | 'upload'
-    name?: string
-    r2Key?: string
-    r2Url?: string
-  } | null>(null)
-  const [audioUrl, setAudioUrl] = useState<string | null>(null)
   const [mediaStream, setMediaStream] = useState<MediaStream | null>(null)
   const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null)
   const [selectedLanguage, setSelectedLanguage] = useState<string>(
@@ -76,68 +60,32 @@ export function STTClient() {
 
   const audioChunks = useRef<Blob[]>([])
   const timerRef = useRef<NodeJS.Timeout | null>(null)
-  const audioRef = useRef<HTMLAudioElement>(null)
-  const fileInputRef = useRef<HTMLInputElement>(null)
   const isMobile = useMediaQuery('MOBILE')
+  const { setCurrentAudio, currentAudio } = useAudioStore()
 
-  const { execute: getPresignedUrl, isPending: isGettingUrl } = useServerAction(
-    getPresignedUploadUrlAction,
-    {
-      onSuccess: (result) => {
+  const { load } = useAudioPlayerContext()
+
+  const { execute: uploadAndTranscribe, isPending: isProcessing } =
+    useServerAction(uploadAndTranscribeDirectAction, {
+      onSuccess: async (result) => {
         if (result.data?.success && result.data.data) {
-          // Store the presigned URL data for client-side upload
-          setPendingAudio((prev) => {
-            if (!prev) return null
-            return {
-              ...prev,
-              r2Key: result.data.data.key,
-              r2Url: result.data.data.uploadUrl,
-            }
-          })
-
-          // Trigger client-side upload
-          uploadToR2Client(result.data.data, pendingAudio?.blob)
-        }
-      },
-      onError: (error) => {
-        const errorMessage = error.err?.message || 'Failed to get upload URL'
-        setError({
-          type: 'upload',
-          message: errorMessage,
-        })
-        setAppState('error')
-        toast.error('Upload Failed', {
-          description: errorMessage,
-        })
-      },
-    },
-  )
-
-  const { execute: queueForProcessing, isPending: isQueuing } = useServerAction(
-    queueForProcessingAction,
-    {
-      onSuccess: (result) => {
-        if (result.data?.success && result.data.data) {
-          setTranscription(result.data.data.transcription)
+          const { transcription: transcriptionText } = result.data.data
+          setTranscription(transcriptionText)
           setAppState('transcribed')
-          toast.success('Transcription Complete', {
-            description: 'Your audio has been successfully transcribed.',
-          })
         }
       },
       onError: (error) => {
         const errorMessage = error.err?.message || 'Failed to process audio'
-        setError({
-          type: 'transcribe',
-          message: errorMessage,
-        })
         setAppState('error')
+        setError({
+          message: errorMessage,
+          type: 'transcribe',
+        })
         toast.error('Processing Failed', {
           description: errorMessage,
         })
       },
-    },
-  )
+    })
 
   // Cleanup on unmount
   useEffect(() => {
@@ -151,79 +99,28 @@ export function STTClient() {
     }
   }, [mediaStream])
 
-  // Client-side upload to R2 using presigned URL
-  const uploadToR2Client = useCallback(
-    async (
-      presignedData: {
-        uploadUrl: string
-        key: string
-        fields: Record<string, string>
-      },
-      blob: Blob | undefined,
-    ) => {
-      if (!blob) return
-
-      try {
-        setAppState('processing')
-
-        const response = await fetch(presignedData.uploadUrl, {
-          method: 'PUT',
-          body: blob,
-          headers: {
-            'Content-Type': blob.type || 'audio/wav',
-          },
-        })
-
-        if (!response.ok) {
-          throw new Error('Failed to upload to R2')
-        }
-
-        // Queue for processing after successful upload
-        await queueForProcessing({
-          key: presignedData.key,
-          language: selectedLanguage,
-        })
-      } catch (error) {
-        console.error('Client upload error:', error)
-        setError({
-          type: 'upload',
-          message: 'Failed to upload file',
-        })
-        setAppState('error')
-      }
-    },
-    [queueForProcessing, selectedLanguage],
-  )
-
   const sendAudioForTranscription = useCallback(
-    async (audioBlob: Blob) => {
+    async (audioFile: File) => {
       try {
         setAppState('processing')
         setError(null)
 
-        // Convert Blob to File
-        const audioFile = new File([audioBlob], 'audio.wav', {
-          type: audioBlob.type || 'audio/wav',
-        })
-
-        // Set pending audio for upload
-        setPendingAudio({
-          blob: audioBlob,
-          source: 'upload',
-          name: audioFile.name,
-        })
-
-        // Get presigned URL for client-side upload
-        await getPresignedUrl({
+        // Upload and transcribe in one action (direct server upload)
+        await uploadAndTranscribe({
           audioFile,
           language: selectedLanguage,
         })
       } catch (err) {
         // Error handling is done in the useServerAction onError callback
         console.error('Upload/transcription error:', err)
+        setAppState('error')
+        setError({
+          message: 'Failed to process audio',
+          type: 'transcribe',
+        })
       }
     },
-    [getPresignedUrl, selectedLanguage],
+    [uploadAndTranscribe, selectedLanguage],
   )
 
   const handleFilesDrop = async (files: File[]) => {
@@ -234,7 +131,6 @@ export function STTClient() {
 
     setError(null)
     setTranscription(null)
-    setPendingAudio(null)
 
     const isValidAudioType =
       file.type === 'audio/wav' ||
@@ -242,33 +138,26 @@ export function STTClient() {
       file.name.toLowerCase().endsWith('.wav')
 
     if (!isValidAudioType) {
-      setError({ type: 'upload', message: 'Please upload a WAV audio file' })
+      toast.error('Please upload a WAV audio file')
       return
     }
 
     if (file.size > FILE_SIZE_LIMIT) {
-      setError({
-        type: 'upload',
-        message: `File is too large. Maximum size is ${FILE_SIZE_LIMIT / 1024 / 1024}MB.`,
-      })
+      toast.error(
+        `File is too large. Maximum size is ${FILE_SIZE_LIMIT / 1024 / 1024}MB.`,
+      )
       return
     }
 
-    // Create audio URL for preview
     const url = URL.createObjectURL(file)
-    setAudioUrl(url)
+    setCurrentAudio({
+      id: `upload-${Date.now()}`,
+      name: file.name,
+      url: url,
+    })
 
-    // Send for transcription
+    load(url, { format: 'wav' })
     sendAudioForTranscription(file)
-  }
-
-  const handleFileInputChange = (
-    event: React.ChangeEvent<HTMLInputElement>,
-  ) => {
-    const files = event.target.files
-    if (files) {
-      handleFilesDrop(Array.from(files))
-    }
   }
 
   const checkMicrophonePermission = async (): Promise<boolean> => {
@@ -279,7 +168,7 @@ export function STTClient() {
       )
 
       if (!hasAudioDevice) {
-        setError({ type: 'microphone', message: 'No microphone device found' })
+        toast.error('No microphone device found')
         return false
       }
 
@@ -287,16 +176,15 @@ export function STTClient() {
         name: 'microphone' as PermissionName,
       })
       if (permission.state === 'denied') {
-        setError({ type: 'microphone', message: 'Microphone access denied' })
+        toast.error(
+          'Microphone access denied, please enable it in your browser',
+        )
         return false
       }
 
       return true
     } catch {
-      setError({
-        type: 'microphone',
-        message: 'Unable to check microphone permissions',
-      })
+      toast.error('Unable to check microphone permissions')
       return false
     }
   }
@@ -330,14 +218,19 @@ export function STTClient() {
         if (err.name === 'NotFoundError') {
           errorMessage = 'No microphone found'
         } else if (err.name === 'NotAllowedError') {
-          errorMessage = 'Microphone access denied'
+          errorMessage =
+            'Microphone access denied, please enable it in your browser'
         } else if (err.name === 'NotReadableError') {
           errorMessage = 'Microphone is busy'
         }
       }
 
-      setError({ type: 'microphone', message: errorMessage })
+      toast.error(errorMessage)
       setAppState('error')
+      setError({
+        message: errorMessage,
+        type: 'microphone',
+      })
     }
   }, [])
 
@@ -350,21 +243,24 @@ export function STTClient() {
         ) {
           const originalOnStop = mediaRecorder.onstop
 
-          mediaRecorder.onstop = () => {
+          mediaRecorder.onstop = async () => {
             const audioBlob = new Blob(audioChunks.current, {
-              type: 'audio/wav',
+              type: mediaRecorder.mimeType,
             })
+            const audioContext = new window.AudioContext()
+            const arrayBuffer = await audioBlob.arrayBuffer()
+            const audioBuffer = await audioContext.decodeAudioData(arrayBuffer)
+            const wavArrayBuffer = toWav(audioBuffer)
+            const wavBlob = new Blob([wavArrayBuffer], { type: 'audio/wav' })
+            // Create audio URL and add to player
+            const url = URL.createObjectURL(wavBlob)
 
-            // Create audio URL for preview
-            const url = URL.createObjectURL(audioBlob)
-            setAudioUrl(url)
-
-            // Set pending audio for upload
-            setPendingAudio({
-              blob: audioBlob,
-              source: 'record',
-              name: 'recording.wav',
+            setCurrentAudio({
+              id: `recording-${Date.now()}`,
+              name: `recording-${Date.now()}.wav`,
+              url,
             })
+            load(url, { format: 'wav' })
 
             audioChunks.current = []
             if (mediaStream) {
@@ -378,7 +274,12 @@ export function STTClient() {
 
             if (shouldTranscribe) {
               setTimeout(() => {
-                sendAudioForTranscription(audioBlob)
+                // TODO: maybe better naming?
+                const fileName = `recording-${Date.now()}.wav`
+                const audioFile = new File([wavBlob], fileName, {
+                  type: wavBlob.type || 'audio/wav',
+                })
+                sendAudioForTranscription(audioFile)
               }, 100)
             }
           }
@@ -444,9 +345,8 @@ export function STTClient() {
       timerRef.current = null
     }
 
-    setPendingAudio(null)
     setError(null)
-    setAudioUrl(null)
+    setCurrentAudio(null)
     setAppState('idle')
     setTranscription(null)
     setTimeRecorded(0)
@@ -485,19 +385,139 @@ export function STTClient() {
     await stopRecording(true)
   }
 
-  const clearFile = () => {
+  const handleClearTranscription = () => {
     setTranscription(null)
-    setPendingAudio(null)
     setError(null)
-    setAudioUrl(null)
+    setCurrentAudio(null)
     setAppState('idle')
   }
 
   return (
-    <div className="space-y-6">
+    <div className="flex gap-4">
+      {/* TODO: proper height handling */}
+      <div className="border-border min-h-[360px] w-full space-y-6">
+        {appState !== 'idle' && appState !== 'transcribed' && (
+          <Button variant="outline" onClick={handleAbortClick}>
+            <ChevronLeft className="h-4 w-4" />
+          </Button>
+        )}
+        {/* Processing State */}
+        {appState === 'processing' && (
+          <ProcessingState
+            message="Uploading and processing your audio..."
+            onCancel={handleAbortClick}
+            cancelText="Cancel"
+          />
+        )}
+
+        {/* Upload/Record Section */}
+        {appState === 'idle' && (
+          <STTDropzone
+            onFilesDropAction={handleFilesDrop}
+            onRecordClickAction={startRecording}
+            onErrorAction={(error) => {
+              toast.error(error.message)
+            }}
+            fileSizeLimit={FILE_SIZE_LIMIT}
+          />
+        )}
+
+        {/* Recording Controls */}
+        {(appState === 'recording' || appState === 'paused') && (
+          <div className="flex flex-col items-center space-y-4">
+            {mediaRecorder && (
+              <LiveAudioVisualizer
+                mediaRecorder={mediaRecorder}
+                width={isMobile ? 320 : 450}
+                barWidth={2}
+                gap={1}
+                backgroundColor="transparent"
+                barColor="#037171"
+              />
+            )}
+
+            <div className="flex items-center justify-center gap-4">
+              <span className="text-muted-foreground">
+                {formatTime(timeRecorded)}
+              </span>
+              <Button onClick={togglePause} className="flex items-center gap-2">
+                {appState === 'paused' ? (
+                  <>
+                    <Play className="h-4 w-4" />
+                    Continue
+                  </>
+                ) : (
+                  <>
+                    <Pause className="h-4 w-4" />
+                    Pause
+                  </>
+                )}
+              </Button>
+              <Button onClick={handleStopAndTranscribe}>Transcribe</Button>
+            </div>
+          </div>
+        )}
+
+        {/* Error Display */}
+        {error &&
+          (error.type === 'transcribe' || error.type === 'microphone') && (
+            <div className="flex flex-col items-center justify-center space-y-4">
+              <ErrorContainer error={error} />
+              <Button variant="outline" onClick={handleAbortClick}>
+                Try Again
+              </Button>
+            </div>
+          )}
+
+        {/* Transcription Result */}
+        {transcription && appState !== 'processing' && !isProcessing && (
+          <div className="">
+            <div className="mb-6 flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="h-10 w-10"
+                  onClick={handleClearTranscription}
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </Button>
+                <h3 className="text-foreground text-base font-medium">
+                  {currentAudio?.name || 'audio-file.wav'}
+                </h3>
+              </div>
+              <div className="flex gap-4">
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={handleCopyToClipboard}
+                  className="h-10 w-10"
+                >
+                  <Copy className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={handleDownloadTranscription}
+                  className="h-10 w-10"
+                >
+                  <Download className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+            {/* Transcription Content */}
+            <div className="space-y-4">
+              <p className="text-foreground text-sm whitespace-pre-wrap">
+                {transcription}
+              </p>
+            </div>
+          </div>
+        )}
+      </div>
+
       {/* Language Selection */}
-      <Card>
-        <CardContent className="pt-6">
+      <Card className="w-1/5">
+        <CardContent className="p-6">
           <CustomSelect
             data={
               config.defaultSettings?.supportedLanguages?.map((language) => ({
@@ -511,188 +531,6 @@ export function STTClient() {
           />
         </CardContent>
       </Card>
-
-      {/* Processing State */}
-      {(isGettingUrl || isQueuing) && (
-        <ProcessingState
-          message={
-            isGettingUrl
-              ? 'Preparing upload...'
-              : isQueuing
-                ? 'Transcribing your audio...'
-                : 'Processing your audio...'
-          }
-          onCancel={handleAbortClick}
-          cancelText="Cancel"
-        />
-      )}
-
-      {/* Upload/Record Section */}
-      {appState === 'idle' && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Upload Audio or Record</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="rounded-lg border-2 border-dashed border-gray-300 p-8 text-center">
-              <Upload className="mx-auto mb-4 h-12 w-12 text-gray-400" />
-              <p className="mb-2 text-lg font-medium">
-                Drag and drop your audio file here
-              </p>
-              <p className="mb-4 text-sm text-gray-500">or</p>
-              <div className="flex justify-center gap-4">
-                <Button
-                  variant="outline"
-                  onClick={() => fileInputRef.current?.click()}
-                  className="flex items-center gap-2"
-                >
-                  <FolderOpen className="h-4 w-4" />
-                  Choose File
-                </Button>
-                <Button
-                  onClick={startRecording}
-                  className="flex items-center gap-2"
-                >
-                  <MicIcon className="h-4 w-4" />
-                  Record Audio
-                </Button>
-              </div>
-              <p className="mt-4 text-xs text-gray-500">
-                Supported formats: WAV • Max size:{' '}
-                {FILE_SIZE_LIMIT / 1024 / 1024}MB
-              </p>
-            </div>
-
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="audio/wav,audio/x-wav"
-              onChange={handleFileInputChange}
-              className="hidden"
-            />
-
-            {error &&
-              (error.type === 'upload' || error.type === 'microphone') && (
-                <ErrorContainer error={error} />
-              )}
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Recording Controls */}
-      {(appState === 'recording' || appState === 'paused') && (
-        <Card>
-          <CardContent className="pt-6">
-            <div className="space-y-4">
-              {mediaRecorder && (
-                <LiveAudioVisualizer
-                  mediaRecorder={mediaRecorder}
-                  width={isMobile ? 320 : 450}
-                  barWidth={2}
-                  gap={1}
-                  backgroundColor="transparent"
-                  barColor="#037171"
-                />
-              )}
-
-              <div className="flex items-center justify-center gap-4">
-                <span className="font-mono text-2xl">
-                  {formatTime(timeRecorded)}
-                </span>
-                <Button
-                  variant="outline"
-                  onClick={togglePause}
-                  className="flex items-center gap-2"
-                >
-                  {appState === 'paused' ? (
-                    <>
-                      <Play className="h-4 w-4" />
-                      Continue
-                    </>
-                  ) : (
-                    <>
-                      <Pause className="h-4 w-4" />
-                      Pause
-                    </>
-                  )}
-                </Button>
-                <Button onClick={handleStopAndTranscribe}>Transcribe</Button>
-                <Button variant="outline" onClick={handleAbortClick}>
-                  <X className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Transcribe Error */}
-      {error && error.type === 'transcribe' && (
-        <Card>
-          <CardContent className="pt-6">
-            <div className="space-y-4 text-center">
-              <ErrorContainer error={error} />
-              <Button variant="outline" onClick={handleAbortClick}>
-                Try Again
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Transcription Result */}
-      {transcription &&
-        appState !== 'processing' &&
-        !isGettingUrl &&
-        !isQueuing && (
-          <Card>
-            <CardHeader>
-              <CardTitle>Transcription Result</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {audioUrl && (
-                <div className="space-y-2">
-                  <Label>Audio Preview</Label>
-                  <audio ref={audioRef} controls className="w-full">
-                    <source src={audioUrl} type="audio/wav" />
-                    <track kind="captions" />
-                    Your browser does not support the audio element.
-                  </audio>
-                  <Button variant="outline" onClick={clearFile} size="sm">
-                    Clear File
-                  </Button>
-                </div>
-              )}
-
-              <div className="space-y-2">
-                <Label>Transcription</Label>
-                <div className="min-h-[200px] rounded-lg border bg-gray-50 p-4">
-                  <p className="whitespace-pre-wrap">{transcription}</p>
-                </div>
-                <div className="flex gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={handleDownloadTranscription}
-                    className="flex items-center gap-2"
-                  >
-                    <Download className="h-4 w-4" />
-                    Download
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={handleCopyToClipboard}
-                    className="flex items-center gap-2"
-                  >
-                    <Copy className="h-4 w-4" />
-                    Copy
-                  </Button>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        )}
     </div>
   )
 }

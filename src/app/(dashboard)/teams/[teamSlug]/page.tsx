@@ -67,8 +67,7 @@ export default async function TeamDashboardPage({ params }: TeamPageProps) {
   const session = await getSessionFromCookie()
   if (!session) {
     redirect(
-      '/auth/login?returnTo=' +
-        encodeURIComponent(`/dashboard/teams/${teamSlug}`),
+      '/login?returnTo=' + encodeURIComponent(`/dashboard/teams/${teamSlug}`),
     )
   }
 

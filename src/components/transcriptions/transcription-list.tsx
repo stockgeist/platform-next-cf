@@ -1,18 +1,11 @@
-import { formatDistanceToNow } from 'date-fns'
-import {
-  FileText,
-  Clock,
-  CheckCircle,
-  XCircle,
-  Download,
-  Trash2,
-} from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Separator } from '@/components/ui/separator'
-import { formatFileSize } from '@/utils/format'
 import type { Transcription } from '@/db/schema'
+import { formatFileSize } from '@/utils/format'
+import { formatDistanceToNow } from 'date-fns'
+import { CheckCircle, Clock, FileText, XCircle } from 'lucide-react'
+import { ActionButtons } from './action-buttons'
 
 interface TranscriptionListProps {
   transcriptions: Transcription[]
@@ -110,15 +103,7 @@ export function TranscriptionList({ transcriptions }: TranscriptionListProps) {
                   </div>
                 </div>
               </div>
-              <div className="flex items-center space-x-2">
-                <Button variant="outline" size="sm">
-                  <Download className="mr-1 h-4 w-4" />
-                  Download
-                </Button>
-                <Button variant="outline" size="sm">
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              </div>
+              <ActionButtons transcription={transcription} />
             </div>
           </CardHeader>
 

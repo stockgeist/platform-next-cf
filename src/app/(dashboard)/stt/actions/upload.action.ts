@@ -5,7 +5,7 @@ import { z } from 'zod'
 import { ZSAError } from 'zsa'
 import { requireVerifiedEmail } from '@/utils/auth'
 import { validateAudioFile } from '@/utils/r2'
-import { generatePresignedUploadUrl } from '@/lib/r2-client'
+import { generatePresignedUploadUrl } from '@/utils/r2'
 import { withRateLimit } from '@/utils/with-rate-limit'
 import {
   createTranscriptionRecord,
@@ -79,22 +79,20 @@ export const getPresignedUploadUrlAction = createServerAction()
         }
 
         try {
-          // Generate presigned URL for client-side upload
-          const key = `stt/${Date.now()}-${Math.random().toString(36).substring(2, 15)}.${audioFile.name.split('.').pop()}`
-          const uploadUrl = await generatePresignedUploadUrl(
-            key,
+          // Generate presigned URL for client-side upload with user-scoped key
+          const uploadResult = await generatePresignedUploadUrl(
+            audioFile.name,
             audioFile.type,
-            600,
-          ) // 10 minutes
+            userId,
+            language,
+          )
 
           return {
             success: true,
             data: {
-              uploadUrl,
-              key,
-              fields: {
-                'Content-Type': audioFile.type,
-              },
+              uploadUrl: uploadResult.uploadUrl,
+              key: uploadResult.key,
+              fields: uploadResult.fields,
               fileName: audioFile.name,
               fileSize: audioFile.size,
               language,

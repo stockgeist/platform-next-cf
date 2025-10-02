@@ -4,7 +4,7 @@ import { createServerAction } from 'zsa'
 import { z } from 'zod'
 import { ZSAError } from 'zsa'
 import { requireVerifiedEmail } from '@/utils/auth'
-import { uploadToR2, validateAudioFile } from '@/utils/r2'
+import { uploadUserScopedToR2, validateAudioFile } from '@/utils/r2'
 import { withRateLimit } from '@/utils/with-rate-limit'
 import {
   createTranscriptionRecord,
@@ -79,13 +79,10 @@ export const uploadAndTranscribeDirectAction = createServerAction()
 
         try {
           // Upload file to R2
-          const uploadResult = await uploadToR2(audioFile, {
+          const uploadResult = await uploadUserScopedToR2(audioFile, userId, {
             contentType: audioFile.type,
             customMetadata: {
               language,
-              userId,
-              originalName: audioFile.name,
-              uploadedAt: new Date().toISOString(),
             },
           })
 
@@ -116,13 +113,16 @@ export const uploadAndTranscribeDirectAction = createServerAction()
               transcriptionText,
               processedAt: new Date(),
             })
+
+            // Generate a presigned download URL for better audio playback
+
             revalidatePath('/stt')
             return {
               success: true,
               data: {
                 transcription: transcriptionText,
                 key: uploadResult.key,
-                url: uploadResult.url,
+                url: uploadResult.url, //could also just use key
                 fileName: audioFile.name,
                 fileSize: audioFile.size,
                 language,
