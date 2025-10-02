@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button'
 import { useAudioPlayerContext } from 'react-use-audio-player'
 import { useAudioStore } from '@/state/audio'
 import { Transcription } from '@/db/schema'
-import { Download } from 'lucide-react'
+import { FileText } from 'lucide-react'
 import { Trash2 } from 'lucide-react'
 import { getFileUrl } from '@/utils/files'
 
@@ -27,10 +27,26 @@ export function ActionButtons({
     })
     load(url, { autoplay: true })
   }
+  const handleDowloadTextFile = (transcription: Transcription) => {
+    if (!transcription.transcriptionText) {
+      return
+    }
+    const blob = new Blob([transcription.transcriptionText], {
+      type: 'text/plain',
+    })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `${transcription.fileName}.txt`
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    URL.revokeObjectURL(url)
+  }
 
   return (
     <div className="flex items-center space-x-2">
-      <Button variant="outline" size="sm" asChild>
+      {/* <Button variant="outline" size="sm" asChild>
         <a
           href={`/api/files/${encodeURIComponent(transcription.r2Key)}`}
           download={transcription.fileName}
@@ -38,13 +54,22 @@ export function ActionButtons({
           <Download className="h-4 w-4" />
           Download
         </a>
-      </Button>
+      </Button> */}
       <Button
         size="sm"
         onClick={() => handlePlayTranscription(transcription)}
         disabled={!transcription.transcriptionText}
       >
         Play
+      </Button>
+
+      <Button
+        variant="outline"
+        size="sm"
+        onClick={() => handleDowloadTextFile(transcription)}
+      >
+        <FileText className="h-4 w-4" />
+        Download Text
       </Button>
 
       <Button variant="outline" size="sm">

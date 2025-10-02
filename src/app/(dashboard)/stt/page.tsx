@@ -56,18 +56,15 @@ export default async function STTPage() {
           },
         ]}
       />
-      <div className="flex flex-col">
+      <div className="mb-[72px] flex flex-col">
         <div className="px-4 pt-4 pb-8">
           <div className="mb-8">
             <STTDirectClient />
           </div>
 
-          <div className="space-y-6">
+          <div className="space-y-4">
             <div>
-              <h2 className="text-2xl font-semibold">Recent Transcriptions</h2>
-              <p className="text-muted-foreground">
-                View and manage your recent speech-to-text transcriptions.
-              </p>
+              <h2 className="text-xl font-semibold">History</h2>
             </div>
 
             <Suspense fallback={<TranscriptionListSkeleton />}>
