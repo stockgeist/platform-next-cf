@@ -9,6 +9,7 @@ import {
   getTranscriptionById,
   deleteTranscriptionRecord,
 } from '@/server/transcriptions'
+import { revalidatePath } from 'next/cache'
 
 // Get user transcriptions schema
 const getUserTranscriptionsSchema = z.object({
@@ -93,6 +94,7 @@ export const deleteTranscriptionAction = createServerAction()
       }
 
       await deleteTranscriptionRecord(input.transcriptionId, session.user.id)
+      revalidatePath('/stt')
 
       return {
         success: true,

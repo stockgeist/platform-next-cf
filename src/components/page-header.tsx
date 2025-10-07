@@ -19,9 +19,11 @@ interface BreadcrumbItem {
 
 interface PageHeaderProps {
   items: BreadcrumbItem[]
+  actions?: React.ReactNode
 }
+export const PAGE_HEADER_HEIGHT = '64px'
 
-export function PageHeader({ items }: PageHeaderProps) {
+export function PageHeader({ items, actions }: PageHeaderProps) {
   return (
     <header className="flex h-16 shrink-0 items-center justify-between gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12">
       <div className="flex items-center gap-2 px-4">
@@ -29,7 +31,7 @@ export function PageHeader({ items }: PageHeaderProps) {
         <Separator orientation="vertical" className="mr-2 h-4" />
 
         {items.length === 1 ? (
-          <h1 className="text-2xl font-bold">{items[0].label}</h1>
+          <h1 className="text-xl font-bold md:text-2xl">{items[0].label}</h1>
         ) : (
           <Breadcrumb>
             <BreadcrumbList>
@@ -50,10 +52,12 @@ export function PageHeader({ items }: PageHeaderProps) {
         )}
       </div>
       <div className="px-4">
-        <Button variant="outline">
-          <ChatBubbleIcon />
-          <Link href="https://netgeist.ai/contact">Feedback</Link>
-        </Button>
+        {actions || (
+          <Button variant="outline">
+            <ChatBubbleIcon />
+            <Link href="https://netgeist.ai/contact">Feedback</Link>
+          </Button>
+        )}
       </div>
     </header>
   )

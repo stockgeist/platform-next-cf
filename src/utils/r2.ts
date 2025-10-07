@@ -31,7 +31,7 @@ export interface R2UploadOptions {
  * Upload a file to R2 storage with user-scoped key
  */
 export async function uploadUserScopedToR2(
-  file: File | Blob,
+  file: File,
   userId: string,
   options: R2UploadOptions = {},
 ): Promise<R2UploadResult> {

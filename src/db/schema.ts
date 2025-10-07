@@ -487,6 +487,43 @@ export const transcriptionTable = sqliteTable(
   ],
 )
 
+export const ttsTable = sqliteTable(
+  'tts',
+  {
+    ...commonColumns,
+    id: text()
+      .primaryKey()
+      .$defaultFn(() => `tts_${createId()}`)
+      .notNull(),
+    userId: text()
+      .notNull()
+      .references(() => userTable.id, { onDelete: 'cascade' }),
+    teamId: text().references(() => teamTable.id, { onDelete: 'cascade' }),
+    text: text().notNull(), // The input text
+    voice: text().notNull(), // Voice identifier
+    r2Key: text(), // R2 object key for the generated audio file
+    fileName: text(), // Generated audio filename
+    fileSize: integer(), // File size in bytes
+    status: text({
+      enum: ['processing', 'completed', 'failed'],
+    })
+      .default('processing')
+      .notNull(),
+    errorMessage: text(), // Error message if failed
+    processedAt: integer({
+      mode: 'timestamp',
+    }), // When processing completed
+    metadata: text(), // JSON string for additional metadata
+  },
+  (table) => [
+    index('tts_user_id_idx').on(table.userId),
+    index('tts_team_id_idx').on(table.teamId),
+    index('tts_r2_key_idx').on(table.r2Key),
+    index('tts_status_idx').on(table.status),
+    index('tts_created_at_idx').on(table.createdAt),
+  ],
+)
+
 export const teamRelations = relations(teamTable, ({ many }) => ({
   memberships: many(teamMembershipTable),
   invitations: many(teamInvitationTable),
@@ -572,12 +609,24 @@ export const transcriptionRelations = relations(
   }),
 )
 
+export const ttsRelations = relations(ttsTable, ({ one }) => ({
+  user: one(userTable, {
+    fields: [ttsTable.userId],
+    references: [userTable.id],
+  }),
+  team: one(teamTable, {
+    fields: [ttsTable.teamId],
+    references: [teamTable.id],
+  }),
+}))
+
 export const userRelations = relations(userTable, ({ many }) => ({
   passkeys: many(passKeyCredentialTable),
   creditTransactions: many(creditTransactionTable),
   purchasedItems: many(purchasedItemsTable),
   apiKeys: many(apiKeyTable),
   transcriptions: many(transcriptionTable),
+  ttsRecords: many(ttsTable),
   teamMemberships: many(teamMembershipTable, {
     relationName: 'teamMembershipUser',
   }),
@@ -617,6 +666,8 @@ export type Invoice = InferSelectModel<typeof invoiceTable>
 export type NewInvoice = InferInsertModel<typeof invoiceTable>
 export type Transcription = InferSelectModel<typeof transcriptionTable>
 export type NewTranscription = InferInsertModel<typeof transcriptionTable>
+export type Tts = InferSelectModel<typeof ttsTable>
+export type NewTts = InferInsertModel<typeof ttsTable>
 
 export const schema = {
   userTable,
@@ -625,6 +676,7 @@ export const schema = {
   purchasedItemsTable,
   apiKeyTable,
   transcriptionTable,
+  ttsTable,
   teamTable,
   teamMembershipTable,
   teamRoleTable,

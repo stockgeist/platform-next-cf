@@ -1,7 +1,6 @@
 'use client'
 
 import { Button } from '@/components/ui/button'
-import { Card, CardContent } from '@/components/ui/card'
 import { STTDropzone } from '@/components/stt/stt-dropzone'
 import { toast } from 'sonner'
 import { ChevronLeft, Copy, Download, Pause, Play } from 'lucide-react'
@@ -12,13 +11,15 @@ import {
 } from '@/components/stt/error-container'
 import { ProcessingState } from '@/components/stt/processing-state'
 import { LiveAudioVisualizer } from '@/components/live-audio-visualizer'
-import { CustomSelect } from '@/components/stt/custom-select'
+import { CustomSelect } from '@/components/custom-select'
 import { useMediaQuery } from '@/hooks/useMediaQuery'
 import { useServerAction } from 'zsa-react'
 import { uploadAndTranscribeDirectAction } from '../actions/upload-direct.action'
 import toWav from 'audiobuffer-to-wav'
 import { useAudioStore } from '@/state/audio'
 import { useAudioPlayerContext } from 'react-use-audio-player'
+import { STT_LANGUAGES } from '@/constants'
+import { SettingsCard } from '@/components/ui/settings-card'
 
 const RECORDING_TIME_LIMIT = 60 * 60 // in seconds
 const FILE_SIZE_LIMIT = 100 * 1024 * 1024 // 100MB
@@ -43,7 +44,7 @@ type AppState =
 const config = {
   defaultSettings: {
     defaultLanguage: 'lt',
-    supportedLanguages: ['lt'],
+    supportedLanguages: STT_LANGUAGES,
   },
 }
 
@@ -55,7 +56,7 @@ export function STTDirectClient() {
   const [mediaStream, setMediaStream] = useState<MediaStream | null>(null)
   const [mediaRecorder, setMediaRecorder] = useState<MediaRecorder | null>(null)
   const [selectedLanguage, setSelectedLanguage] = useState<string>(
-    config.defaultSettings?.defaultLanguage || 'en',
+    config.defaultSettings?.defaultLanguage,
   )
 
   const audioChunks = useRef<Blob[]>([])
@@ -516,21 +517,17 @@ export function STTDirectClient() {
       </div>
 
       {/* Language Selection */}
-      <Card className="w-1/5">
-        <CardContent className="p-6">
-          <CustomSelect
-            data={
-              config.defaultSettings?.supportedLanguages?.map((language) => ({
-                label: language.toUpperCase(),
-                value: language,
-              })) || []
-            }
-            label="Select Language"
-            value={selectedLanguage}
-            onChange={setSelectedLanguage}
-          />
-        </CardContent>
-      </Card>
+      <SettingsCard title="Settings" className="w-80">
+        <CustomSelect
+          data={config.defaultSettings.supportedLanguages.map((language) => ({
+            ...language,
+            icon: language.avatar,
+          }))}
+          label="Select Language"
+          value={selectedLanguage}
+          onChange={setSelectedLanguage}
+        />
+      </SettingsCard>
     </div>
   )
 }

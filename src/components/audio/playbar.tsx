@@ -24,32 +24,67 @@ export function Playbar() {
     togglePlaybar,
   } = useAudioStore()
 
-  const { isPlaying, isLoading, getPosition, seek, duration, togglePlayPause } =
-    useAudioPlayerContext()
+  const {
+    isPlaying,
+    isLoading,
+    getPosition,
+    seek,
+    duration,
+    togglePlayPause,
+    player,
+  } = useAudioPlayerContext()
 
   const [currentTime, setCurrentTime] = useState(0)
   const desktopProgressRef = useRef<HTMLDivElement>(null)
   const mobileProgressRef = useRef<HTMLDivElement>(null)
   const lastClickTime = useRef<number>(0)
+  const intervalRef = useRef<NodeJS.Timeout | null>(null)
 
-  // Update current time periodically
+  // Update current time periodically when playing
   useEffect(() => {
-    if (!isPlaying) return
+    // Clear any existing interval
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current)
+      intervalRef.current = null
+    }
 
-    const interval = setInterval(() => {
+    if (!isPlaying) {
+      // When paused, still update once to get the current position
       const position = getPosition()
       setCurrentTime(position)
-    }, 100)
+      return
+    }
 
-    return () => clearInterval(interval)
+    // Start new interval for smooth updates while playing
+    intervalRef.current = setInterval(() => {
+      const position = getPosition()
+      setCurrentTime(position)
+    }, 20)
+
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current)
+        intervalRef.current = null
+      }
+    }
   }, [isPlaying, getPosition])
+
+  // Cleanup interval on unmount
+  useEffect(() => {
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current)
+        intervalRef.current = null
+      }
+    }
+  }, [])
 
   const progress =
     duration > 0 && isFinite(currentTime) ? (currentTime / duration) * 100 : 0
 
   const skipForward = useCallback(() => {
-    if (!isFinite(currentTime) || !isFinite(duration)) return
-    const newTime = Math.min(currentTime + 10, duration)
+    // if (!isFinite(currentTime) || !isFinite(duration)) return
+    const newTime = Math.min(currentTime + 10)
     try {
       seek(newTime)
       setCurrentTime(newTime)

@@ -21,6 +21,7 @@ export const GOOGLE_OAUTH_CODE_VERIFIER_COOKIE_NAME =
 
 export const TTS_CHARS_PER_MINUTE = 1000
 export const TTS_CREDITS_PER_CHAR = 0.5
+export const MAX_TEXT_LENGTH = 5000
 
 export const CREDIT_PACKAGES = [
   {
@@ -73,3 +74,32 @@ export const MAX_TRANSACTIONS_PER_PAGE = 10
 export const REDIRECT_AFTER_SIGN_IN = '/dashboard' as Route
 
 export const INVOICE_NUMBER_PREFIX = 'NLP'
+
+export const TTS_VOICES = [
+  { value: 'female_1', label: 'Lina', avatar: '👩' },
+  { value: 'female_2', label: 'Rasa', avatar: '👩' },
+  { value: 'female_3', label: 'Sandra', avatar: '👩' },
+  { value: 'male_1', label: 'Tomas', avatar: '👨' },
+  { value: 'male_2', label: 'Andrius', avatar: '👨' },
+  { value: 'male_3', label: 'Jonas', avatar: '👨' },
+  { value: 'vip_1', label: 'Greta', avatar: '👩', disabled: true },
+]
+
+export const TTS_LANGUAGES = [
+  { value: 'lt', label: 'Lithuanian', avatar: '🇱🇹' },
+]
+
+export const TTS_EMOTIONS = [
+  { value: 'neutral', label: 'Neutral', avatar: '😐' },
+  { value: 'happy', label: 'Happy', avatar: '😊' },
+  { value: 'sad', label: 'Sad', avatar: '😢' },
+  { value: 'angry', label: 'Angry', avatar: '😠' },
+  { value: 'fearful', label: 'Fearful', avatar: '😨' },
+  { value: 'disappointed', label: 'Disappointed', avatar: '😞' },
+]
+
+export const TTS_CHARS_LIMIT = 5000
+
+export const STT_LANGUAGES = [
+  { value: 'lt', label: 'Lithuanian', avatar: '🇱🇹' },
+]

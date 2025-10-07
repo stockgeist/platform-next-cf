@@ -5,9 +5,9 @@ import { type ComponentType, useEffect, useState } from 'react'
 
 import {
   BadgeDollarSign,
+  Book,
   Building2,
   CreditCard,
-  FileText,
   Key,
   Mic,
   Settings2,
@@ -94,10 +94,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         icon: Mic,
       },
       {
-        title: 'Transcriptions',
-        url: '/transcriptions',
-        icon: FileText,
+        title: 'Text-to-Speech',
+        url: '/tts',
+        icon: Book,
       },
+
       {
         title: 'Teams',
         url: '/teams',

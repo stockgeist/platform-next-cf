@@ -114,8 +114,6 @@ export const uploadAndTranscribeDirectAction = createServerAction()
               processedAt: new Date(),
             })
 
-            // Generate a presigned download URL for better audio playback
-
             revalidatePath('/stt')
             return {
               success: true,
